@@ -337,6 +337,11 @@ function PhoneRuntime({
         (_, i) => i !== index,
       ),
     });
+  useEffect(() => {
+    if (!banner) return;
+    const timer = window.setTimeout(() => setBanner(""), 2000);
+    return () => window.clearTimeout(timer);
+  }, [banner]);
   if (!ready) return <div className="phone-loading">正在恢复进度…</div>;
   return (
     <div
