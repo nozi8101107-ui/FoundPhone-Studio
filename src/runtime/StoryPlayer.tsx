@@ -548,6 +548,7 @@ user 我刚刚路过一家店 看到这个
   make(profile.ex,handles[profile.ex],"",{handle:handles[profile.ex],username:handles[profile.ex],account:"ex",relationship:"互关",remark:exNames[profile.ex]})
  ];
  const exContact=profile.ex!==profile.crush?exMessages:[];
+ const randId=()=>Array.from({length:9},()=>{const chars="abcdefghijklmnopqrstuvwxyz0123456789";return chars[Math.floor(Math.random()*chars.length)];}).join("");
  const hanjinSelected=profile.crush==="hanjin"||profile.ex==="hanjin";
  const hanjinWechatMessages=hanjinSelected?(profile.crush==="hanjin"?hanjinWechat:buildMessages("hanjin",handles.hanjin,breakupText.hanjin,avatarFor("hanjin"))):[];
  const isPlaceholder=(item:Work["data"][string][number])=>/测试(用户|联系人|会话|消息|内容|回复|动态)/.test([item.title,item.body,item.sender].join(" "))||item.body==="这是一条测试内容。"||item.body==="这是一条测试消息。";
@@ -589,7 +590,6 @@ user 我刚刚路过一家店 看到这个
  const threadTexts=[
 "tms我好像没允许你们开始","你性侵别人这辈子就完了 你一辈子都是强奸犯","高认知群体在听tms新歌","一天天在tms什么 tws很难打吗","tms到底飞升没有","原来你们都和卢关sl了才敢互动的啊 我以为大家都是陌生人","老雕居然没在养梦女 好恐怖","tms要养死侍吗","tms宁再当宁的免费男孩就全都给我滚","tws有没有hybe鼻","看看猫图","李涛ive谁胸最大","咖妹是真韩红啊","男女爱豆就应该住在两个星球","我要告诉崔英宰","我卸载threads了","脆用户平均年龄究竟几岁","这里不是川普超话吗","李涛脆女一是谁","韩娱有全员原生脸的吗","吐司亩别吵了好难看","tms新photoism怎么拍。","所以吴是温和朴元彬谁更有女人味","不是 為什麼大家都能看懂繁體字啊","谁想看tws鉴鸟我出一个","气候卡能不能回来","有没有二十块钱的黑五打折爱豆同款衣服","想问一下大家在韩国留学的租房都多少钱","掉漆们你们买kgma票了吗…","谁说fm在室内的","wvs影通已中 金道勋6xxx 韩振6xxx","有没有这次回归part大拉表","李在民你的子民欺负我","希望志强幸福…","𬶍家这姐弟神了","金道勋就是小黑猫呀小黑猫塑是正确的","宰比这次唱得太好听了吧我流猪泪了","灵润的头发是谁给他做的…","韩振又在勾引我","cody什么时候能滚"
  ];
- const randId=()=>Array.from({length:9},()=>{const chars="abcdefghijklmnopqrstuvwxyz0123456789";return chars[Math.floor(Math.random()*chars.length)];}).join("");
  const shuffledThreadTexts=[...threadTexts].sort(()=>Math.random()-.5); const threadItems=shuffledThreadTexts.map((body,index)=>{const author=randId();const item=make("thread-"+index,body,body,{handle:author,reposts:String(Math.floor(Math.random()*900)),shares:String(Math.floor(Math.random()*500))});item.sender=author;item.folder="正在关注";item.likes=Math.floor(Math.random()*12000);item.comments=Array.from({length:Math.floor(Math.random()*180)},()=>randId()+": "+["笑死","蹲后续","？？？","真的嘛","啊啊啊"][Math.floor(Math.random()*5)]);return item;});
  const extraThreads=["TWS这次舞台的镜头分配有人整理了吗","今天路过公司附近又看到好多站姐","求推荐适合通勤听的韩语歌","崔英宰今天的自拍怎么这么乖","韩振的机场穿搭谁懂","道勋最近是不是又染头发了","想看TWS完整团综补课顺序"].map((body,index)=>{const author=randId();const item=make("thread-extra-"+index,body,body,{handle:author,reposts:String(Math.floor(Math.random()*900)),shares:String(Math.floor(Math.random()*500))});item.sender=author;item.folder="正在关注";item.likes=Math.floor(Math.random()*12000);item.comments=Array.from({length:Math.floor(Math.random()*80)},()=>randId()+": "+["蹲","同问","哈哈哈哈","好想看"][Math.floor(Math.random()*4)]);return item;});
  const historicalBills=historicalOrders.map(order=>{const bill=make("bill-"+order.id,order.title,"淘宝订单付款",{merchant:"淘宝 · "+order.sender,amount:"-¥"+order.meta.price,status:"支付成功",orderNumber:order.meta.number});bill.sender="淘宝";bill.folder="交易";bill.time=order.time;return bill;});
