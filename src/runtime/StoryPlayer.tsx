@@ -352,80 +352,6 @@ user 我刚看到一个东西 特别像你
  const avatarFor=(id:string)=>`${import.meta.env.BASE_URL}people/${id==="hanjin"?"jihoon":id==="jihoon"?"hanjin":id}.jpg`;
  const crushTitle=crushNames[profile.crush]||labels[profile.crush];
  const contacts=buildMessages(profile.crush,crushTitle,chatText[profile.crush]||"",avatarFor(profile.crush));
- const hanjinWechat=profile.crush==="hanjin"?buildMessages("hanjin","韩振",`@2026-10-01 19:20
-睡了吗 user
-今天有点想家
-不是那种想
-就是突然闻到一种味道 很像小时候在老家闻到的
-老家的泥土味
-你：懂你意思…
-你：我也想
-你：嗯嗯…想吃你煮的麻辣香锅！
-哈哈哈哈哈哈怎么突然
-唉 我在这边挺好的 真的
-但是有些话
-用韩语说和用中文说感觉不一样
-跟你说中文的时候
-我觉得我比较像我
-你别觉得我矫情 我就跟你说说
-说完就好了
-你：不矫情。
-你：我在
-你：这有什么矫情的
-嗯
-@2026-10-04 20:32
-今天光线太好了
-你看这张
-你：我去 男神驾到
-嘿嘿
-这张我也喜欢
-但是这张构图是不是有点歪
-你：确实
-你：我不行了
-你：但是这张完全 骨相绝了
-你说哪张好看 我想发wvs
-你：都发吧！
-你：要我挑我也挑不出来 这张脸绝了
-真的吗
-你眼光好 你说行就行
-@2026-10-04 21:02
-你：诶 第一张怎么没发
-@2026-10-04 21:14
-其实第一张我是想发给你看的
-你懂我意思吧
-你：你！
-你：网恋大省发力了。
-哈哈哈哈哈哈笑死我了
-@2026-10-07 14:02
-user 我刚刚路过一家店 看到这个
-你：OMG好可爱啊这个项链
-我就觉得你会喜欢
-我买了 下次给你
-你：OMG！！
-你：谢谢…
-没事没事
-@2026-10-09 20:30
-你今天出去了吗
-看到你朋友圈了
-你：对…今天浩俊帮我拍了照
-哦哦
-浩俊？我记得他是你组员
-你们出去做什么了
-你：嗯 没什么 组里有点东西要线下讨论一下
-哦哦哦
-@2026-10-09 21:12
-他用的什么镜头
-构图一般 一点都没拍出我们user的闭月羞花沉鱼落雁
-你：哎哟 你干嘛
-下次我给你拍 我知道你哪个角度最好看
-不 你哪个角度都很好看
-但是别人拍不出我拍的效果
-你：…行
-明天见 可以吗
-你：好
-那 下午？
-你：okok`,avatarFor("hanjin")): [];
-
  const breakupText:Record<string,string>={
  shinyu:`我想了一阵了 不是冲动
 我们这样下去 你会累 我也会
@@ -448,7 +374,7 @@ user 我刚刚路过一家店 看到这个
 我只是换一种方式
 你：？
 保重`,
- dohoon:`: time。
+ dohoon:`time。
 先别说话 让我说
 我现在直说
 我早就感觉到不对了
@@ -526,6 +452,84 @@ user 我刚刚路过一家店 看到这个
  };
  const crushMessages=buildMessages(profile.crush,crushNames[profile.crush]||labels[profile.crush],chatText[profile.crush]||"",avatarFor(profile.crush));
  const exMessages=buildMessages(profile.ex,exNames[profile.ex]||labels[profile.ex],breakupText[profile.ex]||"",avatarFor(profile.ex));
+ const hanjinWechat=profile.crush==="hanjin"
+  ? buildMessages("hanjin","韩振",`@2026-10-01 19:20
+睡了吗 user
+今天有点想家
+不是那种想
+就是突然闻到一种味道 很像小时候在老家闻到的
+老家的泥土味
+你：懂你意思…
+你：我也想
+你：嗯嗯…想吃你煮的麻辣香锅！
+哈哈哈哈哈哈怎么突然
+唉 我在这边挺好的 真的
+但是有些话
+用韩语说和用中文说感觉不一样
+跟你说中文的时候
+我觉得我比较像我
+你别觉得我矫情 我就跟你说说
+说完就好了
+你：不矫情。
+你：我在
+你：这有什么矫情的
+嗯
+@2026-10-04 20:32
+今天光线太好了
+你看这张
+你：我去 男神驾到
+嘿嘿
+这张我也喜欢
+但是这张构图是不是有点歪
+你：确实
+你：我不行了
+你：但是这张完全 骨相绝了
+你说哪张好看 我想发wvs
+你：都发吧！
+你：要我挑我也挑不出来 这张脸绝了
+真的吗
+你眼光好 你说行就行
+@2026-10-04 21:02
+你：诶 第一张怎么没发
+@2026-10-04 21:14
+其实第一张我是想发给你看的
+你懂我意思吧
+你：你！
+你：网恋大省发力了。
+哈哈哈哈哈哈笑死我了
+@2026-10-07 14:02
+user 我刚刚路过一家店 看到这个
+你：OMG好可爱啊这个项链
+我就觉得你会喜欢
+我买了 下次给你
+你：OMG！！
+你：谢谢…
+没事没事
+@2026-10-09 20:30
+你今天出去了吗
+看到你朋友圈了
+你：对…今天浩俊帮我拍了照
+哦哦
+浩俊？我记得他是你组员
+你们出去做什么了
+你：嗯 没什么 组里有点东西要线下讨论一下
+哦哦哦
+@2026-10-09 21:12
+他用的什么镜头
+构图一般 一点都没拍出我们user的闭月羞花沉鱼落雁
+你：哎哟 你干嘛
+下次我给你拍 我知道你哪个角度最好看
+不 你哪个角度都很好看
+但是别人拍不出我拍的效果
+你：…行
+明天见 可以吗
+你：好
+那 下午？
+你：okok`,avatarFor("hanjin"))
+  : profile.ex==="hanjin"
+    ? buildMessages("hanjin","韩振",breakupText.hanjin,avatarFor("hanjin"))
+    : [];
+
  const crushIsHanjin=profile.crush==="hanjin", exIsHanjin=profile.ex==="hanjin";
  const hanjinWechat=crushIsHanjin?buildMessages("hanjin","韩振",`@2026-10-01 19:20
 睡了吗 user
