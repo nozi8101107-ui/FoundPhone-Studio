@@ -451,7 +451,7 @@ user 我刚看到一个东西 特别像你
 我这种太累了
 保重`
  };
- const crushMessages=buildMessages(profile.crush,handles[profile.crush]||labels[profile.crush],chatText[profile.crush]||"",avatarFor(profile.crush));
+ const crushMessages=buildMessages(profile.crush,crushNames[profile.crush]||handles[profile.crush]||labels[profile.crush],chatText[profile.crush]||"",avatarFor(profile.crush));
  const exMessages=buildMessages(profile.ex,exNames[profile.ex]||handles[profile.ex]||labels[profile.ex],breakupText[profile.ex]||"",avatarFor(profile.ex));
  const crushIsHanjin=profile.crush==="hanjin", exIsHanjin=profile.ex==="hanjin";
  const hanjinWechat=crushIsHanjin?buildMessages("hanjin",handles.hanjin,`@2026-10-01 19:20
