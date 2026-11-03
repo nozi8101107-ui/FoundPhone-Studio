@@ -33,3 +33,6 @@
 .start-choice-secondary{margin-top:11px;border:1px solid #dedbd4;background:#ffffff80;color:#292824}
 .start-choice-primary span,.start-choice-secondary span{font-size:11px;font-weight:400;opacity:.66}
 .start-choice-card>small{display:block;margin-top:24px;color:#a19c93;font-size:10px;line-height:1.6}
+
+.story-runtime{padding:0}
+.story-runtime .phone-shell{margin:0;transform:scale(var(--phone-scale));transform-origin:center center}
