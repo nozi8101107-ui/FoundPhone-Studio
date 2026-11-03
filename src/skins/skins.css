@@ -1976,6 +1976,12 @@
   gap: 5px;
   font-size: 9px;
 }
+.social-actions > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+}
 .social-actions button:last-child {
   margin-left: auto;
 }
