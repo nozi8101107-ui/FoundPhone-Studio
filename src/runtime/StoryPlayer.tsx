@@ -39,17 +39,7 @@ function StoryPlayer(){
   make(profile.crush,handles[profile.crush],"",{handle:handles[profile.crush],username:handles[profile.crush],account:"crush"}),
   make(profile.ex,handles[profile.ex],"",{handle:handles[profile.ex],username:handles[profile.ex],account:"ex"})
  ];
- const kakaoOriginal=(work.data.kakao||[]).map((item)=>{
-  const selected=[profile.crush,profile.ex];
-  const match=selected.find((id)=>item.title===labels[id]||item.sender===labels[id]||item.title===id||item.sender===id);
-  if(!match)return item;
-  const nickname=match===profile.crush?crushNames[match]:exNames[match];
-  return {...item,title:nickname,sender:nickname};
- });
- const hanjinSelected=profile.crush==="hanjin"||profile.ex==="hanjin";
- const hanjinNickname=profile.crush==="hanjin"?crushNames.hanjin:exNames.hanjin;
- const wechatContacts=hanjinSelected?[{...make("hanjin",hanjinNickname,"微信联系人",{contact:"true"}),title:hanjinNickname,sender:hanjinNickname,folder:"通讯录"}]:[];
- const personalized:Work={...work,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),lockWallpaperImage:profile.lockWallpaper,homeWallpaperImage:profile.homeWallpaper},data:{...work.data,kakao:[...kakaoOriginal,...contacts],instagram:[...(work.data.instagram||[]),...insta],wechat:[...(work.data.wechat||[]),...wechatContacts]}};
+ const personalized:Work={...work,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4)},data:{...work.data,kakao:[...(work.data.kakao||[]),...contacts],instagram:[...(work.data.instagram||[]),...insta]}};
  return <main className="story-runtime"><Phone key={session} work={personalized}/></main>;
 }
 createRoot(document.getElementById("root")!).render(<StoryPlayer/>);
