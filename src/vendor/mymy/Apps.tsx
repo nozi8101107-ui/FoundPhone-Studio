@@ -327,6 +327,8 @@ export function MymyInstagram(p: SkinProps) {
   const posts = p.items.filter(
       (i) => i.folder !== "私信" && i.meta.story !== "true",
     ),
+    accounts = posts.filter((i) => !!i.meta.account),
+    feedPosts = posts.filter((i) => !i.meta.account),
     stories = p.items.filter((i) => i.meta.story === "true"),
     dms = p.items.filter((i) => i.folder === "私信"),
     active = stories[story - 1];
@@ -453,6 +455,16 @@ export function MymyInstagram(p: SkinProps) {
           {selected && post(selected)}
           {!selected && tab === "主页" && (
             <>
+              {accounts.length > 0 && <section className="ig-following-accounts">
+                <div className="ig-following-title">正在关注 <span>{accounts.length}</span></div>
+                {accounts.map((a) => <article className="ig-following-card" key={a.id}>
+                  <Avatar name={a.sender} src={a.avatar}/>
+                  <div className="ig-following-info"><b>{a.meta.username || a.sender}</b><small>@{a.meta.handle || ""}</small>
+                    {a.meta.account === "official" && <small>{a.meta.posts} 帖子 · {a.meta.followers} 粉丝 · {a.meta.following} 关注</small>}
+                  </div>
+                  <span className="ig-following-mark">✓</span>
+                </article>)}
+              </section>}
               <div className="sts">
                 {stories.map((s, n) => (
                   <button
@@ -469,7 +481,7 @@ export function MymyInstagram(p: SkinProps) {
                   </button>
                 ))}
               </div>
-              {posts.map(post)}
+              {feedPosts.map(post)}
               {!posts.length && <Blank />}
             </>
           )}
@@ -479,7 +491,7 @@ export function MymyInstagram(p: SkinProps) {
                 <Avatar name={p.owner || "机主"} />
                 <div className="ps">
                   <div>
-                    <b>{posts.length}</b>
+                    <b>{feedPosts.length}</b>
                     <small>帖子</small>
                   </div>
                   <div>

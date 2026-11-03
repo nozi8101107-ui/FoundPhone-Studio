@@ -628,3 +628,13 @@
   width: 25px;
   height: 25px;
 }
+
+.mymy-ui .ig-following-accounts{padding:12px 14px 8px;border-bottom:1px solid #eee}
+.mymy-ui .ig-following-title{font-size:13px;font-weight:700;margin-bottom:8px}
+.mymy-ui .ig-following-title span{color:#888;font-weight:400;margin-left:4px}
+.mymy-ui .ig-following-card{display:flex;align-items:center;gap:10px;padding:8px 0}
+.mymy-ui .ig-following-card>.catalog-avatar{width:42px;height:42px;flex:none;border-radius:50%}
+.mymy-ui .ig-following-info{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.mymy-ui .ig-following-info b{font-size:13px}
+.mymy-ui .ig-following-info small{font-size:10px;color:#888}
+.mymy-ui .ig-following-mark{font-size:13px;color:#3897f0;font-weight:700}
