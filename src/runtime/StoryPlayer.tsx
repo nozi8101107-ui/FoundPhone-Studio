@@ -21,7 +21,7 @@ function StoryPlayer(){
  if(!work)return <main className="story-runtime"><p role="status">{error||"正在打开手机…"}</p></main>;
  if(!profile)return <UserOnboarding key={session} onComplete={complete}/>;
  if(choice==="choose")return <StartChoice onContinue={()=>setChoice("play")} onRestart={()=>void restart()}/>;
- const labels:Record<string,string>={shinyu:"申惟",dohoon:"金道勋",youngjae:"崔英宰",hanjin:"韩振",jihoon:"志薰",kyungmin:"李炅潣"};
+ const labels:Record<string,string>={shinyu:"tlswjdghks",dohoon:"doking",youngjae:"jae_e",hanjin:"henan_prince",jihoon:"ahoooon",kyungmin:"kyungman_lee"};
  const crushNames:Record<string,string>={shinyu:"晶㬊尼",dohoon:"小屎狗",youngjae:"居家服务型男",hanjin:"珍珍",jihoon:"击击击昏",kyungmin:"炅man"};
  const exNames:Record<string,string>={shinyu:"事多爹系天蝎男",dohoon:"不要理他！",youngjae:"远离双子男",hanjin:"不中",jihoon:"tws韩志薰",kyungmin:"李炅jiong潣min"};
  const handles:Record<string,string>={shinyu:"tlswjdghks",dohoon:"doking",youngjae:"jae_e",hanjin:"henan_prince",jihoon:"ahoooon",kyungmin:"kyungman_lee"};
@@ -551,7 +551,7 @@ user 我刚刚路过一家店 看到这个
  const hanjinWechatMessages=hanjinSelected?(profile.crush==="hanjin"?hanjinWechat:buildMessages("hanjin","韩振",breakupText.hanjin,avatarFor("hanjin"))):[];
  const isPlaceholder=(item:Work["data"][string][number])=>/测试(用户|联系人|会话|消息|内容|回复|动态)/.test([item.title,item.body,item.sender].join(" "))||item.body==="这是一条测试内容。"||item.body==="这是一条测试消息。";
  const cleanedData=Object.fromEntries(Object.entries(work.data).map(([app,items])=>[app,items.filter(item=>!isPlaceholder(item))])) as Work["data"];
- cleanedData.instagram=(cleanedData.instagram||[]).filter(item=>item.meta.account||(!["我的帖子","个人帖子"].includes(item.folder)&&item.sender!==profile.nickname&&item.meta.owner!=="user"));
+ cleanedData.instagram=(cleanedData.instagram||[]).filter(item=>item.meta.account==="official"||item.meta.account==="crush"||item.meta.account==="ex"||item.meta.owner==="member");
  const taobaoProducts=[
   ["bag-dior-ladydior","Dior Lady Dior 中号手袋",51000,"DIOR 迪奥官方旗舰店","藤格纹羊皮革，经典五格戴妃包。","奢侈品女包"],
   ["bag-dior-toujours","Dior Toujours 小号手袋",29000,"DIOR 迪奥官方旗舰店","小号牛皮革手袋，日常通勤款。","奢侈品女包"],
@@ -583,13 +583,19 @@ user 我刚刚路过一家店 看到这个
  const phoneDate=work.phone.date||new Date().toLocaleDateString("en-CA");
  const historyDate=(monthsAgo:number,day:number)=>{const base=new Date(phoneDate+"T12:00:00");const target=new Date(base.getFullYear(),base.getMonth()-monthsAgo,1,12);const last=new Date(target.getFullYear(),target.getMonth()+1,0).getDate();target.setDate(Math.min(day,last));const pad=(n:number)=>String(n).padStart(2,"0");return `${target.getFullYear()}-${pad(target.getMonth()+1)}-${pad(target.getDate())} ${day===6?"20:16":"22:08"}`;};
  const historicalOrders:ReturnType<typeof make>[]=[];
- if(profile.xp==="BG"){for(let m=12;m>=1;m--){for(const day of [6,21]){const product=taobaoItems.find(i=>i.id==="condom-durex-air")!;const order=make("history-condom-"+m+"-"+day,product.title,product.body,{...product.meta,price:product.meta.price,quantity:"1",status:"已完成",number:"TB"+String(m).padStart(2,"0")+String(day)+"2026",paidBy:"支付宝余额"});order.sender=product.sender;order.folder="订单";order.time=historyDate(m,day);historicalOrders.push(order);}}}
+ if(profile.xp==="BG"){for(let m=12;m>=1;m--){for(const day of [6,21]){const product=taobaoItems.find(i=>i.id==="condom-durex-mix")!;const order=make("history-condom-"+m+"-"+day,product.title,product.body,{...product.meta,price:product.meta.price,quantity:"1",status:"已完成",number:"TB"+String(m).padStart(2,"0")+String(day)+"2026",paidBy:"支付宝余额"});order.sender=product.sender;order.folder="订单";order.time=historyDate(m,day);historicalOrders.push(order);}}}
  if(profile.xp==="GB"){const product=taobaoItems.find(i=>i.id==="toy-wearable")!;const order=make("history-wearable",product.title,product.body,{...product.meta,price:product.meta.price,quantity:"1",status:"已完成",number:"TB20260618",paidBy:"支付宝余额"});order.sender=product.sender;order.folder="订单";order.time=historyDate(5,18);historicalOrders.push(order);}
+ const threadTexts=[
+"tms我好像没允许你们开始","你性侵别人这辈子就完了 你一辈子都是强奸犯","高认知群体在听tms新歌","一天天在tms什么 tws很难打吗","tms到底飞升没有","原来你们都和卢关sl了才敢互动的啊 我以为大家都是陌生人","老雕居然没在养梦女 好恐怖","tms要养死侍吗","tms宁再当宁的免费男孩就全都给我滚","tws有没有hybe鼻","看看猫图","李涛ive谁胸最大","咖妹是真韩红啊","男女爱豆就应该住在两个星球","我要告诉崔英宰","我卸载threads了","脆用户平均年龄究竟几岁","这里不是川普超话吗","李涛脆女一是谁","韩娱有全员原生脸的吗","吐司亩别吵了好难看","tms新photoism怎么拍。","所以吴是温和朴元彬谁更有女人味","不是 為什麼大家都能看懂繁體字啊","谁想看tws鉴鸟我出一个","气候卡能不能回来","有没有二十块钱的黑五打折爱豆同款衣服","想问一下大家在韩国留学的租房都多少钱","掉漆们你们买kgma票了吗…","谁说fm在室内的","wvs影通已中 金道勋6xxx 韩振6xxx","有没有这次回归part大拉表","李在民你的子民欺负我","希望志强幸福…","𬶍家这姐弟神了","金道勋就是小黑猫呀小黑猫塑是正确的","宰比这次唱得太好听了吧我流猪泪了","灵润的头发是谁给他做的…","韩振又在勾引我","cody什么时候能滚"
+ ];
+ const randId=()=>Array.from({length:9},()=>{const chars="abcdefghijklmnopqrstuvwxyz0123456789";return chars[Math.floor(Math.random()*chars.length)];}).join("");
+ const threadItems=threadTexts.map((body,index)=>{const item=make("thread-"+index,body,body,{handle:randId(),reposts:String(Math.floor(Math.random()*900)),shares:String(Math.floor(Math.random()*500))});item.sender=randId();item.folder="正在关注";item.likes=Math.floor(Math.random()*12000);item.comments=Array.from({length:Math.floor(Math.random()*180)},()=>randId()+": "+["笑死","蹲后续","？？？","真的嘛","啊啊啊"][Math.floor(Math.random()*5)]);return item;});
+ const extraThreads=["TWS这次舞台的镜头分配有人整理了吗","今天路过公司附近又看到好多站姐","求推荐适合通勤听的韩语歌","崔英宰今天的自拍怎么这么乖","韩振的机场穿搭谁懂","道勋最近是不是又染头发了","想看TWS完整团综补课顺序"].map((body,index)=>{const item=make("thread-extra-"+index,body,body,{handle:randId(),reposts:String(Math.floor(Math.random()*900)),shares:String(Math.floor(Math.random()*500))});item.sender=randId();item.folder="正在关注";item.likes=Math.floor(Math.random()*12000);item.comments=Array.from({length:Math.floor(Math.random()*80)},()=>randId()+": "+["蹲","同问","哈哈哈哈","好想看"][Math.floor(Math.random()*4)]);return item;});
  const historicalBills=historicalOrders.map(order=>{const bill=make("bill-"+order.id,order.title,"淘宝订单付款",{merchant:"淘宝 · "+order.sender,amount:"-¥"+order.meta.price,status:"支付成功",orderNumber:order.meta.number});bill.sender="淘宝";bill.folder="交易";bill.time=order.time;return bill;});
  const hiddenAppIds=new Set(["appstore","contacts","reminders","spotify","find"]);
  const cleanedApps=work.apps.map(app=>hiddenAppIds.has(app.id)?{...app,installed:false,visible:false,dock:false,folder:""}:app.id==="taobao"?{...app,installed:true,visible:true}:app);
  if(!cleanedApps.some(app=>app.id==="taobao"))cleanedApps.push({id:"taobao",name:"淘宝",installed:true,visible:true,dock:false,folder:"",icon:""});
- const personalized:Work={...work,apps:cleanedApps,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...cleanedData,kakao:[...(cleanedData.kakao||[]),...crushMessages,...exContact],wechat:[...(cleanedData.wechat||[]),...hanjinWechatMessages],instagram:[...(cleanedData.instagram||[]),...insta],taobao:[...(cleanedData.taobao||[]),...taobaoItems,...historicalOrders],alipay:[...(cleanedData.alipay||[]),...historicalBills]}};
+ const personalized:Work={...work,apps:cleanedApps,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...cleanedData,kakao:[...(cleanedData.kakao||[]),...crushMessages,...exContact],wechat:[...(cleanedData.wechat||[]),...hanjinWechatMessages],instagram:[...(cleanedData.instagram||[]),...insta],threads:[...(cleanedData.threads||[]),...threadItems,...extraThreads],taobao:[...(cleanedData.taobao||[]),...taobaoItems,...historicalOrders],alipay:[...(cleanedData.alipay||[]),...historicalBills]}};
  return <main className="story-runtime"><Phone key={session} work={personalized}/></main>;
 }
 createRoot(document.getElementById("root")!).render(<StoryPlayer/>);
