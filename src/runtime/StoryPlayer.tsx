@@ -349,10 +349,10 @@ user 我刚看到一个东西 特别像你
 你：ok`
  };
  const buildMessages=(id:string,title:string,text:string,avatar:string)=>{let current="2026-10-01 09:00",n=0;return text.split("\n").flatMap((line)=>{if(!line.trim())return [];if(line.startsWith("@")){current=line.slice(1);return [];}const outgoing=line.startsWith("你：");let body=outgoing?line.slice(2):line;if(!outgoing)body=body.replaceAll("user",address);const item=make(id,title,body,{},avatar);item.id="personal-"+id+"-"+(++n);item.time=current;item.sender=outgoing?profile.nickname:labels[id];item.outgoing=outgoing;item.read=false;return [item];});};
- const avatarFor=(id:string)=>profile.avatar&&id===profile.crush?"":`${import.meta.env.BASE_URL}people/${id}.jpg`;
+ const avatarFor=(id:string)=>`${import.meta.env.BASE_URL}people/${id==="hanjin"?"jihoon":id==="jihoon"?"hanjin":id}.jpg`;
  const crushTitle=crushNames[profile.crush]||labels[profile.crush];
  const contacts=buildMessages(profile.crush,crushTitle,chatText[profile.crush]||"",avatarFor(profile.crush));
- const hanjinWechat=profile.crush==="hanjin"?buildMessages("hanjin",profile.nickname+"的微信",`@2026-10-01 19:20
+ const hanjinWechat=profile.crush==="hanjin"?buildMessages("hanjin","韩振",`@2026-10-01 19:20
 睡了吗 user
 今天有点想家
 不是那种想
