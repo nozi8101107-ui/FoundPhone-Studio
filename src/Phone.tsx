@@ -172,9 +172,9 @@ function PhoneRuntime({
         Math.max(
           0.4,
           Math.min(
-            1,
-            (el.parentElement!.clientWidth - 24) / 407,
-            (window.innerHeight - (creator ? 170 : external ? 150 : 40)) / 866,
+            1.2,
+            (el.parentElement!.clientWidth - 8) / 406,
+            (window.innerHeight - 8) / 860,
           ),
         ),
       );
@@ -320,6 +320,7 @@ function PhoneRuntime({
         <div
           className={`phone-screen wallpaper-${work.phone.wallpaper} ${locked ? "is-locked" : ""} ${app ? "in-app" : ""} ${keyboard ? "keyboard-open" : ""}`}
           data-app={app}
+          style={work.phone.wallpaperImage ? { backgroundImage: "linear-gradient(#00000008,#00000008), url(\"" + work.phone.wallpaperImage + "\")", backgroundSize: "cover", backgroundPosition: "center" } : undefined}
           onDragStart={(e) => e.preventDefault()}
           onPointerDown={(e) => {
             gestureConsumed.current = false;

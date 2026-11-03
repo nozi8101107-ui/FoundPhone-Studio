@@ -39,7 +39,7 @@ function StoryPlayer(){
   make(profile.crush,handles[profile.crush],"",{handle:handles[profile.crush],username:handles[profile.crush],account:"crush"}),
   make(profile.ex,handles[profile.ex],"",{handle:handles[profile.ex],username:handles[profile.ex],account:"ex"})
  ];
- const personalized:Work={...work,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4)},data:{...work.data,kakao:[...(work.data.kakao||[]),...contacts],instagram:[...(work.data.instagram||[]),...insta]}};
+ const personalized:Work={...work,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...work.data,kakao:[...(work.data.kakao||[]),...contacts],instagram:[...(work.data.instagram||[]),...insta]}};
  return <main className="story-runtime"><Phone key={session} work={personalized}/></main>;
 }
 createRoot(document.getElementById("root")!).render(<StoryPlayer/>);
