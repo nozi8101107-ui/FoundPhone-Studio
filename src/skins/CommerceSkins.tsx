@@ -184,7 +184,7 @@ export function TaobaoSkin(p: Props) {
             </div>}
             {!paymentStep && <div className="taobao-payment-row"><span>支付方式</span><strong>支付宝余额　›</strong></div>}
             {!paymentStep && <div className="taobao-total"><span>合计</span><b>¥ {(Number(meta(selected,"price","0"))*quantity).toFixed(2)}</b></div>}
-            {paymentStep ? <button className="taobao-pay-button" onClick={() => {window.dispatchEvent(new CustomEvent("foundphone:purchase",{detail:{item:selected,quantity}}));setSelected(null);setPaymentStep(false);setTab("订单");setStatus("全部");}}>支付</button> : <button className="taobao-pay-button" onClick={() => setPaymentStep(true)}>去支付宝支付</button>}
+            {paymentStep ? <button className="taobao-pay-button" onClick={() => {window.dispatchEvent(new CustomEvent("foundphone:purchase",{detail:{item:selected,quantity}}));setSelected(null);setPaymentStep(false);setTab("订单");setStatus("全部");}}>支付</button> : <button className="taobao-pay-button" onClick={() => {window.dispatchEvent(new CustomEvent("foundphone:checkout",{detail:{item:selected,quantity}}));setSelected(null);setPaymentStep(false);}}>去支付宝支付</button>}
             <small className="taobao-pay-note">模拟购买 · 不会产生真实扣款</small>
           </section>
         </div>
