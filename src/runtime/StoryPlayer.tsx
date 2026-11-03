@@ -349,10 +349,10 @@ user 我刚看到一个东西 特别像你
 嗯 明天要不要去吃烤肉？在狎鸥亭
 你：ok`
  };
- const buildMessages=(id:string,title:string,text:string,avatar:string)=>{let current="2026-10-01 09:00",n=0;return text.split("\n").flatMap((line)=>{if(!line.trim())return [];if(line.startsWith("@")){current=line.slice(1);return [];}const outgoing=line.startsWith("你：");let body=outgoing?line.slice(2):line;if(!outgoing)body=body.replaceAll("user",profile.nickname+(olderThan(id)?"姐姐":""));const item=make(id,handles[id]||title,body,{handle:handles[id]||"",remark:profile.crush===id?(crushNames[id]||""):(exNames[id]||"")},avatar);item.id="personal-"+id+"-"+(++n);item.time=current;item.sender=outgoing?profile.nickname:(handles[id]||labels[id]);item.outgoing=outgoing;item.read=false;return [item];});};
+ const buildMessages=(id:string,title:string,text:string,avatar:string)=>{let current="2026-10-01 09:00",n=0;return text.split("\n").flatMap((line)=>{if(!line.trim())return [];if(line.startsWith("@")){current=line.slice(1);return [];}const outgoing=line.startsWith("你：");let body=outgoing?line.slice(2):line;if(!outgoing)body=body.replaceAll("user",profile.nickname+(olderThan(id)?"姐姐":""));const item=make(id,title,body,{handle:handles[id]||"",remark:profile.crush===id?(crushNames[id]||""):(exNames[id]||"")},avatar);item.id="personal-"+id+"-"+(++n);item.time=current;item.sender=outgoing?profile.nickname:(handles[id]||labels[id]);item.outgoing=outgoing;item.read=false;return [item];});};
  const avatarFor=(id:string)=>`${import.meta.env.BASE_URL}people/${id==="hanjin"?"jihoon":id==="jihoon"?"hanjin":id}.jpg`;
  const crushTitle=handles[profile.crush]||labels[profile.crush];
- const contacts=buildMessages(profile.crush,crushTitle,chatText[profile.crush]||"",avatarFor(profile.crush));
+ const contacts=buildMessages(profile.crush,crushNames[profile.crush]||crushTitle,chatText[profile.crush]||"",avatarFor(profile.crush));
  const breakupText:Record<string,string>={
  shinyu:`我想了一阵了 不是冲动
 我们这样下去 你会累 我也会
@@ -452,7 +452,7 @@ user 我刚看到一个东西 特别像你
 保重`
  };
  const crushMessages=buildMessages(profile.crush,handles[profile.crush]||labels[profile.crush],chatText[profile.crush]||"",avatarFor(profile.crush));
- const exMessages=buildMessages(profile.ex,handles[profile.ex]||labels[profile.ex],breakupText[profile.ex]||"",avatarFor(profile.ex));
+ const exMessages=buildMessages(profile.ex,exNames[profile.ex]||handles[profile.ex]||labels[profile.ex],breakupText[profile.ex]||"",avatarFor(profile.ex));
  const crushIsHanjin=profile.crush==="hanjin", exIsHanjin=profile.ex==="hanjin";
  const hanjinWechat=crushIsHanjin?buildMessages("hanjin",handles.hanjin,`@2026-10-01 19:20
 睡了吗 user
