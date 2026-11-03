@@ -546,7 +546,42 @@ user 我刚刚路过一家店 看到这个
   make(profile.crush,handles[profile.crush],"",{handle:handles[profile.crush],username:handles[profile.crush],account:"crush"}),
   make(profile.ex,handles[profile.ex],"",{handle:handles[profile.ex],username:handles[profile.ex],account:"ex"})
  ];
- const exContact=profile.ex!==profile.crush?exMessages:[]; const hanjinSelected=profile.crush==="hanjin"||profile.ex==="hanjin"; const hanjinKakaoMessages=profile.crush==="hanjin"?crushMessages:profile.ex==="hanjin"?exMessages:[]; const hanjinWechatMessages=hanjinSelected?(profile.crush==="hanjin"?hanjinWechat:buildMessages("hanjin","韩振",breakupText.hanjin,avatarFor("hanjin"))):[]; const kakaoItems=[...(work.data.kakao||[]),...crushMessages,...exContact]; const personalized:Work={...work,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...work.data,kakao:kakaoItems,wechat:[...(work.data.wechat||[]),...hanjinWechatMessages],instagram:[...(work.data.instagram||[]),...insta]}};
+ const exContact=profile.ex!==profile.crush?exMessages:[];
+ const hanjinSelected=profile.crush==="hanjin"||profile.ex==="hanjin";
+ const hanjinWechatMessages=hanjinSelected?(profile.crush==="hanjin"?hanjinWechat:buildMessages("hanjin","韩振",breakupText.hanjin,avatarFor("hanjin"))):[];
+ const isPlaceholder=(item:Work["data"][string][number])=>/测试(用户|联系人|会话|消息|内容|回复|动态)/.test([item.title,item.body,item.sender].join(" "))||item.body==="这是一条测试内容。"||item.body==="这是一条测试消息。";
+ const cleanedData=Object.fromEntries(Object.entries(work.data).map(([app,items])=>[app,items.filter(item=>!isPlaceholder(item))])) as Work["data"];
+ const taobaoProducts=[
+  ["bag-dior-ladydior","Dior Lady Dior 中号手袋",51000,"DIOR 迪奥官方旗舰店","藤格纹羊皮革，经典五格戴妃包。","奢侈品女包"],
+  ["bag-dior-toujours","Dior Toujours 小号手袋",29000,"DIOR 迪奥官方旗舰店","小号牛皮革手袋，日常通勤款。","奢侈品女包"],
+  ["bag-chanel-cf","CHANEL Classic Flap 中号口盖包",84000,"CHANEL 香奈儿精品店","经典菱格纹链条包。","奢侈品女包"],
+  ["bag-chanel-mini","CHANEL Mini 迷你口盖包",58000,"CHANEL 香奈儿精品店","迷你尺寸经典链条包。","奢侈品女包"],
+  ["bag-celine-triomphe","CELINE Teen Triomphe 凯旋门包",27000,"CELINE 思琳官方旗舰店","经典凯旋门金属扣饰肩背包。","奢侈品女包"],
+  ["bag-celine-ava","CELINE Ava 腋下包",18500,"CELINE 思琳官方旗舰店","简洁弧形包身，牛皮革款。","奢侈品女包"],
+  ["bag-lv-neverfull","Louis Vuitton Neverfull MM",15200,"Louis Vuitton 路易威登官方旗舰店","Monogram 帆布经典托特包。","奢侈品女包"],
+  ["bag-lv-speedy","Louis Vuitton Speedy Bandoulière 25",23600,"Louis Vuitton 路易威登官方旗舰店","经典 Speedy 迷你波士顿包。","奢侈品女包"],
+  ["bag-gucci-marmont","Gucci GG Marmont 小号肩背包",19500,"GUCCI 古驰官方旗舰店","双 G 标识绗缝皮革肩背包。","奢侈品女包"],
+  ["bag-prada-reedition","Prada Re-Edition 2005 Re-Nylon",16000,"PRADA 普拉达官方旗舰店","再生尼龙迷你肩背包。","奢侈品女包"],
+  ["bag-ysl-loulou","Saint Laurent LouLou 小号包",23500,"Saint Laurent 圣罗兰官方旗舰店","绗缝皮革包身与 YSL 标识。","奢侈品女包"],
+  ["bag-loewe-puzzle","LOEWE Puzzle Edge 小号包",29500,"LOEWE 罗意威官方旗舰店","几何拼接结构小号手袋。","奢侈品女包"],
+  ["bag-bottega-cassette","Bottega Veneta Cassette 编织包",22500,"Bottega Veneta 官方旗舰店","经典 Intrecciato 编织皮革包。","奢侈品女包"],
+  ["bag-fendi-baguette","Fendi Baguette 中号法棍包",29800,"FENDI 芬迪官方旗舰店","标志性法棍廓形肩背包。","奢侈品女包"],
+  ["bag-miumiu-wander","Miu Miu Wander 漫游包",18500,"Miu Miu 缪缪官方旗舰店","Matelassé 纳帕皮革腋下包。","奢侈品女包"],
+  ["bag-balenciaga-lecity","Balenciaga Le City 小号机车包",18500,"BALENCIAGA 巴黎世家官方旗舰店","复古机车风皮革手袋。","奢侈品女包"],
+  ["bag-hermes-picotin","Hermès Picotin 18 菜篮子",24000,"Hermès 爱马仕精品店","经典水桶包基础皮款参考价。","奢侈品女包"],
+  ["bag-burberry-check","Burberry Check 肩背包",13800,"BURBERRY 博柏利官方旗舰店","品牌格纹拼接皮革肩背包。","奢侈品女包"],
+  ["condom-durex-air","杜蕾斯 AIR 空气套 12只装",59,"杜蕾斯官方旗舰店","超薄天然乳胶避孕套，12只装。","避孕用品"],
+  ["condom-jissbon-ultra","杰士邦超薄系列 12只装",49,"杰士邦官方旗舰店","超薄天然乳胶避孕套，12只装。","避孕用品"],
+  ["condom-okamoto003","冈本 003 12只装",109,"冈本官方旗舰店","003 超薄系列，12只装。","避孕用品"],
+  ["condom-sagami002","相模原装 0.02 6只装",129,"相模官方旗舰店","聚氨酯材质，6只装。","避孕用品"],
+  ["condom-durex-mix","杜蕾斯多款组合装 24只",99,"杜蕾斯官方旗舰店","多款组合装。","避孕用品"],
+  ["toy-remote-egg","APP远程遥控用品",369,"成人用品品牌旗舰店","手机 APP 远程控制，多档模式。","成人用品"]
+ ];
+ if(profile.xp==="GB")taobaoProducts.push(["toy-wearable","穿戴式用品套装",499,"成人用品品牌旗舰店","可调节穿戴式设计，含固定带。","成人用品"]);
+ const taobaoItems=taobaoProducts.map(([id,title,price,shop,body,category])=>{const item=make(String(id),String(title),String(body),{price:String(price),category:String(category),currency:"CNY",condition:"全新",sales:"店铺商品"}, "");item.sender=String(shop);item.kind="image";return item;});
+ const cleanedApps=work.apps.map(app=>app.id==="taobao"?{...app,installed:true,visible:true}:app);
+ if(!cleanedApps.some(app=>app.id==="taobao"))cleanedApps.push({id:"taobao",name:"淘宝",installed:true,visible:true,dock:false,folder:"",icon:""});
+ const personalized:Work={...work,apps:cleanedApps,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...cleanedData,kakao:[...(cleanedData.kakao||[]),...crushMessages,...exContact],wechat:[...(cleanedData.wechat||[]),...hanjinWechatMessages],instagram:[...(cleanedData.instagram||[]),...insta],taobao:[...(cleanedData.taobao||[]),...taobaoItems]}};
  return <main className="story-runtime"><Phone key={session} work={personalized}/></main>;
 }
 createRoot(document.getElementById("root")!).render(<StoryPlayer/>);
