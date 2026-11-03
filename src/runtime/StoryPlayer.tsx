@@ -425,15 +425,12 @@ user 我刚刚路过一家店 看到这个
 你：好
 那 下午？
 你：okok`,avatarFor("hanjin")): [];
- const hanjinKakao=profile.crush==="hanjin"?buildMessages("hanjin","珍珍","@2026-10-01 19:08
-哈咯 user 备注韩振
-你：好的好的",avatarFor("hanjin")):[];
  const insta=[
   make("tws","TWS (투어스)","welcometoourBside",{handle:"tws_pledis",username:"TWS (투어스)",posts:"2540",followers:"363w",following:"1",account:"official"}),
   make(profile.crush,handles[profile.crush],"",{handle:handles[profile.crush],username:handles[profile.crush],account:"crush"}),
   make(profile.ex,handles[profile.ex],"",{handle:handles[profile.ex],username:handles[profile.ex],account:"ex"})
  ];
- const personalized:Work={...work,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...work.data,kakao:[...(work.data.kakao||[]),...contacts,...hanjinKakao],wechat:[...(work.data.wechat||[]),...hanjinWechat],instagram:[...(work.data.instagram||[]),...insta]}};
+ const personalized:Work={...work,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...work.data,kakao:[...(work.data.kakao||[]),...contacts],wechat:[...(work.data.wechat||[]),...hanjinWechat],instagram:[...(work.data.instagram||[]),...insta]}};
  return <main className="story-runtime"><Phone key={session} work={personalized}/></main>;
 }
 createRoot(document.getElementById("root")!).render(<StoryPlayer/>);
