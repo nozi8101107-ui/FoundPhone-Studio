@@ -543,17 +543,23 @@ user 我刚刚路过一家店 看到这个
 就这样吧`,avatarFor("hanjin")):[];
  const hanjinKakao=exIsHanjin&&!crushIsHanjin?exMessages:crushIsHanjin?crushMessages:[];
  
+ const selectedMembers=[...new Set([profile.crush,profile.ex])];
+ const friendNames=["민서","서연","지우","유진","수빈","예린","채원","하린","도연","나연","소희","은서","지민","다은","현아","예지","승아","가은","혜원","시은"];
+ const friends=friendNames.map((name,index)=>{const handle=randId();return make("ig-friend-"+index,handle,"",{handle,username:name,account:"friend",relationship:"互相关注",mutual:"true"});});
+ const selectedAccounts=selectedMembers.map(id=>make("ig-member-"+id,handles[id],"",{handle:handles[id],username:handles[id],account:id===profile.crush?"crush":"ex",member:id,relationship:"互相关注",remark:id===profile.crush?crushNames[id]:exNames[id]}));
+ const mutualCount=friends.length+selectedAccounts.length;
  const insta=[
   make("tws","TWS (투어스)","",{handle:"tws_pledis",username:"TWS (투어스)",posts:"2540",followers:"363w",following:"1",account:"official",relationship:"关注"}),
-  ...Object.entries(handles).map(([id,handle])=>make("ig-member-"+id,handle,"",{handle,username:handle,account:"member",member:id,relationship:id===profile.crush||id===profile.ex?"互关":"关注",remark:id===profile.crush?crushNames[id]:id===profile.ex?exNames[id]:""})),
-  make("ig-user-profile",profile.nickname,"",{handle:profile.nickname,username:profile.nickname,account:"user",followers:"42",following:"43",mutuals:"42",followingOnly:"tws_pledis"})
+  ...selectedAccounts,
+  ...friends,
+  make("ig-user-profile",profile.nickname,"",{handle:profile.nickname,username:profile.nickname,account:"user",followers:String(mutualCount),following:String(mutualCount+1),mutuals:String(mutualCount),followingOnly:"tws_pledis"})
  ];
  const exContact=profile.ex!==profile.crush?exMessages:[];
  const hanjinSelected=profile.crush==="hanjin"||profile.ex==="hanjin";
  const hanjinWechatMessages=hanjinSelected?(profile.crush==="hanjin"?hanjinWechat:buildMessages("hanjin",handles.hanjin,breakupText.hanjin,avatarFor("hanjin"))):[];
  const isPlaceholder=(item:Work["data"][string][number])=>/测试(用户|联系人|会话|消息|内容|回复|动态)/.test([item.title,item.body,item.sender].join(" "))||item.body==="这是一条测试内容。"||item.body==="这是一条测试消息。";
  const cleanedData=Object.fromEntries(Object.entries(work.data).map(([app,items])=>[app,items.filter(item=>!isPlaceholder(item))])) as Work["data"];
- cleanedData.instagram=(cleanedData.instagram||[]).filter(item=>item.meta.account==="official"||item.meta.account==="crush"||item.meta.account==="ex"||item.meta.owner==="member");
+ cleanedData.instagram=(cleanedData.instagram||[]).filter(item=>item.meta.account==="official");
  const taobaoProducts=[
   ["bag-dior-ladydior","Dior Lady Dior 中号手袋",51000,"DIOR 迪奥官方旗舰店","藤格纹羊皮革，经典五格戴妃包。","奢侈品女包"],
   ["bag-dior-toujours","Dior Toujours 小号手袋",29000,"DIOR 迪奥官方旗舰店","小号牛皮革手袋，日常通勤款。","奢侈品女包"],
