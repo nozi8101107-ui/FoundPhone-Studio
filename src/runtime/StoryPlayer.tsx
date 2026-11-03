@@ -21,7 +21,25 @@ function StoryPlayer(){
  if(!work)return <main className="story-runtime"><p role="status">{error||"正在打开手机…"}</p></main>;
  if(!profile)return <UserOnboarding key={session} onComplete={complete}/>;
  if(choice==="choose")return <StartChoice onContinue={()=>setChoice("play")} onRestart={()=>void restart()}/>;
- const personalized:Work={...work,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4)}};
+ const labels:Record<string,string>={shinyu:"申惟",dohoon:"金道勋",youngjae:"崔英宰",hanjin:"韩振",jihoon:"志薰",kyungmin:"李炅潣"};
+ const crushNames:Record<string,string>={shinyu:"晶㬊尼",dohoon:"小屎狗",youngjae:"居家服务型男",hanjin:"珍珍",jihoon:"击击击昏",kyungmin:"炅man"};
+ const exNames:Record<string,string>={shinyu:"事多爹系天蝎男",dohoon:"不要理他！",youngjae:"远离双子男",hanjin:"不中",jihoon:"tws韩志薰",kyungmin:"李炅jiong潣min"};
+ const handles:Record<string,string>={shinyu:"tlswjdghks",dohoon:"doking",youngjae:"jae_e",hanjin:"henan_prince",jihoon:"ahoooon",kyungmin:"kyungman_lee"};
+ const make=(id:string,title:string,body:string,meta:Record<string,string>={},avatar="")=>({id,title,body,richText:"",meta,time:"2026-11-03 09:41",sender:labels[id]||title,avatar,kind:"text" as const,media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:false,read:false,likes:0,comments:[] as string[]});
+ const contacts=[
+  make(profile.crush,"", "最近联系的人",{}, ""),
+  make(profile.ex,"", "聊天记录",{}, "")
+ ];
+ contacts[0].title=crushNames[profile.crush]||labels[profile.crush];
+ contacts[0].sender=labels[profile.crush];
+ contacts[1].title=exNames[profile.ex]||labels[profile.ex];
+ contacts[1].sender=labels[profile.ex];
+ const insta=[
+  make("tws","TWS (투어스)","welcometoourBside",{handle:"tws_pledis",username:"TWS (투어스)",posts:"2540",followers:"363w",following:"1",account:"official"}),
+  make(profile.crush,handles[profile.crush],"",{handle:handles[profile.crush],username:handles[profile.crush],account:"crush"}),
+  make(profile.ex,handles[profile.ex],"",{handle:handles[profile.ex],username:handles[profile.ex],account:"ex"})
+ ];
+ const personalized:Work={...work,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4)},data:{...work.data,kakao:[...(work.data.kakao||[]),...contacts],instagram:[...(work.data.instagram||[]),...insta]}};
  return <main className="story-runtime"><Phone key={session} work={personalized}/></main>;
 }
 createRoot(document.getElementById("root")!).render(<StoryPlayer/>);

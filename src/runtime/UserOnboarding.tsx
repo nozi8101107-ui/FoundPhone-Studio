@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import "./onboarding.css";
 export type UserProfile = { nickname:string; birthday:string; avatar:string; crush:string; ex:string; xp:"BG"|"GB" };
-const people = [["shinyu","申惟"],["dohoon","道勋"],["youngjae","英宰"],["jihoon","志训"],["hanjin","韩振"],["kyungmin","景敏"]] as const;
+const people = [["shinyu","申惟"],["dohoon","道勋"],["youngjae","英宰"],["hanjin","韩振"],["jihoon","志薰"],["kyungmin","炅潣"]] as const;
 const photo=(id:string)=>`${import.meta.env.BASE_URL}people/${id}.jpg`;
 function validDate(v:string){if(!/^\d{8}$/.test(v))return false;const y=+v.slice(0,4),m=+v.slice(4,6),d=+v.slice(6,8),x=new Date(Date.UTC(y,m-1,d));return x.getUTCFullYear()===y&&x.getUTCMonth()===m-1&&x.getUTCDate()===d&&y>=1900&&y<=new Date().getFullYear();}
 function crop(file:File):Promise<string>{return new Promise((resolve,reject)=>{const url=URL.createObjectURL(file),img=new Image();img.onload=()=>{const s=Math.min(img.naturalWidth,img.naturalHeight),c=document.createElement("canvas");c.width=c.height=512;c.getContext("2d")!.drawImage(img,(img.naturalWidth-s)/2,(img.naturalHeight-s)/2,s,s,0,0,512,512);URL.revokeObjectURL(url);resolve(c.toDataURL("image/jpeg",.78));};img.onerror=()=>{URL.revokeObjectURL(url);reject(Error("图片读取失败"));};img.src=url;});}
