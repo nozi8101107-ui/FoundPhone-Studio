@@ -141,6 +141,7 @@ function PhoneRuntime({
   const [recent, setRecent] = useState<string[]>([]);
   const appSnapshots = useRef(new Map<string, HTMLElement>());
   const [banner, setBanner] = useState("");
+  const [checkout, setCheckout] = useState<{item:Item;quantity:number;success:boolean}|null>(null);
   const noticesSeen = useRef(0);
   const [contextApp, setContextApp] = useState("");
   const [deviceScale, setDeviceScale] = useState(0.84);
@@ -197,22 +198,27 @@ function PhoneRuntime({
     onRuntime?.(next);
   };
   useEffect(() => {
-    const handlePurchase = (event: Event) => {
+    const handleCheckout = (event: Event) => {
       const detail = (event as CustomEvent<{item:Item;quantity:number}>).detail;
       if (!detail?.item || !detail.quantity) return;
-      const {item,quantity}=detail;
-      const total=Number(item.meta.price||0)*quantity;
-      const time=new Date().toLocaleString("sv-SE",{hour12:false}).replace("T"," ");
-      const number="TB"+Date.now().toString().slice(-12);
-      const order:Item={id:"purchase-"+crypto.randomUUID(),title:item.title,body:item.body,richText:"",meta:{...item.meta,price:total.toFixed(2),quantity:String(quantity),status:"已完成",number,paidBy:"支付宝余额"},time,sender:item.sender,avatar:"",kind:"order",media:"",hidden:false,unlock:"",password:"",folder:"订单",favorite:false,outgoing:false,read:false,likes:0,comments:[]};
-      const bill:Item={id:"alipay-"+crypto.randomUUID(),title:item.title,body:"淘宝订单付款",richText:"",meta:{merchant:"淘宝 · "+item.sender,amount:"-¥"+total.toFixed(2),status:"支付成功",orderNumber:number,quantity:String(quantity)},time,sender:"淘宝",avatar:"",kind:"order",media:"",hidden:false,unlock:"",password:"",folder:"交易",favorite:false,outgoing:false,read:false,likes:0,comments:[]};
-      const current=runtimeRef.current;
-      update({...current,messages:{...current.messages,taobao:[...(current.messages.taobao||[]),order],alipay:[...(current.messages.alipay||[]),bill]}});
+      setCheckout({...detail,success:false});
       setApp("alipay");
     };
-    window.addEventListener("foundphone:purchase",handlePurchase);
-    return ()=>window.removeEventListener("foundphone:purchase",handlePurchase);
+    window.addEventListener("foundphone:checkout",handleCheckout);
+    return ()=>window.removeEventListener("foundphone:checkout",handleCheckout);
   }, []);
+  const completePayment = () => {
+    if (!checkout) return;
+    const {item,quantity}=checkout;
+    const total=Number(item.meta.price||0)*quantity;
+    const time=new Date().toLocaleString("sv-SE",{hour12:false}).replace("T"," ");
+    const number="TB"+Date.now().toString().slice(-12);
+    const order:Item={id:"purchase-"+(globalThis.crypto?.randomUUID?.()||Date.now()),title:item.title,body:item.body,richText:"",meta:{...item.meta,price:total.toFixed(2),quantity:String(quantity),status:"已完成",number,paidBy:"支付宝余额"},time,sender:item.sender,avatar:"",kind:"order",media:"",hidden:false,unlock:"",password:"",folder:"订单",favorite:false,outgoing:false,read:false,likes:0,comments:[]};
+    const bill:Item={id:"alipay-"+(globalThis.crypto?.randomUUID?.()||Date.now()),title:item.title,body:"淘宝订单付款",richText:"",meta:{merchant:"淘宝 · "+item.sender,amount:"-¥"+total.toFixed(2),status:"支付成功",orderNumber:number,quantity:String(quantity)},time,sender:"淘宝",avatar:"",kind:"order",media:"",hidden:false,unlock:"",password:"",folder:"交易",favorite:false,outgoing:false,read:false,likes:0,comments:[]};
+    const current=runtimeRef.current;
+    update({...current,messages:{...current.messages,taobao:[...(current.messages.taobao||[]),order],alipay:[...(current.messages.alipay||[]),bill]}});
+    setCheckout({...checkout,success:true});
+  };
   useEffect(() => {
     let active = true;
     if (creator || external) return;
@@ -699,6 +705,25 @@ function PhoneRuntime({
                   </button>
                 )}
               </div>
+            </div>
+          )}
+          {checkout && !locked && (
+            <div className="alipay-flow-backdrop">
+              <section className="alipay-flow-card" role="dialog" aria-modal="true">
+                <div className="alipay-flow-brand">支付宝</div>
+                {checkout.success ? <>
+                  <div className="alipay-success-mark">✓</div>
+                  <h2>付款成功</h2>
+                  <p>¥ {(Number(checkout.item.meta.price||0)*checkout.quantity).toFixed(2)}</p>
+                  <button onClick={()=>{const title=checkout.item.title;setCheckout(null);setApp("taobao");setBanner("您已成功购买「"+title+"」");}}>完成</button>
+                </> : <>
+                  <small>确认付款</small>
+                  <strong className="alipay-flow-amount">¥ {(Number(checkout.item.meta.price||0)*checkout.quantity).toFixed(2)}</strong>
+                  <div className="alipay-flow-detail"><span>{checkout.item.title} × {checkout.quantity}</span><b>付款方式：余额</b></div>
+                  <button onClick={completePayment}>支付</button>
+                  <small className="alipay-flow-note">模拟支付 · 不会产生真实扣款</small>
+                </>}
+              </section>
             </div>
           )}
           {banner && !locked && (
