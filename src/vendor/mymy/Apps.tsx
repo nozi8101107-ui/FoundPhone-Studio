@@ -494,14 +494,14 @@ export function MymyInstagram(p: SkinProps) {
                     <b>{feedPosts.length}</b>
                     <small>帖子</small>
                   </div>
-                  <div>
-                    <b>—</b>
+                  <button className="ig-profile-count" onClick={() => setAccountList("粉丝")}>
+                    <b>{posts.find((i) => i.meta.account === "user")?.meta.followers || "42"}</b>
                     <small>粉丝</small>
-                  </div>
-                  <div>
-                    <b>—</b>
+                  </button>
+                  <button className="ig-profile-count" onClick={() => setAccountList("关注")}>
+                    <b>{posts.find((i) => i.meta.account === "user")?.meta.following || "43"}</b>
                     <small>关注</small>
-                  </div>
+                  </button>
                 </div>
               </div>
               <p className="pn">{p.owner}</p>
@@ -511,7 +511,7 @@ export function MymyInstagram(p: SkinProps) {
                 </div>
               </div>
               <div className="pg2">
-                {posts.map((i) => (
+                {feedPosts.map((i) => (
                   <button key={i.id} onClick={() => openPost(i)}>
                     <Media item={i} />
                   </button>
@@ -566,6 +566,28 @@ export function MymyInstagram(p: SkinProps) {
           ))}
         </nav>
       </div>
+      {accountList && (
+        <div className="ig-account-overlay" role="dialog" aria-modal="true" aria-label={accountList}>
+          <header>
+            <button aria-label="返回个人主页" onClick={() => setAccountList("")}><ArrowLeft /></button>
+            <b>{accountList}</b>
+            <span />
+          </header>
+          <div className="ig-account-list">
+            {(accountList === "粉丝" ? accounts.filter((a) => a.meta.account !== "official") : accounts).map((a) => (
+              <article className="ig-following-card" key={a.id}>
+                <Avatar name={a.sender} src={a.avatar} />
+                <div className="ig-following-info">
+                  <b>{a.meta.username || a.sender}</b>
+                  <small>@{a.meta.handle || ""}</small>
+                </div>
+                <span className="ig-following-mark">{a.meta.relationship === "互关" ? "互相关注" : "已关注"}</span>
+              </article>
+            ))}
+            {!accounts.length && <Blank />}
+          </div>
+        </div>
+      )}
       {sheet && (
         <div className="kzcs">
           <button
