@@ -40,7 +40,7 @@ import {
   Suspense,
   type CSSProperties,
 } from "react";
-import { AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import {
   ChevronLeft,
   Plus,
@@ -324,7 +324,7 @@ function PhoneRuntime({
     const count = s.notifications.length;
     if (!locked && work.phone.notifications && count > noticesSeen.current) {
       setBanner(s.notifications.at(-1) || "");
-      const timer = setTimeout(() => setBanner(""), 4500);
+      const timer = setTimeout(() => setBanner(""), 2000);
       noticesSeen.current = count;
       return () => clearTimeout(timer);
     }
@@ -715,7 +715,7 @@ function PhoneRuntime({
                   <div className="alipay-success-mark">✓</div>
                   <h2>付款成功</h2>
                   <p>{(Number(checkout.item.meta.price||0)*checkout.quantity).toFixed(2)}元</p>
-                  <button onClick={()=>{const title=checkout.item.title;setCheckout(null);setApp("taobao");setBanner("您已成功购买「"+title+"」");}}>完成</button>
+                  <button onClick={()=>{const title=checkout.item.title;setCheckout(null);setApp("taobao");setBanner("淘宝：您已成功购买「"+title+"」");}}>完成</button>
                 </> : <>
                   <small>确认付款</small>
                   <strong className="alipay-flow-amount">{(Number(checkout.item.meta.price||0)*checkout.quantity).toFixed(2)}元</strong>
@@ -726,24 +726,30 @@ function PhoneRuntime({
               </section>
             </div>
           )}
-          {banner && !locked && (
-            <button
-              className="device-banner"
-              onClick={() => {
-                setBanner("");
-                setPanel("notification");
-              }}
-            >
-              <AppIcon
-                id={notificationContent(banner, work.apps).appId}
-                small
-              />
-              <span>
-                <strong>{notificationContent(banner, work.apps).title}</strong>
-                <span>{notificationContent(banner, work.apps).body}</span>
-              </span>
-            </button>
-          )}
+          <AnimatePresence>
+            {banner && !locked && (
+              <motion.button
+                className="device-banner"
+                initial={{ opacity: 0, y: -28 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -72, transition: { duration: 0.16, ease: "easeIn" } }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                onClick={() => {
+                  setBanner("");
+                  setPanel("notification");
+                }}
+              >
+                <AppIcon
+                  id={notificationContent(banner, work.apps).appId}
+                  small
+                />
+                <span>
+                  <strong>{notificationContent(banner, work.apps).title}</strong>
+                  <span>{notificationContent(banner, work.apps).body}</span>
+                </span>
+              </motion.button>
+            )}
+          </AnimatePresence>
           {panel === "switcher" && (
             <div className="device-switcher">
               <div className="switcher-cards">
