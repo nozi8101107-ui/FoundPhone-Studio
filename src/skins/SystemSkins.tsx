@@ -814,24 +814,13 @@ function LocationMap({
 }) {
   return (
     <div className={`fiction-map ${find ? "find-map" : ""}`}>
-      <svg viewBox="0 0 300 300" aria-label="原创虚构地图">
-        <rect width="300" height="300" fill="#e4e5d8" />
-        {[35, 100, 190, 260].map((n) => (
-          <path
-            key={n}
-            d={`M0 ${n} H300 M${n} 0 V300`}
-            stroke="#fff"
-            strokeWidth="11"
-          />
-        ))}
-        <path
-          d="M20 0 Q190 110 120 300"
-          stroke="#b6d8df"
-          strokeWidth="24"
-          fill="none"
-        />
-        <rect x="205" y="112" width="42" height="65" rx="7" fill="#bdcfac" />
-      </svg>
+      <iframe
+        title="首尔地图"
+        src="https://www.openstreetmap.org/export/embed.html?bbox=126.86%2C37.46%2C127.12%2C37.63&layer=mapnik"
+        loading="lazy"
+        referrerPolicy="no-referrer"
+      />
+      <div className="map-city-label">서울 · 首尔</div>
       {items.map((i, n) => (
         <button
           key={i.id}
