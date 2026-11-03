@@ -638,3 +638,64 @@
 .mymy-ui .ig-following-info b{font-size:13px}
 .mymy-ui .ig-following-info small{font-size:10px;color:#888}
 .mymy-ui .ig-following-mark{font-size:13px;color:#3897f0;font-weight:700}
+
+
+.mymy-ui .ig-profile-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 48px;
+  background: transparent;
+  color: inherit;
+  border: 0;
+  padding: 0 4px;
+}
+.mymy-ui .ig-profile-count b {
+  font-size: 15px;
+  font-weight: 700;
+}
+.mymy-ui .ig-profile-count small {
+  font-size: 12px;
+}
+.mymy-ui .ig-account-overlay {
+  position: absolute;
+  z-index: 45;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  color: #111;
+}
+.mymy-ui .ig-account-overlay > header {
+  height: 52px;
+  min-height: 52px;
+  display: grid;
+  grid-template-columns: 48px 1fr 48px;
+  align-items: center;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+.mymy-ui .ig-account-overlay > header button {
+  display: grid;
+  place-items: center;
+}
+.mymy-ui .ig-account-list {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 8px 14px;
+}
+.mymy-ui .ig-account-list .ig-following-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+}
+.mymy-ui .ig-account-list .catalog-avatar {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 50%;
+}
