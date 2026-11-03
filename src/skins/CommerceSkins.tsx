@@ -93,6 +93,8 @@ export function AlipaySkin(p: Props) {
 export function TaobaoSkin(p: Props) {
   const { tab, setTab, q, setQ, items } = useContent(p, "商品");
   const [status, setStatus] = useState("全部");
+  const [selected, setSelected] = useState<import("../schema").Item|null>(null);
+  const [quantity, setQuantity] = useState(1);
   const list = items
     .filter((i) =>
       tab === "商品"
@@ -110,7 +112,7 @@ export function TaobaoSkin(p: Props) {
         {tab === "商品" ? (
           <div className="taobao-products">
             {list.map((i) => (
-              <button key={i.id} onClick={() => p.onItem(i)}>
+              <button key={i.id} onClick={() => {setSelected(i);setQuantity(1);}}>
                 <Media item={i} />
                 <strong>{i.title}</strong>
                 <p>
@@ -161,6 +163,36 @@ export function TaobaoSkin(p: Props) {
         )}
         <Empty items={list} />
       </div>
+      {selected && (
+        <div className="taobao-buy-backdrop" role="presentation" onClick={() => setSelected(null)}>
+          <section className="taobao-buy-sheet" role="dialog" aria-modal="true" aria-label="商品购买" onClick={e => e.stopPropagation()}>
+            <button className="taobao-buy-close" onClick={() => setSelected(null)}>×</button>
+            <Media item={selected} />
+            <div className="taobao-buy-info">
+              <strong>{selected.title}</strong>
+              <p>{selected.body}</p>
+              <b>¥ {meta(selected,"price","0")}</b>
+            </div>
+            <div className="taobao-quantity">
+              <span>购买数量</span>
+              <div>
+                <button aria-label="减少数量" disabled={quantity<=1} onClick={()=>setQuantity(v=>Math.max(1,v-1))}>−</button>
+                <strong>{quantity}</strong>
+                <button aria-label="增加数量" onClick={()=>setQuantity(v=>Math.min(99,v+1))}>＋</button>
+              </div>
+            </div>
+            <div className="taobao-payment-row"><span>支付方式</span><strong>支付宝余额　›</strong></div>
+            <div className="taobao-total"><span>合计</span><b>¥ {(Number(meta(selected,"price","0"))*quantity).toFixed(2)}</b></div>
+            <button className="taobao-pay-button" onClick={() => {
+              window.dispatchEvent(new CustomEvent("foundphone:purchase",{detail:{item:selected,quantity}}));
+              setSelected(null);
+              setTab("订单");
+              setStatus("全部");
+            }}>确认并使用支付宝余额付款</button>
+            <small className="taobao-pay-note">模拟购买 · 不会产生真实扣款</small>
+          </section>
+        </div>
+      )}
       <Tabs
         tabs={["商品", "订单", "物流"]}
         value={tab}
