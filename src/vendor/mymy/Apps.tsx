@@ -324,6 +324,7 @@ export function MymyInstagram(p: SkinProps) {
     [story, setStory] = useState(0),
     [draft, setDraft] = useState(""),
     [pop, setPop] = useState("");
+  const [accountList, setAccountList] = useState<"粉丝" | "关注" | "">("");
   const posts = p.items.filter(
       (i) => i.folder !== "私信" && i.meta.story !== "true",
     ),
@@ -472,7 +473,7 @@ export function MymyInstagram(p: SkinProps) {
                 ))}
               </div>
               {feedPosts.map(post)}
-              {!posts.length && <Blank />}
+              {!feedPosts.length && <Blank />}
             </>
           )}
           {!selected && tab === "个人主页" && (
@@ -523,20 +524,7 @@ export function MymyInstagram(p: SkinProps) {
               {!dms.length && <Blank />}
             </>
           )}
-          {!selected && tab === "搜索" && (
-            <>
-              <input
-                className="mymy-search"
-                aria-label="搜索Instagram"
-                placeholder="搜索"
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-              />
-              {feedPosts
-                .filter((i) => (i.title + i.body + i.sender).includes(draft))
-                .map(post)}
-            </>
-          )}
+          {!selected && tab === "搜索" && <Blank />}
         </div>
         <nav className="mymy-ig-nav">
           {[Home, Search, Send, User].map((Icon, n) => (
