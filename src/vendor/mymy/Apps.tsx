@@ -532,7 +532,7 @@ export function MymyInstagram(p: SkinProps) {
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
               />
-              {posts
+              {feedPosts
                 .filter((i) => (i.title + i.body + i.sender).includes(draft))
                 .map(post)}
             </>
@@ -564,7 +564,7 @@ export function MymyInstagram(p: SkinProps) {
             <span />
           </header>
           <div className="ig-account-list">
-            {(accountList === "粉丝" ? accounts.filter((a) => a.meta.account !== "official") : accounts).map((a) => (
+            {(accountList === "粉丝" ? accounts.filter((a) => a.meta.account !== "official" && a.meta.account !== "user") : accounts.filter((a) => a.meta.account !== "user")).map((a) => (
               <article className="ig-following-card" key={a.id}>
                 <Avatar name={a.sender} src={a.avatar} />
                 <div className="ig-following-info">
