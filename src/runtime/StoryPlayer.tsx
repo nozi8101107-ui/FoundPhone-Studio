@@ -29,7 +29,7 @@ function StoryPlayer(){
  const make=(id:string,title:string,body:string,meta:Record<string,string>={},avatar="")=>({id,title,body,richText:"",meta,time:"2026-11-03 09:41",sender:labels[id]||title,avatar,kind:"text" as const,media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:false,read:false,likes:0,comments:[] as string[]});
  const birthdayCompare=(a:string,b:string)=>a.localeCompare(b);
  const olderThan=(id:string)=>birthdayCompare(profile.birthday,({shinyu:"20031107",dohoon:"20050130",youngjae:"20050531",hanjin:"20060105",jihoon:"20060328",kyungmin:"20071002"} as Record<string,string>)[id]||"99999999")<0;
- const address=profile.nickname+(olderThan(profile.crush)?"姐姐":"");
+ 
  const chatText:Record<string,string>={
  shinyu:`@2026-10-01 01:47
 user
@@ -348,7 +348,7 @@ user 我刚看到一个东西 特别像你
 嗯 明天要不要去吃烤肉？在狎鸥亭
 你：ok`
  };
- const buildMessages=(id:string,title:string,text:string,avatar:string)=>{let current="2026-10-01 09:00",n=0;return text.split("\n").flatMap((line)=>{if(!line.trim())return [];if(line.startsWith("@")){current=line.slice(1);return [];}const outgoing=line.startsWith("你：");let body=outgoing?line.slice(2):line;if(!outgoing)body=body.replaceAll("user",address);const item=make(id,title,body,{},avatar);item.id="personal-"+id+"-"+(++n);item.time=current;item.sender=outgoing?profile.nickname:labels[id];item.outgoing=outgoing;item.read=false;return [item];});};
+ const buildMessages=(id:string,title:string,text:string,avatar:string)=>{let current="2026-10-01 09:00",n=0;return text.split("\n").flatMap((line)=>{if(!line.trim())return [];if(line.startsWith("@")){current=line.slice(1);return [];}const outgoing=line.startsWith("你：");let body=outgoing?line.slice(2):line;if(!outgoing)body=body.replaceAll("user",profile.nickname+(olderThan(id)?"姐姐":""));const item=make(id,title,body,{},avatar);item.id="personal-"+id+"-"+(++n);item.time=current;item.sender=outgoing?profile.nickname:labels[id];item.outgoing=outgoing;item.read=false;return [item];});};
  const avatarFor=(id:string)=>`${import.meta.env.BASE_URL}people/${id==="hanjin"?"jihoon":id==="jihoon"?"hanjin":id}.jpg`;
  const crushTitle=crushNames[profile.crush]||labels[profile.crush];
  const contacts=buildMessages(profile.crush,crushTitle,chatText[profile.crush]||"",avatarFor(profile.crush));
