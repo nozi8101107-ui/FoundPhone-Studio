@@ -193,6 +193,20 @@ export function XSkin(p: Props) {
     </div>
   );
 }
+function ThreadsPostActions({ p, item }: { p: Props; item: Item }) {
+  const [liked, setLiked] = useSkinState<boolean>(p, `liked-${item.id}`, false);
+  return (
+    <div className="social-actions threads-post-actions">
+      <button aria-label={`喜欢${item.title}`} aria-pressed={liked} onClick={() => setLiked(!liked)}>
+        <Heart size={17} fill={liked ? "currentColor" : "none"} />
+        {item.likes + (liked ? 1 : 0)}
+      </button>
+      <span><MessageCircle size={17} />{item.comments.length}</span>
+      <span><Repeat2 size={17} />{meta(item, "reposts", "0")}</span>
+      <span><Share2 size={17} />{meta(item, "shares", "0")}</span>
+    </div>
+  );
+}
 export function ThreadsSkin(p: Props) {
   const { tab, setTab, items } = useContent(p, "为你推荐");
   return (
@@ -200,9 +214,7 @@ export function ThreadsSkin(p: Props) {
       <Header p={p} />
       <div className="threads-title">
         <AtSign size={30} />
-        <button
-          onClick={() => setTab(tab === "为你推荐" ? "正在关注" : "为你推荐")}
-        >
+        <button onClick={() => setTab(tab === "为你推荐" ? "正在关注" : "为你推荐")}>
           {tab} ⌄
         </button>
       </div>
@@ -221,14 +233,11 @@ export function ThreadsSkin(p: Props) {
                 <strong>{i.sender}</strong>
                 <small>{i.time.slice(5, 10)}</small>
               </div>
-              <button className="social-body" onClick={() => p.onItem(i)}>
+              <div className="social-body">
                 <p>{i.body}</p>
                 {i.media && <Media item={i} />}
-              </button>
-              <Actions p={p} item={i} />
-              <button className="thread-replies" onClick={() => p.onItem(i)}>
-                {i.comments.length} 条回复
-              </button>
+              </div>
+              <ThreadsPostActions p={p} item={i} />
             </div>
           </article>
         ))}
