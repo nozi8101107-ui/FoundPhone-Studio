@@ -197,6 +197,23 @@ function PhoneRuntime({
     onRuntime?.(next);
   };
   useEffect(() => {
+    const handlePurchase = (event: Event) => {
+      const detail = (event as CustomEvent<{item:Item;quantity:number}>).detail;
+      if (!detail?.item || !detail.quantity) return;
+      const {item,quantity}=detail;
+      const total=Number(item.meta.price||0)*quantity;
+      const time=new Date().toLocaleString("sv-SE",{hour12:false}).replace("T"," ");
+      const number="TB"+Date.now().toString().slice(-12);
+      const order:Item={id:"purchase-"+crypto.randomUUID(),title:item.title,body:item.body,richText:"",meta:{...item.meta,price:total.toFixed(2),quantity:String(quantity),status:"已完成",number,paidBy:"支付宝余额"},time,sender:item.sender,avatar:"",kind:"order",media:"",hidden:false,unlock:"",password:"",folder:"订单",favorite:false,outgoing:false,read:false,likes:0,comments:[]};
+      const bill:Item={id:"alipay-"+crypto.randomUUID(),title:item.title,body:"淘宝订单付款",richText:"",meta:{merchant:"淘宝 · "+item.sender,amount:"-¥"+total.toFixed(2),status:"支付成功",orderNumber:number,quantity:String(quantity)},time,sender:"淘宝",avatar:"",kind:"order",media:"",hidden:false,unlock:"",password:"",folder:"交易",favorite:false,outgoing:false,read:false,likes:0,comments:[]};
+      const current=runtimeRef.current;
+      update({...current,messages:{...current.messages,taobao:[...(current.messages.taobao||[]),order],alipay:[...(current.messages.alipay||[]),bill]}});
+      setApp("alipay");
+    };
+    window.addEventListener("foundphone:purchase",handlePurchase);
+    return ()=>window.removeEventListener("foundphone:purchase",handlePurchase);
+  }, []);
+  useEffect(() => {
     let active = true;
     if (creator || external) return;
     void db.saves
