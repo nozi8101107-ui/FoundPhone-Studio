@@ -45,6 +45,20 @@ export function ThreadsReference(p: SkinProps) {
     [numbers, setNumbers] = useState(false),
     [options, setOptions] = useState(false),
     [selected, setSelected] = useState<Item | null>(null);
+  // Normalize imported story data before rendering. Older work files may omit
+  // optional social fields even though newly generated posts always include them.
+  const safeItems = (Array.isArray(p.items) ? p.items : [])
+    .filter((i): i is Item => !!i && typeof i === "object")
+    .map((i) => ({
+      ...i,
+      title: typeof i.title === "string" ? i.title : "",
+      body: typeof i.body === "string" ? i.body : "",
+      sender: typeof i.sender === "string" ? i.sender : "未知用户",
+      time: typeof i.time === "string" ? i.time : "09:41",
+      meta: i.meta && typeof i.meta === "object" ? i.meta : {},
+      comments: Array.isArray(i.comments) ? i.comments : [],
+      likes: Number.isFinite(i.likes) ? i.likes : 0,
+    }));
   const local = posts.map((body, n) =>
     makeItem({
       id: "local-thread-" + n,
@@ -57,10 +71,10 @@ export function ThreadsReference(p: SkinProps) {
   );
   const feed = [
       ...local,
-      ...p.items.filter((i) => i.folder !== "私信" && !i.meta.activityType),
+      ...safeItems.filter((i) => i.folder !== "私信" && !i.meta.activityType),
     ],
-    messages = p.items.filter((i) => i.folder === "私信"),
-    activities = p.items.filter((i) => i.meta.activityType);
+    messages = safeItems.filter((i) => i.folder === "私信"),
+    activities = safeItems.filter((i) => i.meta.activityType);
   const toggle = (id: string, items: string[], set: (v: string[]) => void) =>
     set(items.includes(id) ? items.filter((v) => v !== id) : [...items, id]);
   const open = (i: Item) => {
@@ -80,7 +94,7 @@ export function ThreadsReference(p: SkinProps) {
       <div className="tr-post-content">
         <div className="tr-byline">
           <b>{i.sender}</b>
-          <span>{i.time.slice(-5)}</span>
+          <span>{(i.time || "09:41").slice(-5)}</span>
           <button
             aria-label="帖子选项"
             onClick={() => {
@@ -109,7 +123,7 @@ export function ThreadsReference(p: SkinProps) {
           </button>
           <button aria-label={"回复" + i.title} onClick={() => open(i)}>
             <MessageCircleIcon />
-            {i.comments.length || ""}
+            {i.comments?.length || ""}
           </button>
           <button
             aria-label={"转发" + i.title}
