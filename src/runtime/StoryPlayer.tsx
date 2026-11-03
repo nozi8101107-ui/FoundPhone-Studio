@@ -578,7 +578,7 @@ user 我刚刚路过一家店 看到这个
   ["toy-remote-egg","APP远程遥控用品",369,"成人用品品牌旗舰店","手机 APP 远程控制，多档模式。","成人用品"]
  ];
  if(profile.xp==="GB")taobaoProducts.push(["toy-wearable","穿戴式用品套装",499,"成人用品品牌旗舰店","可调节穿戴式设计，含固定带。","成人用品"]);
- const taobaoItems=taobaoProducts.map(([id,title,price,shop,body,category])=>{const item=make(String(id),String(title),String(body),{price:String(price),category:String(category),currency:"CNY",condition:"全新",sales:"店铺商品"}, "");item.sender=String(shop);item.kind="image";return item;});
+ const taobaoItems=taobaoProducts.map(([id,title,price,shop,body,category])=>{const item=make(String(id),String(title),String(body),{price:String(price),category:String(category),currency:"CNY",condition:"全新",sales:"店铺商品"}, "");item.sender=String(shop);return item;});
  const cleanedApps=work.apps.map(app=>app.id==="taobao"?{...app,installed:true,visible:true}:app);
  if(!cleanedApps.some(app=>app.id==="taobao"))cleanedApps.push({id:"taobao",name:"淘宝",installed:true,visible:true,dock:false,folder:"",icon:""});
  const personalized:Work={...work,apps:cleanedApps,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...cleanedData,kakao:[...(cleanedData.kakao||[]),...crushMessages,...exContact],wechat:[...(cleanedData.wechat||[]),...hanjinWechatMessages],instagram:[...(cleanedData.instagram||[]),...insta],taobao:[...(cleanedData.taobao||[]),...taobaoItems]}};
