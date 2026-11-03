@@ -455,16 +455,6 @@ export function MymyInstagram(p: SkinProps) {
           {selected && post(selected)}
           {!selected && tab === "主页" && (
             <>
-              {accounts.length > 0 && <section className="ig-following-accounts">
-                <div className="ig-following-title">正在关注 <span>{accounts.length}</span></div>
-                {accounts.map((a) => <article className="ig-following-card" key={a.id}>
-                  <Avatar name={a.sender} src={a.avatar}/>
-                  <div className="ig-following-info"><b>{a.meta.username || a.sender}</b><small>@{a.meta.handle || ""}</small>
-                    {a.meta.account === "official" && <small>{a.meta.posts} 帖子 · {a.meta.followers} 粉丝 · {a.meta.following} 关注</small>}
-                  </div>
-                  <span className="ig-following-mark">✓</span>
-                </article>)}
-              </section>}
               <div className="sts">
                 {stories.map((s, n) => (
                   <button
