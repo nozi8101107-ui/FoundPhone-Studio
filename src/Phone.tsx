@@ -714,11 +714,11 @@ function PhoneRuntime({
                 {checkout.success ? <>
                   <div className="alipay-success-mark">✓</div>
                   <h2>付款成功</h2>
-                  <p>¥ {(Number(checkout.item.meta.price||0)*checkout.quantity).toFixed(2)}</p>
+                  <p>{(Number(checkout.item.meta.price||0)*checkout.quantity).toFixed(2)}元</p>
                   <button onClick={()=>{const title=checkout.item.title;setCheckout(null);setApp("taobao");setBanner("您已成功购买「"+title+"」");}}>完成</button>
                 </> : <>
                   <small>确认付款</small>
-                  <strong className="alipay-flow-amount">¥ {(Number(checkout.item.meta.price||0)*checkout.quantity).toFixed(2)}</strong>
+                  <strong className="alipay-flow-amount">{(Number(checkout.item.meta.price||0)*checkout.quantity).toFixed(2)}元</strong>
                   <div className="alipay-flow-detail"><span>{checkout.item.title} × {checkout.quantity}</span><b>付款方式：余额</b></div>
                   <button onClick={completePayment}>支付</button>
                   <small className="alipay-flow-note">模拟支付 · 不会产生真实扣款</small>
