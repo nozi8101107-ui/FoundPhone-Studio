@@ -173,7 +173,7 @@ function PhoneRuntime({
           0.4,
           Math.min(
             1,
-            (el.parentElement!.clientWidth - 8) / 407,
+            (el.parentElement!.clientWidth - 8) / 336,
             (window.innerHeight - (creator ? 170 : external ? 150 : 40)) / 866,
           ),
         ),
@@ -318,7 +318,7 @@ function PhoneRuntime({
     >
       <KeyboardContext.Provider value={setKeyboard}>
         <div
-          className={`phone-screen wallpaper-${work.phone.wallpaper} ${locked ? "is-locked" : ""} ${app ? "in-app" : ""} ${keyboard ? "keyboard-open" : ""}`}\n          style={{backgroundImage: `url("${locked ? work.phone.lockWallpaperImage || "" : work.phone.homeWallpaperImage || ""}")`,backgroundSize:"cover",backgroundPosition:"center"}}
+          className={`phone-screen wallpaper-${work.phone.wallpaper} ${locked ? "is-locked" : ""} ${app ? "in-app" : ""} ${keyboard ? "keyboard-open" : ""}`}\n          style={{backgroundImage: (locked ? work.phone.lockWallpaperImage : work.phone.homeWallpaperImage) ? `url("${locked ? work.phone.lockWallpaperImage : work.phone.homeWallpaperImage}")` : undefined,backgroundSize:"cover",backgroundPosition:"center"}}
           data-app={app}
           onDragStart={(e) => e.preventDefault()}
           onPointerDown={(e) => {
