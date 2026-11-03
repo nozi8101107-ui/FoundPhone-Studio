@@ -551,6 +551,7 @@ user 我刚刚路过一家店 看到这个
  const hanjinWechatMessages=hanjinSelected?(profile.crush==="hanjin"?hanjinWechat:buildMessages("hanjin","韩振",breakupText.hanjin,avatarFor("hanjin"))):[];
  const isPlaceholder=(item:Work["data"][string][number])=>/测试(用户|联系人|会话|消息|内容|回复|动态)/.test([item.title,item.body,item.sender].join(" "))||item.body==="这是一条测试内容。"||item.body==="这是一条测试消息。";
  const cleanedData=Object.fromEntries(Object.entries(work.data).map(([app,items])=>[app,items.filter(item=>!isPlaceholder(item))])) as Work["data"];
+ cleanedData.instagram=(cleanedData.instagram||[]).filter(item=>item.meta.account||(!["我的帖子","个人帖子"].includes(item.folder)&&item.sender!==profile.nickname&&item.meta.owner!=="user"));
  const taobaoProducts=[
   ["bag-dior-ladydior","Dior Lady Dior 中号手袋",51000,"DIOR 迪奥官方旗舰店","藤格纹羊皮革，经典五格戴妃包。","奢侈品女包"],
   ["bag-dior-toujours","Dior Toujours 小号手袋",29000,"DIOR 迪奥官方旗舰店","小号牛皮革手袋，日常通勤款。","奢侈品女包"],
@@ -577,11 +578,18 @@ user 我刚刚路过一家店 看到这个
   ["condom-durex-mix","杜蕾斯多款组合装 24只",99,"杜蕾斯官方旗舰店","多款组合装。","避孕用品"],
   ["toy-remote-egg","APP远程遥控用品",369,"成人用品品牌旗舰店","手机 APP 远程控制，多档模式。","成人用品"]
  ];
- if(profile.xp==="GB")taobaoProducts.push(["toy-wearable","穿戴式用品套装",499,"成人用品品牌旗舰店","可调节穿戴式设计，含固定带。","成人用品"]);
+ if(profile.xp==="GB")taobaoProducts.push(["toy-wearable","穿戴式假生殖器套装",499,"成人用品品牌旗舰店","可调节穿戴式设计，含固定带。","成人用品"]);
  const taobaoItems=taobaoProducts.map(([id,title,price,shop,body,category])=>{const item=make(String(id),String(title),String(body),{price:String(price),category:String(category),currency:"CNY",condition:"全新",sales:"店铺商品"}, "");item.sender=String(shop);return item;});
- const cleanedApps=work.apps.map(app=>app.id==="taobao"?{...app,installed:true,visible:true}:app);
+ const phoneDate=work.phone.date||new Date().toLocaleDateString("en-CA");
+ const historyDate=(monthsAgo:number,day:number)=>{const base=new Date(phoneDate+"T12:00:00");const target=new Date(base.getFullYear(),base.getMonth()-monthsAgo,1,12);const last=new Date(target.getFullYear(),target.getMonth()+1,0).getDate();target.setDate(Math.min(day,last));const pad=(n:number)=>String(n).padStart(2,"0");return `${target.getFullYear()}-${pad(target.getMonth()+1)}-${pad(target.getDate())} ${day===6?"20:16":"22:08"}`;};
+ const historicalOrders:ReturnType<typeof make>[]=[];
+ if(profile.xp==="BG"){for(let m=12;m>=1;m--){for(const day of [6,21]){const product=taobaoItems.find(i=>i.id==="condom-durex-air")!;const order=make("history-condom-"+m+"-"+day,product.title,product.body,{...product.meta,price:product.meta.price,quantity:"1",status:"已完成",number:"TB"+String(m).padStart(2,"0")+String(day)+"2026",paidBy:"支付宝余额"});order.sender=product.sender;order.folder="订单";order.time=historyDate(m,day);historicalOrders.push(order);}}}
+ if(profile.xp==="GB"){const product=taobaoItems.find(i=>i.id==="toy-wearable")!;const order=make("history-wearable",product.title,product.body,{...product.meta,price:product.meta.price,quantity:"1",status:"已完成",number:"TB20260618",paidBy:"支付宝余额"});order.sender=product.sender;order.folder="订单";order.time=historyDate(5,18);historicalOrders.push(order);}
+ const historicalBills=historicalOrders.map(order=>{const bill=make("bill-"+order.id,order.title,"淘宝订单付款",{merchant:"淘宝 · "+order.sender,amount:"-¥"+order.meta.price,status:"支付成功",orderNumber:order.meta.number});bill.sender="淘宝";bill.folder="交易";bill.time=order.time;return bill;});
+ const hiddenAppIds=new Set(["appstore","contacts","reminders","spotify","find"]);
+ const cleanedApps=work.apps.map(app=>hiddenAppIds.has(app.id)?{...app,installed:false,visible:false,dock:false,folder:""}:app.id==="taobao"?{...app,installed:true,visible:true}:app);
  if(!cleanedApps.some(app=>app.id==="taobao"))cleanedApps.push({id:"taobao",name:"淘宝",installed:true,visible:true,dock:false,folder:"",icon:""});
- const personalized:Work={...work,apps:cleanedApps,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...cleanedData,kakao:[...(cleanedData.kakao||[]),...crushMessages,...exContact],wechat:[...(cleanedData.wechat||[]),...hanjinWechatMessages],instagram:[...(cleanedData.instagram||[]),...insta],taobao:[...(cleanedData.taobao||[]),...taobaoItems]}};
+ const personalized:Work={...work,apps:cleanedApps,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...cleanedData,kakao:[...(cleanedData.kakao||[]),...crushMessages,...exContact],wechat:[...(cleanedData.wechat||[]),...hanjinWechatMessages],instagram:[...(cleanedData.instagram||[]),...insta],taobao:[...(cleanedData.taobao||[]),...taobaoItems,...historicalOrders],alipay:[...(cleanedData.alipay||[]),...historicalBills]}};
  return <main className="story-runtime"><Phone key={session} work={personalized}/></main>;
 }
 createRoot(document.getElementById("root")!).render(<StoryPlayer/>);
