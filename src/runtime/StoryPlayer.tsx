@@ -541,11 +541,11 @@ user 我刚刚路过一家店 看到这个
 那个人应该不会让你说对不起吧
 就这样吧`,avatarFor("hanjin")):[];
  const hanjinKakao=exIsHanjin&&!crushIsHanjin?exMessages:crushIsHanjin?crushMessages:[];
- const mutualInstagram=Array.from({length:40},(_,index)=>{const handle="luce"+String(index+1).padStart(2,"0")+"_"+Math.random().toString(36).slice(2,6);return make("ig-mutual-"+index,handle,"",{handle,username:handle,account:"mutual"});});
+ const mutualInstagram=Array.from({length:40},(_,index)=>{const handle=randId();return make("ig-mutual-"+index,handle,"",{handle,username:handle,account:"mutual",relationship:"互关"});});
  const insta=[
-  make("tws","TWS (투어스)","welcometoourBside",{handle:"tws_pledis",username:"TWS (투어스)",posts:"2540",followers:"363w",following:"1",account:"official"}),
-  make(profile.crush,handles[profile.crush],"",{handle:handles[profile.crush],username:handles[profile.crush],account:"crush"}),
-  make(profile.ex,handles[profile.ex],"",{handle:handles[profile.ex],username:handles[profile.ex],account:"ex"})
+  make("tws","TWS (투어스)","welcometoourBside",{handle:"tws_pledis",username:"TWS (투어스)",posts:"2540",followers:"363w",following:"1",account:"official",relationship:"关注"}),
+  make(profile.crush,handles[profile.crush],"",{handle:handles[profile.crush],username:handles[profile.crush],account:"crush",relationship:"互关",remark:crushNames[profile.crush]}),
+  make(profile.ex,handles[profile.ex],"",{handle:handles[profile.ex],username:handles[profile.ex],account:"ex",relationship:"互关",remark:exNames[profile.ex]})
  ];
  const exContact=profile.ex!==profile.crush?exMessages:[];
  const hanjinSelected=profile.crush==="hanjin"||profile.ex==="hanjin";
@@ -596,7 +596,7 @@ user 我刚刚路过一家店 看到这个
  const hiddenAppIds=new Set(["appstore","contacts","reminders","spotify","find"]);
  const cleanedApps=work.apps.map(app=>hiddenAppIds.has(app.id)?{...app,installed:false,visible:false,dock:false,folder:""}:app.id==="taobao"?{...app,installed:true,visible:true}:app);
  if(!cleanedApps.some(app=>app.id==="taobao"))cleanedApps.push({id:"taobao",name:"淘宝",installed:true,visible:true,dock:false,folder:"",icon:""});
- const personalized:Work={...work,apps:cleanedApps,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...cleanedData,kakao:[...(cleanedData.kakao||[]),...crushMessages,...exContact],wechat:[...(cleanedData.wechat||[]),...hanjinWechatMessages],instagram:[...(cleanedData.instagram||[]),...insta,...mutualInstagram],threads:[...(cleanedData.threads||[]),...threadItems,...extraThreads],taobao:[...(cleanedData.taobao||[]),...taobaoItems,...historicalOrders],alipay:[...(cleanedData.alipay||[]),...historicalBills]}};
+ const personalized:Work={...work,apps:cleanedApps,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...cleanedData,kakao:[...(cleanedData.kakao||[]),...crushMessages,...exContact],wechat:[...(cleanedData.wechat||[]),...hanjinWechatMessages],instagram:[...(cleanedData.instagram||[]),...insta,...mutualInstagram,make("ig-user-profile",profile.nickname,"",{handle:profile.nickname,username:profile.nickname,account:"user",followers:"42",following:"43",mutuals:"42",followingOnly:"tws_pledis"})],threads:[...(cleanedData.threads||[]),...threadItems,...extraThreads],taobao:[...(cleanedData.taobao||[]),...taobaoItems,...historicalOrders],alipay:[...(cleanedData.alipay||[]),...historicalBills]}};
  return <main className="story-runtime"><Phone key={session} work={personalized}/></main>;
 }
 createRoot(document.getElementById("root")!).render(<StoryPlayer/>);
