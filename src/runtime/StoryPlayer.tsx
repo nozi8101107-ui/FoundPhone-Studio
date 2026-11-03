@@ -425,12 +425,202 @@ user 我刚刚路过一家店 看到这个
 你：好
 那 下午？
 你：okok`,avatarFor("hanjin")): [];
+
+ const breakupText:Record<string,string>={
+ shinyu:`我想了一阵了 不是冲动
+我们这样下去 你会累 我也会
+我不想让你觉得是我不要你
+是我发现 我给的方式可能不是你想要的
+你：…
+我这个人 什么都想安排好
+连你几点起我都想管
+我以为那是照顾
+你：你也知道
+对不起…
+算了。说多了没意思
+你以后，按时吃饭
+别吃速食凑合
+你：谢谢 我吃得很好。
+…
+天气冷了 穿厚点
+最后一句
+我认定了就不会改 这句话现在也还算数
+我只是换一种方式
+你：？
+保重`,
+ dohoon:`: time。
+先别说话 让我说
+我现在直说
+我早就感觉到不对了
+我这个人 看起来跟谁都能聊 其实边界感很强 你是少数进来的
+所以现在才这么难受
+你：？你是想挽留吗
+……
+我说这话自己都想笑
+我就是有点不甘心
+我以为我想要的东西我都能留住
+原来不是
+行。我说完了 你以后找个像我这样的
+……算了，不像也行。`,
+ youngjae:`我想清楚了才来找你
+不是一时冲动 我这个人 冲动的话不会说出口
+我们之间的问题 我列过
+不是你的错 也不是我的错
+我一直以为 只要我稳定 只要我把问题都拆开解决就没事
+但是我发现 有些事不是拆开就能解决的
+我逃避过
+你：…
+你可能没发现 我自己消化 消化完再回来
+回来的时候 你已经走远了一点
+我这个人 很多人说我温柔 但是让人猜不透 这个我知道
+猜久了会累 你累了 我看得出来
+你：多说无益
+…以后你哭的时候 还是会有人抱住你
+但是那个人不是我了
+你要好好的 真的
+有事……还是可以找我`,
+ hanjin:`我想了很久要不要说
+可能我就是这样 什么都想很久
+我们之间 我其实早就看到了结局 我只是没说
+我以为不说 就能多留一会儿
+我拍过你很多张照片 每一张我都留着
+你：…对不起
+我才对不起你
+不 谁都没对不起谁
+但是……
+有些话用中文说比用韩语疼
+我现在知道了
+你：真的对不起…
+你以后 会遇到给你拍得更好的人
+那个人应该不会让你说对不起吧
+就这样吧`,
+ jihoon:`睡了吗 我知道很晚了
+我打了一大段 撤回了 太长了 太天真了
+我重新说
+我这个人 话多 你一直知道的。
+我早就感觉到了 我容易吃醋 你知道的 但是后来我连吃醋都不敢了
+因为没立场了
+我一般不把负面情绪给别人
+但是对你 我好像藏不住
+你：别说这些…
+现在也一样 我很难受 我不藏了
+你不用回 真的
+你：你让我好难受 为什么我会流这么多泪呢
+对不起 怪我
+我就是想让你知道。
+我是真的喜欢过你 不是开玩笑的
+你：…`,
+ kyungmin:`你：你发的igstory 什么意思
+嗯。没事
+不是你的问题。
+…
+其实也不是完全没事
+我说不清楚。但是
+你知道的
+我们这段关系 我后知后觉
+等我发现我在意的时候 已经晚了
+你：可是我那时候喜欢你 我不怕累
+不 你以后还是找个让你不用猜的人吧
+我这种太累了
+保重`
+ };
+ const crushMessages=buildMessages(profile.crush,crushNames[profile.crush]||labels[profile.crush],chatText[profile.crush]||"",avatarFor(profile.crush));
+ const exMessages=buildMessages(profile.ex,exNames[profile.ex]||labels[profile.ex],breakupText[profile.ex]||"",avatarFor(profile.ex));
+ const crushIsHanjin=profile.crush==="hanjin", exIsHanjin=profile.ex==="hanjin";
+ const hanjinWechat=crushIsHanjin?buildMessages("hanjin","韩振",`@2026-10-01 19:20
+睡了吗 user
+今天有点想家
+不是那种想
+就是突然闻到一种味道 很像小时候在老家闻到的
+老家的泥土味
+你：懂你意思…
+你：我也想
+你：嗯嗯…想吃你煮的麻辣香锅！
+哈哈哈哈哈哈怎么突然
+唉 我在这边挺好的 真的
+但是有些话
+用韩语说和用中文说感觉不一样
+跟你说中文的时候
+我觉得我比较像我
+你别觉得我矫情 我就跟你说说
+说完就好了
+你：不矫情。
+你：我在
+你：这有什么矫情的
+嗯
+@2026-10-04 20:32
+今天光线太好了
+你看这张
+你：我去 男神驾到
+嘿嘿
+这张我也喜欢
+但是这张构图是不是有点歪
+你：确实
+你：我不行了
+你：但是这张完全 骨相绝了
+你说哪张好看 我想发wvs
+你：都发吧！
+你：要我挑我也挑不出来 这张脸绝了
+真的吗
+你眼光好 你说行就行
+@2026-10-04 21:02
+你：诶 第一张怎么没发
+@2026-10-04 21:14
+其实第一张我是想发给你看的
+你懂我意思吧
+你：你！
+你：网恋大省发力了。
+哈哈哈哈哈哈笑死我了
+@2026-10-07 14:02
+user 我刚刚路过一家店 看到这个
+你：OMG好可爱啊这个项链
+我就觉得你会喜欢
+我买了 下次给你
+你：OMG！！
+你：谢谢…
+没事没事
+@2026-10-09 20:30
+你今天出去了吗
+看到你朋友圈了
+你：对…今天浩俊帮我拍了照
+哦哦
+浩俊？我记得他是你组员
+你们出去做什么了
+你：嗯 没什么 组里有点东西要线下讨论一下
+哦哦哦
+@2026-10-09 21:12
+他用的什么镜头
+构图一般 一点都没拍出我们user的闭月羞花沉鱼落雁
+你：哎哟 你干嘛
+下次我给你拍 我知道你哪个角度最好看
+不 你哪个角度都很好看
+但是别人拍不出我拍的效果
+你：…行
+明天见 可以吗
+你：好
+那 下午？
+你：okok`,avatarFor("hanjin")):exIsHanjin?buildMessages("hanjin","韩振",`我想了很久要不要说
+可能我就是这样 什么都想很久
+我们之间 我其实早就看到了结局 我只是没说
+我以为不说 就能多留一会儿
+我拍过你很多张照片 每一张我都留着
+你：…对不起
+我才对不起你
+不 谁都没对不起谁
+但是……
+有些话用中文说比用韩语疼
+我现在知道了
+你：真的对不起…
+你以后 会遇到给你拍得更好的人
+那个人应该不会让你说对不起吧
+就这样吧`,avatarFor("hanjin")):[];
+ const hanjinKakao=exIsHanjin&&!crushIsHanjin?exMessages:crushIsHanjin?crushMessages:[];
  const insta=[
   make("tws","TWS (투어스)","welcometoourBside",{handle:"tws_pledis",username:"TWS (투어스)",posts:"2540",followers:"363w",following:"1",account:"official"}),
   make(profile.crush,handles[profile.crush],"",{handle:handles[profile.crush],username:handles[profile.crush],account:"crush"}),
   make(profile.ex,handles[profile.ex],"",{handle:handles[profile.ex],username:handles[profile.ex],account:"ex"})
  ];
- const personalized:Work={...work,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...work.data,kakao:[...(work.data.kakao||[]),...contacts],wechat:[...(work.data.wechat||[]),...hanjinWechat],instagram:[...(work.data.instagram||[]),...insta]}};
+ const personalized:Work={...work,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...work.data,kakao:[...(work.data.kakao||[]),...crushMessages,...(profile.ex===profile.crush?[]:exMessages)],wechat:[...(work.data.wechat||[]),...hanjinWechat],instagram:[...(work.data.instagram||[]),...insta]}};
  return <main className="story-runtime"><Phone key={session} work={personalized}/></main>;
 }
 createRoot(document.getElementById("root")!).render(<StoryPlayer/>);
