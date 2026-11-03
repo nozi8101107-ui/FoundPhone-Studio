@@ -4160,3 +4160,14 @@
 .taobao-quantity,.taobao-payment-row,.taobao-total{display:flex;align-items:center;justify-content:space-between;padding:13px 2px;border-top:1px solid #eee;font-size:13px}
 .taobao-quantity>div{display:flex;align-items:center;gap:16px}.taobao-quantity button{width:28px;height:28px;border:0;border-radius:6px;background:#f2f2f2;font-size:19px}.taobao-quantity button:disabled{opacity:.35}
 .taobao-payment-row strong{color:#222}.taobao-pay-button{width:100%;border:0;border-radius:24px;padding:13px;background:#f45136;color:#fff;font-weight:700;margin-top:12px}.taobao-pay-note{display:block;text-align:center;color:#999;font-size:10px;margin-top:8px}
+
+.alipay-flow-backdrop{position:absolute;inset:0;z-index:80;background:#f5f6f8;display:flex;align-items:center;justify-content:center;padding:22px;box-sizing:border-box}
+.alipay-flow-card{width:100%;background:#fff;border-radius:18px;padding:26px 20px 22px;text-align:center;box-shadow:0 8px 30px #00000012;color:#222}
+.alipay-flow-brand{font-size:20px;font-weight:700;color:#1688d4;margin-bottom:28px}
+.alipay-flow-card>small{display:block;color:#888;font-size:12px}
+.alipay-flow-amount{display:block;font-size:38px;margin:14px 0 28px;color:#171717}
+.alipay-flow-detail{border-top:1px solid #eee;border-bottom:1px solid #eee;padding:14px 0;display:flex;flex-direction:column;gap:10px;text-align:left;font-size:12px;color:#666}
+.alipay-flow-card>button{width:100%;border:0;border-radius:8px;background:#1677d2;color:white;font-size:16px;font-weight:600;padding:14px;margin-top:22px}
+.alipay-flow-note{margin-top:12px}
+.alipay-success-mark{width:64px;height:64px;border-radius:50%;background:#16b66b;color:#fff;font-size:42px;line-height:64px;margin:8px auto 18px}
+.alipay-flow-card h2{font-size:23px;margin:0 0 10px}.alipay-flow-card p{font-size:25px;font-weight:700;margin:12px 0}
