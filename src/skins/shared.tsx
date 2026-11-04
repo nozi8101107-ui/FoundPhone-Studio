@@ -84,6 +84,35 @@ export function SearchBox({
     </label>
   );
 }
+const MEMBER_AVATARS: Record<string, string> = {
+  shinyu: "IMG_9696",
+  "申惟": "IMG_9696",
+  "晶㬊尼": "IMG_9696",
+  "事多爹系天蝎男": "IMG_9696",
+  tlswjdghks: "IMG_9696",
+  dohoon: "IMG_9697",
+  "道勋": "IMG_9697",
+  "小屎狗": "IMG_9697",
+  doking: "IMG_9697",
+  youngjae: "IMG_9701",
+  "英宰": "IMG_9701",
+  "居家服务型男": "IMG_9701",
+  "远离双子男": "IMG_9701",
+  jae_e: "IMG_9701",
+  hanjin: "IMG_9702",
+  "韩振": "IMG_9702",
+  "珍珍": "IMG_9702",
+  henan_prince: "IMG_9702",
+  jihoon: "IMG_9703",
+  "志薰": "IMG_9703",
+  "击击击昏": "IMG_9703",
+  ahoooon: "IMG_9703",
+  kyungmin: "IMG_9704",
+  "炅潣": "IMG_9704",
+  "炅man": "IMG_9704",
+  kyungman_lee: "IMG_9704",
+};
+
 export function Avatar({
   name,
   round = true,
@@ -93,10 +122,14 @@ export function Avatar({
   round?: boolean;
   src?: string;
 }) {
-  const imageSrc = src.startsWith("data:image/")
-    ? safeMedia(src)
-    : /^(\\/|\\.\\/|people\\/)/.test(src)
-      ? src
+  const mappedImage = MEMBER_AVATARS[name.trim()];
+  const resolvedSrc = src || (mappedImage
+    ? `${import.meta.env.BASE_URL}people/${mappedImage}.jpeg`
+    : "");
+  const imageSrc = resolvedSrc.startsWith("data:image/")
+    ? safeMedia(resolvedSrc)
+    : /^(\\/|\\.\\/|people\\/)/.test(resolvedSrc)
+      ? resolvedSrc
       : "";
 
   return (
