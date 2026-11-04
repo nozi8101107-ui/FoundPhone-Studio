@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Phone } from "../Phone";
 import { db } from "../persistence";
@@ -545,7 +545,7 @@ user 我刚刚路过一家店 看到这个
  
  const selectedMembers=[...new Set([profile.crush,profile.ex])];
  const friendNames=["민서","서연","지우","유진","수빈","예린","채원","하린","도연","나연","소희","은서","지민","다은","현아","예지","승아","가은","혜원","시은"];
- const friends=friendNames.map((name,index)=>{const handle=randId();return make("ig-friend-"+index,handle,"",{handle,username:name,account:"friend",relationship:"互相关注",mutual:"true"});});
+ const friends=useMemo(()=>friendNames.map((name,index)=>{const handle=randId();return make("ig-friend-"+index,handle,"",{handle,username:name,account:"friend",relationship:"互相关注",mutual:"true"});}),[profile.nickname]);
  const selectedAccounts=selectedMembers.map(id=>make("ig-member-"+id,handles[id],"",{handle:handles[id],username:handles[id],account:id===profile.crush?"crush":"ex",member:id,relationship:"互相关注",remark:id===profile.crush?crushNames[id]:exNames[id]},avatarFor(id)));
  const mutualCount=friends.length+selectedAccounts.length;
  const officialIgPostData=[
