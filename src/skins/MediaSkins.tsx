@@ -242,50 +242,44 @@ export function NeteaseSkin(p: Props) {
 }
 export function YouTubeSkin(p: Props) {
   const { tab, setTab, q, setQ, items } = useContent(p, "首页");
-  const [category, setCategory] = useState("全部");
-  const list = items.filter((i) =>
-    tab === "Shorts"
-      ? i.folder === "Shorts"
-      : tab === "订阅"
-        ? i.folder === "订阅"
-        : tab === "播放列表"
-          ? i.favorite || i.folder === "播放列表"
-          : category === "全部" || i.folder === category,
-  );
+  const list = tab === "首页"
+    ? items
+    : tab === "订阅"
+      ? items
+      : tab === "播放列表"
+        ? items.filter((i) => i.favorite || i.folder === "播放列表")
+        : items.filter((i) => i.folder === tab);
   return (
     <div className="catalog-skin youtube-ui">
-      <Header p={p} />
-      <SearchBox value={q} set={setQ} />
+      <Header p={p}>
+        <span className="youtube-brand-mark" aria-label="YouTube">▶</span>
+      </Header>
+      <SearchBox value={q} set={setQ} placeholder="搜索 YouTube" />
       <div className="youtube-chips">
-        {["全部", ...groupItems(items).filter((g) => g !== "未分类")].map(
-          (g) => (
-            <button
-              className={category === g ? "selected" : ""}
-              key={g}
-              onClick={() => setCategory(g)}
-            >
-              {g}
-            </button>
-          ),
-        )}
+        <button className="selected">全部</button>
       </div>
       <div className="catalog-scroll">
-        <div className={tab === "Shorts" ? "youtube-shorts" : "youtube-videos"}>
+        <div className="youtube-videos">
           {list.map((i) => (
             <article key={i.id}>
               <button className="youtube-thumb" onClick={() => p.onItem(i)}>
-                <Media item={i} />
-                {meta(i, "duration") && <time>{meta(i, "duration")}</time>}
+                <img
+                  src={import.meta.env.BASE_URL + "youtube/" + meta(i, "thumbnail")}
+                  alt={i.title}
+                  loading="lazy"
+                />
+                <span className="youtube-play-overlay"><Play size={30} fill="white" /></span>
               </button>
-              <button className="youtube-byline" onClick={() => p.onItem(i)}>
-                <Avatar name={i.sender} />
-                <div>
+              <div className="youtube-byline">
+                <Avatar name={i.sender} src="/youtube/channels4_profile.jpeg" />
+                <button onClick={() => p.onItem(i)}>
                   <strong>{i.title}</strong>
                   <small>
-                    {i.sender} · {meta(i, "views", "—")} 次播放
+                    TWS · {meta(i, "views")} · {meta(i, "likesCount")} 赞
                   </small>
-                </div>
-              </button>
+                </button>
+                <button className="youtube-more" aria-label="更多选项" onClick={() => p.onItem(i)}>⋮</button>
+              </div>
             </article>
           ))}
         </div>
