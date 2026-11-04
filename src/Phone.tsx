@@ -312,6 +312,9 @@ function PhoneRuntime({
     if (!work.apps.some((a) => a.id === id && a.installed)) return;
     setApp(id);
     setKeyboard(false);
+    if (id === "twitter") {
+      window.dispatchEvent(new CustomEvent("foundphone-open-dispatch"));
+    }
     setRecent((v) => [id, ...v.filter((a) => a !== id)].slice(0, 8));
     setFolder("");
     setPanel("");
