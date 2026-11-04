@@ -1057,6 +1057,7 @@ const extraThreads=extraThreadTexts.map((body,index)=>{const author=randId();con
  const chapterBlack:Record<string,string>={shinyu:"老雕",dohoon:"老牛",youngjae:"丑年",hanjin:"蛤蟆",jihoon:"强子",kyungmin:"娟子"};
  const chapterCaught:Record<string,string>={shinyu:"晶㬊申晶㬊",dohoon:"道勋金道勋",youngjae:"英宰崔英宰",hanjin:"韩振朴韩振",jihoon:"志薰韩志薰",kyungmin:"炅潣李炅潣"};
  const chapterMember=chapterRealNames[profile.crush]||"申惟", chapterAlias=labels[profile.crush]||"SHINYU";
+ const chapterStageName=({shinyu:"shinyu",dohoon:"dohoon",youngjae:"youngjae",hanjin:"hanjin",jihoon:"jihoon",kyungmin:"kyungmin"} as Record<string,string>)[profile.crush]||"shinyu";
  const chapterThreadTexts=[
   "wtf我的河道好精彩","别吵了烦不烦","黄泉路人能不能滚","纳尼","我就说他面相看起来会很爱谈的",
   "我让"+chapterBlack[profile.crush]+"粉丝成天飒飒飒 回旋镖了吧","啊啊啊大晚上睡不着了好坤动",
@@ -1076,8 +1077,8 @@ const extraThreads=extraThreadTexts.map((body,index)=>{const author=randId();con
   ...["【心灵丑】恋爱咖滚","【心灵丑】为什么这么漂亮的皮囊底下是这么没有内涵的灵魂 你很丑陋","脸丑就算了 还心灵丑 谈谈谈 谈你爸 放生几张生图 姥子再也不替你捂了"].map((body,i)=>makeWeibo("chapter-toilet-"+i,"不脱先踩丑老公","不脱先踩丑老公",body,toiletChapterComments,"厕所")),
   ...["事已至此tws top是不是可以换人了","不要让"+chapterBlack[profile.crush]+"粉丝太嚣张","等着看hybe顶级公关","tws恋爱拉表来了 有一个人高居榜首"].map((body,i)=>makeWeibo("chapter-battle-"+i,"浴血奋战","浴血奋战",body,battleChapterComments,"厕所")),
   ...["恋爱咖滚","滚吧负心汉 和嫂子一起下地狱","你太伤粉丝的心了 学生党花得不多 别审判我"].map((body,i)=>makeWeibo("chapter-exfan-"+i,"脱粉回踩救钱包","脱粉回踩救钱包",body,exChapterComments,"厕所")),
-  makeWeibo("chapter-giveaway",weiboName(),weiboName(),"【抽奖博】"+chapterAlias+"的敬业和职业素养我们有目共睹 恋爱传闻纯属造谣 图片已澄清 详情见：微博正文\n转发+评论抽5个人188元🧧、10个人52元🧧 自动开奖\n要求没有嘴过"+chapterAlias+" 会查主页",giveawayComments,"推荐")
- ];
+  makeWeibo("chapter-giveaway",weiboName(),weiboName(),"【抽奖博】"+chapterStageName+"的敬业和职业素养我们有目共睹 恋爱传闻纯属造谣 图片已澄清 详情见：微博正文\n转发+评论抽5个人188元🧧、10个人52元🧧 自动开奖\n要求没有嘴过"+chapterStageName+" 会查主页",giveawayComments,"推荐")
+ ].sort(()=>Math.random()-.5);
  const dispatchComments=["让"+chapterBlack[profile.crush]+"粉丝成天飒飒飒 回旋镖了吧","啊啊啊大晚上睡不着了",chapterMember+"你对得起谁","d社依旧权威","蹲pledis回应","等公司公告吧","等公司公告的 冷知识 那个谁当年也发公告了","上升期谈恋爱 "+chapterMember+"你要死吗",chapterMember+"十年老粉脱粉了","一直烦串不串 出道才几年就十年老粉","是路人你就给我路过","这么真的料不信的有了","今晚hybe将灯火通明",chapterMember+"你对得起谁 退团！","今年谈恋爱的好多啊","黄泉路人都滚","这是ai的吧",chapterMember+" tws唯一恋爱咖"];
  const chapterDispatch=xPost("chapter-dispatch","Dispatch","dispatch","【独家】TWS成员"+chapterStageName+"深夜密会素人女性 汉南洞街头举止亲密疑似恋爱中\n\nDispatch独家报道\nD社今日晚间独家捕捉到TWS成员"+chapterStageName+"与一名素人女性在首尔深夜约会，两人举止亲密，疑似恋爱中。\n据本社记者追踪，当晚21时40分许，"+chapterStageName+"身着黑色卫衣、佩戴棒球帽和口罩，与一名素人女性一同离开，两人自然并肩而行，"+chapterStageName+"主动接过女方手中的纸袋，途中多次低头靠近女方耳边交谈，笑容明显。"+chapterStageName+"轻拍女方背部，随后两人分别乘车离开。\n据本社掌握的信息，该女性为圈外素人，尚未知两人通过何种渠道认识。身边人士向D社透露：“"+chapterStageName+"对这段关系非常谨慎，私下对女方很体贴”\n截至发稿时，"+chapterStageName+"所属公司PLEDIS Entertainment尚未就此事发表官方立场。",true);
  chapterDispatch.likes=30000+Math.floor(Math.random()*9000);chapterDispatch.meta.reposts="50000+";chapterDispatch.meta.commentCount="2000+";chapterDispatch.comments=dispatchComments.sort(()=>Math.random()-.5).slice(0,15+Math.floor(Math.random()*11)).map((body)=>weiboName()+": "+body);
