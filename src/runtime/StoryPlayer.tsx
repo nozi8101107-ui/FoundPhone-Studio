@@ -614,6 +614,7 @@ user 我刚刚路过一家店 看到这个
   wechatStub("wechat-buddy","搭子",{stub:"true",contact:"true"})
  ];
 
+ const realNames:Record<string,string>={shinyu:"申惟",dohoon:"金道勋",youngjae:"崔英宰",hanjin:"韩振",jihoon:"韩志薰",kyungmin:"李炅潣"};
  const buildWechatConversation=(id:string,title:string,raw:string)=>{
   let current="2026-11-04 19:00",index=0;
   const rows:Work["data"][string]=[];
