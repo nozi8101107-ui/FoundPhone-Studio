@@ -47,6 +47,7 @@ export type SkinProps = {
   onBack: () => void;
   thread: string;
   onThread: (s: string) => void;
+  unreadThread?: string;
 };
 function Avatar({
   name,
@@ -383,12 +384,11 @@ export function WeChatSkin(p: SkinProps) {
                     >
                       <span className="wx-chat-avatar">
                         <Avatar name={t} src={contactAvatar} />
-                        {!readThreads.includes(t) &&
-                          list.some((i) => !i.read) && (
-                            <b className="wx-unread">
-                              {list.filter((i) => !i.read).length}
-                            </b>
-                          )}
+                        {p.unreadThread === t ? (
+                          <b className="wx-unread" style={{width:8,height:8,minWidth:8,padding:0,borderRadius:"50%",fontSize:0}} />
+                        ) : !readThreads.includes(t) && list.some((i) => !i.read) ? (
+                          <b className="wx-unread">{list.filter((i) => !i.read).length}</b>
+                        ) : null}
                       </span>
                       <div>
                         <strong>{t}</strong>
