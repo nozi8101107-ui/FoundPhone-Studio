@@ -75,6 +75,17 @@ export function ChapterOne({work,onFinish,onDispatchOpen,onNativeOpen,onNativeIt
  callbacks.current={onNativeOpen,onNativeItem,onNativePrompt,onNativeNotification};
  useEffect(()=>{if(stage!=="done"&&stage!=="dispatch")callbacks.current.onNativeOpen(nativeApp,nativeThread)},[stage,nativeApp,nativeThread]);
 
+
+ const goDispatch=()=>{setComments(false);setStage("friend");setRows([]);setCursor(0)};
+ useEffect(()=>{
+   if(stage!=="dispatch")return;
+   setXOpened(true);
+   onDispatchOpen();
+   let timer:number|undefined;
+   const openDispatch=()=>{timer=window.setTimeout(goDispatch,2000)};
+   window.addEventListener("foundphone-open-dispatch",openDispatch);
+   return()=>{window.removeEventListener("foundphone-open-dispatch",openDispatch);if(timer)window.clearTimeout(timer)};
+ },[stage]);
  const events=rows.length?rows:current;
  useEffect(()=>{try{localStorage.setItem(key,JSON.stringify({stage,cursor,done:stage==="done",comments,xOpened,blocked}))}catch{}},[stage,cursor,comments,xOpened,blocked]);
  const history = useMemo(()=>{const app=(id:string)=>id==="hanjin"?"wechat":"kakao"; if(stage==="friend")return (work.data.wechat||[]).filter(item=>item.title==="闺蜜"); if(stage==="ex")return (work.data[app(ex)]||[]).filter(item=>item.meta.handle===handles[ex]); if(stage==="crush"||stage==="closing")return (work.data[app(crush)]||[]).filter(item=>item.meta.handle===handles[crush]); return [];},[work,stage,crush,ex]);
