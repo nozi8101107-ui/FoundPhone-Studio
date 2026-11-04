@@ -66,17 +66,33 @@ export function ChapterOne({work,onFinish,onDispatchOpen,onNativeOpen,onNativeIt
  const [comments,setComments]=useState(()=>{try{return !!JSON.parse(localStorage.getItem(key)||"null")?.comments}catch{return false}});
  const [xOpened,setXOpened]=useState(()=>{try{return !!JSON.parse(localStorage.getItem(key)||"null")?.xOpened}catch{return false}});
  const [blocked,setBlocked]=useState(()=>{try{return !!JSON.parse(localStorage.getItem(key)||"null")?.blocked}catch{return false}});
+ const [exFirstDelivered,setExFirstDelivered]=useState(()=>{try{return !!JSON.parse(localStorage.getItem(key)||"null")?.exFirstDelivered}catch{return false}});
  const current=stage==="crush"?crushChat(crush):stage==="friend"?friendChat():stage==="ex"?exChat(ex,crush,xp):stage==="closing"?closeChat(crush,nick):[];
  const stamp=crush==="dohoon"?"15:30":crush==="hanjin"?"15:25":crush==="youngjae"?"20:30":crush==="jihoon"?"18:50":crush==="kyungmin"?"19:49":"20:03";
  const targetId=stage==="ex"?ex:crush;
  const nativeApp=stage==="friend"?"wechat":targetId==="hanjin"?"wechat":"kakao";
  const nativeThread=stage==="friend"?"闺蜜":(work.data[nativeApp]||[]).find(item=>item.meta.handle===handles[targetId])?.title||names[targetId];
+ const exApp=ex==="hanjin"?"wechat":"kakao";
+ const exThread=(work.data[exApp]||[]).find(item=>item.meta.handle===handles[ex])?.title||names[ex];
  const callbacks=useRef({onNativeOpen,onNativeItem,onNativePrompt,onNativeNotification});
  callbacks.current={onNativeOpen,onNativeItem,onNativePrompt,onNativeNotification};
  useEffect(()=>{if(stage!=="done"&&stage!=="dispatch")callbacks.current.onNativeOpen(nativeApp,nativeThread)},[stage,nativeApp,nativeThread]);
 
 
  const goDispatch=()=>{setComments(false);setStage("friend");setRows([]);setCursor(0)};
+
+ useEffect(()=>{
+   if(stage!=="friend"||exFirstDelivered)return;
+   const first=exChat(ex,crush,xp)[0];
+   if(!first)return;
+   const t=window.setTimeout(()=>{
+     const item:Item={id:"chapter1-ex-0",title:exThread,body:first.text,richText:"",meta:{story:"chapter1"},time:stamp,sender:names[ex],avatar:(work.data[exApp]||[]).find(v=>v.meta.handle===handles[ex])?.avatar||"",kind:"text",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:false,read:false,likes:0,comments:[]};
+     callbacks.current.onNativeItem(exApp,item);
+     callbacks.current.onNativeNotification(exApp,exThread,item);
+     setExFirstDelivered(true);
+   },900);
+   return()=>clearTimeout(t);
+ },[stage,exFirstDelivered,ex,crush,xp,exApp,exThread,stamp,work]);
  useEffect(()=>{
    if(stage!=="dispatch")return;
    setXOpened(true);
@@ -87,7 +103,7 @@ export function ChapterOne({work,onFinish,onDispatchOpen,onNativeOpen,onNativeIt
    return()=>{window.removeEventListener("foundphone-open-dispatch",openDispatch);if(timer)window.clearTimeout(timer)};
  },[stage]);
  const events=rows.length?rows:current;
- useEffect(()=>{try{localStorage.setItem(key,JSON.stringify({stage,cursor,done:stage==="done",comments,xOpened,blocked}))}catch{}},[stage,cursor,comments,xOpened,blocked]);
+ useEffect(()=>{try{localStorage.setItem(key,JSON.stringify({stage,cursor,done:stage==="done",comments,xOpened,blocked,exFirstDelivered}))}catch{}},[stage,cursor,comments,xOpened,blocked]);
  const history = useMemo(()=>{const app=(id:string)=>id==="hanjin"?"wechat":"kakao"; if(stage==="friend")return (work.data.wechat||[]).filter(item=>item.title==="闺蜜"); if(stage==="ex")return (work.data[app(ex)]||[]).filter(item=>item.meta.handle===handles[ex]); if(stage==="crush"||stage==="closing")return (work.data[app(crush)]||[]).filter(item=>item.meta.handle===handles[crush]); return [];},[work,stage,crush,ex]);
  useEffect(()=>{
    if(stage==="done"||stage==="dispatch")return;
@@ -95,7 +111,7 @@ export function ChapterOne({work,onFinish,onDispatchOpen,onNativeOpen,onNativeIt
      if(!events.length)return;
      const t=window.setTimeout(()=>{
        if(stage==="crush"){setStage("dispatch");setRows([]);setCursor(0)}
-       else if(stage==="friend"){setStage("ex");setRows([]);setCursor(0)}
+       else if(stage==="friend"){setStage("ex");setRows([]);setCursor(exFirstDelivered?1:0)}
        else if(stage==="ex"){setStage("closing");setRows([]);setCursor(0)}
        else if(stage==="closing"){setStage("done");try{localStorage.setItem(key,JSON.stringify({done:true}))}catch{}}
      },stage==="crush"?2000:stage==="ex"?1000:500);
@@ -125,7 +141,7 @@ export function ChapterOne({work,onFinish,onDispatchOpen,onNativeOpen,onNativeIt
    };
    window.addEventListener("foundphone-story-send",receive);
    return()=>window.removeEventListener("foundphone-story-send",receive);
- },[stage,cursor,events.length,nativeApp,nativeThread,stamp,targetId,ex,xp,work]);
+ },[stage,cursor,events.length,nativeApp,nativeThread,stamp,targetId,ex,xp,work,exFirstDelivered]);
 
  if(stage!=="done")return null;
  return (
