@@ -1282,7 +1282,7 @@ function AppContent({
           <ChevronLeft size={23} />
           {detail || thread ? "返回" : ""}
         </button>
-        <strong>{thread ? (isHanjinThread(thread, shown.filter((i) => i.title === thread)) ? hanjinRemark : shown.find((i) => i.title === thread && i.meta?.remark)?.meta.remark || thread) : name}</strong>
+        <strong>{thread ? (isHanjinThread(thread, shown.filter((i) => i.title === thread)) ? hanjinRemark : (shown.find((i) => i.title === thread && !i.outgoing && i.meta?.remark)?.meta.remark || thread)) : name}</strong>
         <button
           onClick={
             creator
@@ -1383,12 +1383,15 @@ function AppContent({
               const list = shown.filter((i) => i.title === t),
                 last = list[list.length - 1],
                 isHanjin = isHanjinThread(t, list),
+                // A conversation preview must use the other participant's
+                // profile, never the avatar/name attached to the latest message.
+                contactItem = list.find((i) => !i.outgoing && i.avatar) || list.find((i) => !i.outgoing),
                 contactAvatar = isHanjin
                   ? hanjinAvatar
-                  : list.find((i) => !i.outgoing && i.avatar)?.avatar || list.find((i) => i.avatar)?.avatar || "",
+                  : contactItem?.avatar || "",
                 contactRemark = isHanjin
                   ? hanjinRemark
-                  : list.find((i) => i.meta?.remark)?.meta.remark || t;
+                  : contactItem?.meta?.remark || list.find((i) => !i.outgoing && i.meta?.remark)?.meta?.remark || t;
               return (
                 <button
                   className="contact-row"
