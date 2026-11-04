@@ -617,7 +617,18 @@ function PhoneRuntime({
               onNativeItem={(nativeApp, item) => {
                 setChapterItems((v) => ({...v,[nativeApp]:[...(v[nativeApp]||[]),item]}));
               }}
-              onNativePrompt={(nativeApp, thread, text, token) => setStoryReply({app:nativeApp,thread,text,token})}
+              onNativePrompt={(nativeApp, thread, text, token) => {
+                // A scripted reply belongs in the real app conversation, never in a separate story overlay.
+                // If the player navigated elsewhere while the other person was typing, return to that thread
+                // before pre-filling the native composer.
+                setStoryApp(nativeApp);
+                setPendingThread(thread);
+                setStoryThread(thread);
+                setStoryNotification(null);
+                setApp(nativeApp);
+                setRecent((v) => [nativeApp, ...v.filter((a) => a !== nativeApp)].slice(0, 8));
+                setStoryReply({app:nativeApp,thread,text,token});
+              }}
               onNativeNotification={(nativeApp, thread, item) => {
                 if (app === nativeApp && storyThread === thread) {
                   setBanner("新消息 · "+item.sender+"："+item.body);
