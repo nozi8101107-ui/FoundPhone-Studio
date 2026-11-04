@@ -242,6 +242,8 @@ export function NeteaseSkin(p: Props) {
 }
 export function YouTubeSkin(p: Props) {
   const { tab, setTab, q, setQ, items } = useContent(p, "首页");
+  const [playing, setPlaying] = useState<Item | null>(null);
+  const videoSrc = playing ? safeMedia(playing.media) : "";
   const list = tab === "首页"
     ? items
     : tab === "订阅"
@@ -258,11 +260,29 @@ export function YouTubeSkin(p: Props) {
       <div className="youtube-chips">
         <button className="selected">全部</button>
       </div>
+      {playing && videoSrc && (
+        <section style={{ padding: "0 12px 12px", background: "#0f0f0f", color: "#fff" }}>
+          <video
+            key={playing.id}
+            controls
+            autoPlay
+            playsInline
+            preload="auto"
+            poster={import.meta.env.BASE_URL + "youtube/" + meta(playing, "thumbnail")}
+            src={import.meta.env.BASE_URL.replace(/\/$/, "") + videoSrc}
+            style={{ display: "block", width: "100%", maxHeight: "52vh", background: "#000" }}
+          />
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, paddingTop: 8 }}>
+            <strong style={{ fontSize: 14 }}>{playing.title}</strong>
+            <button onClick={() => setPlaying(null)} style={{ color: "#fff", padding: 8 }}>关闭</button>
+          </div>
+        </section>
+      )}
       <div className="catalog-scroll">
         <div className="youtube-videos">
           {list.map((i) => (
             <article key={i.id}>
-              <button className="youtube-thumb" onClick={() => p.onItem(i)}>
+              <button className="youtube-thumb" onClick={() => setPlaying(i)}>
                 <img
                   src={import.meta.env.BASE_URL + "youtube/" + meta(i, "thumbnail")}
                   alt={i.title}
@@ -272,13 +292,13 @@ export function YouTubeSkin(p: Props) {
               </button>
               <div className="youtube-byline">
                 <Avatar name={i.sender} src="/youtube/channels4_profile.jpeg" />
-                <button onClick={() => p.onItem(i)}>
+                <button onClick={() => setPlaying(i)}>
                   <strong>{i.title}</strong>
                   <small>
                     TWS · {meta(i, "views")} · {meta(i, "likesCount")} 赞
                   </small>
                 </button>
-                <button className="youtube-more" aria-label="更多选项" onClick={() => p.onItem(i)}>⋮</button>
+                <button className="youtube-more" aria-label="更多选项" onClick={() => setPlaying(i)}>⋮</button>
               </div>
             </article>
           ))}
