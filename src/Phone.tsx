@@ -523,7 +523,7 @@ function PhoneRuntime({
                     const priority = (id:string) => id === "chapter-dispatch" ? 0 : app === "threads" && id.startsWith("chapter-thread-") ? 0 : app === "weibo" && id === "chapter-giveaway" ? 0 : app === "weibo" && (id.startsWith("chapter-toilet-") || id.startsWith("chapter-battle-") || id.startsWith("chapter-exfan-")) ? 1 : 2;
                     return priority(a.id)-priority(b.id);
                   })}
-                  initialThread={app === storyApp ? pendingThread : ""}
+                  initialThread=""
                   unreadThread={unreadThreadForApp}
                   unreadThreads={Object.keys(storyUnreadThreads).filter((key) => key.startsWith(app + "::")).map((key) => key.slice(app.length + 2))}
                   storyReply={storyReply}
@@ -607,27 +607,17 @@ function PhoneRuntime({
               key={storyFlowKey}
               work={work}
               onNativeOpen={(nativeApp, thread) => {
+                // Remember the destination, but let the player open the app and conversation manually.
                 setStoryApp(nativeApp);
                 setPendingThread(thread);
-                setStoryThread(thread);
-                setStoryUnreadThreads((v) => { const next={...v}; delete next[storyUnreadKey(nativeApp,thread)]; return next; });
-                setStoryNotification(null);
-                setApp(nativeApp);
-                setRecent((v) => [nativeApp, ...v.filter((a) => a !== nativeApp)].slice(0, 8));
               }}
               onNativeItem={(nativeApp, item) => {
                 setChapterItems((v) => ({...v,[nativeApp]:[...(v[nativeApp]||[]),item]}));
               }}
               onNativePrompt={(nativeApp, thread, text, token) => {
-                // A scripted reply belongs in the real app conversation, never in a separate story overlay.
-                // If the player navigated elsewhere while the other person was typing, return to that thread
-                // before pre-filling the native composer.
+                // Keep the reply ready for the native composer, without opening the app or conversation.
                 setStoryApp(nativeApp);
                 setPendingThread(thread);
-                setStoryThread(thread);
-                setStoryNotification(null);
-                setApp(nativeApp);
-                setRecent((v) => [nativeApp, ...v.filter((a) => a !== nativeApp)].slice(0, 8));
                 setStoryReply({app:nativeApp,thread,text,token});
               }}
               onNativeNotification={(nativeApp, thread, item) => {
