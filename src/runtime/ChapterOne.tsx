@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { Work } from "../schema";
+import type { Item, Work } from "../schema";
 
 type Event = { from: "them" | "you"; text: string };
 const names: Record<string,string> = { shinyu:"申惟", dohoon:"金道勋", youngjae:"崔英宰", hanjin:"韩振", jihoon:"韩志薰", kyungmin:"李炅潣" };
@@ -54,7 +54,7 @@ function dispatchBody(id:string):string {
  const n=english[id]||"SHINYU";
  return "【独家】TWS成员"+n+"深夜密会素人女性 汉南洞街头举止亲密疑似恋爱中\n\nDispatch独家报道\nD社今日晚间独家捕捉到TWS成员"+n+"与一名素人女性在首尔深夜约会，两人举止亲密，疑似恋爱中。\n据本社记者追踪，当晚21时40分许，"+n+"身着黑色卫衣、佩戴棒球帽和口罩，与一名素人女性一同离开，两人自然并肩而行，"+n+"主动接过女方手中的纸袋，途中"+n+"多次低头靠近女方耳边交谈，笑容明显。"+n+"轻拍女方背部，随后两人分别乘车离开。\n据本社掌握的信息，该女性为圈外素人，尚未知两人通过何种渠道认识。身边人士向D社透露：“"+n+"对这段关系非常谨慎，私下对女方很体贴”\n截至发稿时，TWS所属公司PLEDIS Entertainment尚未就此事发表官方立场。";
 }
-export function ChapterOne({work,onFinish,onDispatchOpen}:{work:Work;onFinish:()=>void;onDispatchOpen:()=>void}) {
+export function ChapterOne({work,onFinish,onDispatchOpen,onNativeOpen,onNativeItem,onNativePrompt,onNativeNotification}:{work:Work;onFinish:()=>void;onDispatchOpen:()=>void;onNativeOpen:(app:string,thread:string)=>void;onNativeItem:(app:string,item:Item)=>void;onNativePrompt:(app:string,thread:string,text:string,token:number)=>void;onNativeNotification:(app:string,thread:string,item:Item)=>void}) {
  const crush=String(work.variables.storyCrush||"shinyu"), ex=String(work.variables.storyEx||"dohoon"), xp=String(work.variables.storyXp||"BG"), nick=String(work.variables.storyNickname||"你");
  const key="foundphone.chapter1.v3:"+work.id+":"+nick;
  const [stage,setStage]=useState<"crush"|"dispatch"|"friend"|"ex"|"closing"|"done">(()=>{try{const v=JSON.parse(localStorage.getItem(key)||"null");return v?.done?"done":v?.stage||"crush"}catch{return "crush"}});
@@ -67,10 +67,53 @@ export function ChapterOne({work,onFinish,onDispatchOpen}:{work:Work;onFinish:()
  const [xOpened,setXOpened]=useState(()=>{try{return !!JSON.parse(localStorage.getItem(key)||"null")?.xOpened}catch{return false}});
  const [blocked,setBlocked]=useState(()=>{try{return !!JSON.parse(localStorage.getItem(key)||"null")?.blocked}catch{return false}});
  const current=stage==="crush"?crushChat(crush):stage==="friend"?friendChat():stage==="ex"?exChat(ex,crush,xp):stage==="closing"?closeChat(crush):[];
+ const targetId=stage==="ex"?ex:crush;
+ const nativeApp=stage==="friend"?"wechat":targetId==="hanjin"?"wechat":"kakao";
+ const nativeThread=stage==="friend"?"闺蜜":(work.data[nativeApp]||[]).find(item=>item.meta.handle===handles[targetId])?.title||names[targetId];
+ const callbacks=useRef({onNativeOpen,onNativeItem,onNativePrompt,onNativeNotification});
+ callbacks.current={onNativeOpen,onNativeItem,onNativePrompt,onNativeNotification};
+ useEffect(()=>{if(stage!=="done"&&stage!=="dispatch")callbacks.current.onNativeOpen(nativeApp,nativeThread)},[stage,nativeApp,nativeThread]);
+
  const events=rows.length?rows:current;
  useEffect(()=>{try{localStorage.setItem(key,JSON.stringify({stage,cursor,done:stage==="done",comments,xOpened,blocked}))}catch{}},[stage,cursor,comments,xOpened,blocked]);
  const history = useMemo(()=>{const app=(id:string)=>id==="hanjin"?"wechat":"kakao"; if(stage==="friend")return (work.data.wechat||[]).filter(item=>item.title==="闺蜜"); if(stage==="ex")return (work.data[app(ex)]||[]).filter(item=>item.meta.handle===handles[ex]); if(stage==="crush"||stage==="closing")return (work.data[app(crush)]||[]).filter(item=>item.meta.handle===handles[crush]); return [];},[work,stage,crush,ex]);
- useEffect(()=>{if(stage==="done")return;if(cursor>=events.length){if(!events.length)return;const t=window.setTimeout(()=>{if(stage==="crush"){setStage("dispatch");setRows([]);setCursor(0)}else if(stage==="friend"){setStage("ex");setRows([]);setCursor(0)}else if(stage==="ex"){setStage("closing");setRows([]);setCursor(0)}else if(stage==="closing"){setStage("done");try{localStorage.setItem(key,JSON.stringify({done:true}))}catch{}}},stage==="crush"?2000:stage==="ex"?1000:500);return()=>clearTimeout(t)}const e=events[cursor];if(e.from==="them"){setBusy(true);const t=window.setTimeout(()=>{setBusy(false);setCursor(v=>v+1);setBanner(e.text);window.setTimeout(()=>setBanner(""),2600)},1200+Math.random()*1300);return()=>clearTimeout(t)}},[stage,cursor,events.length]);
+ useEffect(()=>{
+   if(stage==="done"||stage==="dispatch")return;
+   if(cursor>=events.length){
+     if(!events.length)return;
+     const t=window.setTimeout(()=>{
+       if(stage==="crush"){setStage("dispatch");setRows([]);setCursor(0)}
+       else if(stage==="friend"){setStage("ex");setRows([]);setCursor(0)}
+       else if(stage==="ex"){setStage("closing");setRows([]);setCursor(0)}
+       else if(stage==="closing"){setStage("done");try{localStorage.setItem(key,JSON.stringify({done:true}))}catch{}}
+     },stage==="crush"?2000:stage==="ex"?1000:500);
+     return()=>clearTimeout(t);
+   }
+   const e=events[cursor];
+   if(e.from==="them"){
+     setBusy(true);
+     const t=window.setTimeout(()=>{
+       setBusy(false);
+       const item:Item={id:"chapter1-"+stage+"-"+cursor,title:nativeThread,body:e.text,richText:"",meta:{story:"chapter1"},time:stamp,sender:stage==="friend"?"闺蜜":names[targetId],avatar:(work.data[nativeApp]||[]).find(v=>v.meta.handle===handles[targetId])?.avatar||"",kind:"text",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:false,read:false,likes:0,comments:[]};
+       callbacks.current.onNativeItem(nativeApp,item);
+       callbacks.current.onNativeNotification(nativeApp,nativeThread,item);
+       setCursor(v=>v+1);
+     },1200+Math.random()*1300);
+     return()=>clearTimeout(t);
+   }
+   callbacks.current.onNativePrompt(nativeApp,nativeThread,e.text,cursor+1);
+   const receive=(event:Event)=>{
+     const detail=(event as CustomEvent<{app:string;thread:string;text:string}>).detail;
+     if(!detail||detail.app!==nativeApp||detail.thread!==nativeThread||!detail.text?.trim())return;
+     window.removeEventListener("foundphone-story-send",receive);
+     const blockedMessage=stage==="ex"&&xp==="BG"&&ex==="youngjae"&&cursor===events.length-1;
+     const item:Item={id:"chapter1-"+stage+"-"+cursor,title:nativeThread,body:detail.text.trim(),richText:"",meta:{story:"chapter1",...(blockedMessage?{blocked:"true"}:{})},time:stamp,sender:work.phone.owner||"我",avatar:"",kind:"text",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:true,read:true,likes:0,comments:[]};
+     callbacks.current.onNativeItem(nativeApp,item);
+     setCursor(v=>v+1);
+   };
+   window.addEventListener("foundphone-story-send",receive);
+   return()=>window.removeEventListener("foundphone-story-send",receive);
+ },[stage,cursor,events.length,nativeApp,nativeThread,stamp,targetId,ex,xp,work]);
  const visibleRows=events.slice(0,cursor);
  const send=()=>{const e=events[cursor];if(!e||e.from!=="you"||!draft.trim())return;if(stage==="ex"&&xp==="BG"&&ex==="youngjae"&&cursor===events.length-1)setBlocked(true);setBusy(false);setCursor(v=>v+1);setDraft("");};
  const fill=()=>{const e=events[cursor];if(e?.from==="you")setDraft(e.text)};
@@ -80,7 +123,7 @@ export function ChapterOne({work,onFinish,onDispatchOpen}:{work:Work;onFinish:()
  const heading=stage==="crush"||stage==="closing"?names[crush]:stage==="friend"?"闺蜜":stage==="ex"?names[ex]:"Dispatch";
  const displayStage:string=stage;
  const stamp=crush==="dohoon"?"15:30":crush==="hanjin"?"15:25":crush==="youngjae"?"20:30":crush==="jihoon"?"18:50":crush==="kyungmin"?"19:49":"20:03";
- if(displayStage==="dispatch")return null;
+ if(displayStage!=="done")return null;
  return <div className="chapter-one-overlay" style={{position:"absolute",inset:0,zIndex:120,background:"#f5f5f7",color:"#19191d",display:"flex",flexDirection:"column",fontFamily:"-apple-system,BlinkMacSystemFont,sans-serif"}}>
  <style>{".chapter-one-overlay button{font:inherit}.chapter-one-head{height:58px;flex:none;background:#fff;border-bottom:1px solid #e7e7eb;display:flex;align-items:center;justify-content:space-between;padding:0 16px}.chapter-one-scroll{overflow:auto;flex:1;padding:14px 12px}.chapter-one-bubble{max-width:82%;padding:11px 13px;border-radius:17px;margin:8px 0;white-space:pre-wrap;line-height:1.45;font-size:14px;background:white;box-shadow:0 1px 2px #0001}.chapter-one-bubble.you{margin-left:auto;background:#a8e6a0}.chapter-one-composer{background:#fff;padding:10px;display:flex;gap:8px;border-top:1px solid #e5e5e9}.chapter-one-composer button{border:0;border-radius:18px;padding:10px 14px;background:#222;color:white}.chapter-one-composer button:disabled{opacity:.35}.chapter-one-feed{background:#fff;border-radius:16px;padding:18px;white-space:pre-wrap;line-height:1.65;font-size:14px}.chapter-one-modal{position:absolute;inset:0;background:#0007;display:grid;place-items:center;padding:24px}.chapter-one-modal section{background:white;border-radius:20px;padding:24px;text-align:center;width:100%;max-width:310px}.chapter-one-modal button,.chapter-one-primary{border:0;background:#171717;color:#fff;border-radius:12px;padding:12px 20px;margin-top:16px}.chapter-one-muted{color:#777;font-size:12px}"}</style>
  <header className="chapter-one-head"><strong>{displayStage==="dispatch"?"X":(stage==="friend"?"微信":appFor(stage==="ex"?ex:crush))+" · "+heading}</strong><small>{stage==="crush"?"1-1":displayStage==="dispatch"?"1-2":stage==="friend"||stage==="ex"?"1-3":stage==="closing"?"1-4":"完成"}</small></header>
