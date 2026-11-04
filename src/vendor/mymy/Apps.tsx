@@ -148,8 +148,10 @@ export function MymyKakao(p: SkinProps) {
                     className={"kzbub" + (m.media ? " kzimg" : "")}
                     onClick={() => m.meta.local !== "true" && read(p, m)}
                   >
+                    {m.meta.blocked === "true" && <b style={{color:"#e5484d",marginRight:5}}>❗</b>}
                     {m.media ? <Media item={m} /> : m.body}
                   </button>
+                  {m.meta.blocked === "true" && <small style={{display:"block",color:"#999",fontSize:10,marginTop:4}}>消息已发出，但被对方拒收了</small>}
                   {!m.outgoing && run.last && (
                     <span className="kzt">{m.time.slice(-5)}</span>
                   )}
