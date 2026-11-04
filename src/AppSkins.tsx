@@ -175,12 +175,21 @@ export function WeChatSkin(p: SkinProps) {
   const conversations = [
     ...new Set(
       p.items
-        .filter((i) => !["朋友圈", "我"].includes(i.folder))
+        .filter((i) => !["朋友圈", "我", "通讯录"].includes(i.folder))
         .map((i) => i.title),
     ),
-  ];
+  ].sort((a, b) => {
+    const aPinned = p.items.some((i) => i.title === a && i.meta.pinned === "true");
+    const bPinned = p.items.some((i) => i.title === b && i.meta.pinned === "true");
+    return Number(bPinned) - Number(aPinned);
+  });
   const contacts = [
-    ...new Set(p.items.map((i) => i.sender).filter((s) => s !== "我")),
+    ...new Set(
+      p.items
+        .filter((i) => i.meta.stub !== "true" || i.meta.contact === "true")
+        .map((i) => i.sender)
+        .filter((s) => s !== "我"),
+    ),
   ];
   const posts = p.items.filter(
     (i) => i.folder === "朋友圈" || i.kind === "post",
@@ -252,13 +261,14 @@ export function WeChatSkin(p: SkinProps) {
         <div className="skin-scroll wx-utility">
           {utility === "聊天信息" && (
             <div className="wx-members">
-              {[
-                ...new Set(
-                  p.items
-                    .filter((i) => i.title === p.thread)
-                    .map((i) => i.sender),
-                ),
-              ].map((name) => (
+              {(() => {
+                const group = p.items.find((i) => i.title === p.thread && i.meta.groupMembers);
+                let names = [...new Set(p.items.filter((i) => i.title === p.thread && i.meta.stub !== "true").map((i) => i.sender))];
+                try {
+                  if (group?.meta.groupMembers) names = JSON.parse(group.meta.groupMembers) as string[];
+                } catch {}
+                return names;
+              })().map((name) => (
                 <div key={name}>
                   <Avatar
                     name={name}
@@ -287,11 +297,14 @@ export function WeChatSkin(p: SkinProps) {
       ) : p.thread ? (
         <>
           <MessageList
-            items={p.items.filter((i) => i.title === p.thread)}
+            items={p.items.filter((i) => i.title === p.thread && i.meta.stub !== "true")}
             creator={p.creator}
             onItem={p.onItem}
             onRead={p.onRead}
           />
+          {!p.items.some((i) => i.title === p.thread && i.meta.stub !== "true") && (
+            <p className="skin-empty">暂无聊天记录</p>
+          )}
           <Compose creator={p.creator} onAdd={p.onAdd} />
         </>
       ) : moments ? (
@@ -371,7 +384,7 @@ export function WeChatSkin(p: SkinProps) {
                         <strong>{t}</strong>
                         <p>{last.body}</p>
                       </div>
-                      <time>{last.time.slice(-5)}</time>
+                      <time>{last.meta.pinned === "true" ? "置顶" : last.time.slice(-5)}</time>
                     </button>
                   );
                 })}
