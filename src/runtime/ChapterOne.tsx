@@ -6,9 +6,9 @@ const names: Record<string,string> = { shinyu:"申惟", dohoon:"金道勋", youn
 const english: Record<string,string> = { shinyu:"SHINYU", dohoon:"DOHOON", youngjae:"YOUNGJAE", hanjin:"HANJIN", jihoon:"JIHOON", kyungmin:"KYUNGMIN" };
 const handles: Record<string,string> = { shinyu:"tlswjdghks", dohoon:"doking", youngjae:"jae_e", hanjin:"henan_prince", jihoon:"ahoooon", kyungmin:"kyungman_lee" };
 const appFor = (id:string) => id === "hanjin" ? "微信" : "KakaoTalk";
-const ev = (...rows:[ "them"|"you", string ][]):StoryEvent[] => rows.map(([from,text])=>({from,text}));
-function crushChat(id:string):Event[] {
- const chats:Record<string,StoryEvent[]> = {
+const ev = (...rows:[ "them"|"you", string ][]):StoryStoryEvent[] => rows.map(([from,text])=>({from,text}));
+function crushChat(id:string):StoryEvent[] {
+ const chats:Record<string,StoryStoryEvent[]> = {
  shinyu:ev(["them","准备好了吗"],["them","我到了"],["them","下来吧"],["you","好啦好啦"],["you","我马上来"]),
  dohoon:ev(["them","你来了吗"],["you","我马上"],["them","好"],["them","等下拍摄结束 我们去吃点什么吧"],["you","好呀好呀"]),
  youngjae:ev(["them","你到了吗"],["you","我到了！你在哪呀"],["them","回头"],["you","！"]),
@@ -18,9 +18,9 @@ function crushChat(id:string):Event[] {
  };
  return chats[id] || chats.shinyu;
 }
-function exChat(ex:string, crush:string, xp:string):Event[] {
+function exChat(ex:string, crush:string, xp:string):StoryEvent[] {
  const n=names[crush]||"他";
- const bg:Record<string,Event[]> = {
+ const bg:Record<string,StoryEvent[]> = {
  shinyu:ev(["them","？"],["them","你跟"+n+"？"],["them","回话"],["them","快点"],["you","？"],["you","嗯 怎么了"],["them","？"],["them","怎么了？"],["them","你厉害"],["you","没你厉害"],["them","……"],["them","所以你和我分手后选了他？"],["you","不行吗"],["them","行"],["them","你们多久了"],["you","关你什么事"],["you","收收味"],["them","他比我好吗？"]),
  dohoon:ev(["them","啊？"],["them","不是 你什么意思"],["them","说话。"],["you","就是这个意思"],["you","嗯"],["them","你故意的"],["them","你故意气我是不是？"]),
  youngjae:ev(["them","？"],["you","？"],["them","你和"+n+"是真的？"],["you","嗯"],["you","怎么了"]),
@@ -28,7 +28,7 @@ function exChat(ex:string, crush:string, xp:string):Event[] {
  jihoon:ev(["them","那张照片是真的吗"],["you","是"],["them","…"],["you","…嗯"],["them","我讨厌你"]),
  kyungmin:ev(["them","？"],["you","。"],["them","你真是厉害啊"],["you","我怎么了"],["them","我没看出来啊"],["them","那我们之前是怎样"],["them","你接近我是为了他吗？"])
  };
- const gb:Record<string,Event[]> = {
+ const gb:Record<string,StoryEvent[]> = {
  shinyu:ev(["them","？"],["them","你跟"+n+"？"],["them","回话"],["them","快点"],["you","？"],["you","嗯 怎么了"],["them","。"],["them","他有我漂亮吗"],["them","他胸肌有我的手感好吗"],["you","请自重"],["them","。自重？"],["them","你厉害"]),
  dohoon:ev(["them","你真厉害"],["them","你跟"+n+"是真的？"],["them","那照片是你吧？"],["them","你化成灰我都认识"],["you","嗯"],["them","“嗯”？"],["them","我等着"+n+"被你吓跑的那天"],["you","不会有那天的"],["them","合着你们金女玉童呗"],["them","假鸡记得买新的"],["them","哈 你们应该谈不到那一步吧？"]),
  youngjae:ev(["them","……"],["them","照片是你吗"],["them","d社那张"],["you","嗯 是我"],["them","早知道就该分手前把你掐死"],["them","^ ^"],["you","？"],["them","怎么 他比我听话吧"],["them","他让你糟蹋？"]),
@@ -38,9 +38,9 @@ function exChat(ex:string, crush:string, xp:string):Event[] {
  };
  return (xp==="GB"?gb:bg)[ex] || (xp==="GB"?gb.shinyu:bg.shinyu);
 }
-function friendChat():StoryEvent[]{return ev(["them","？？？？"],["them","啊啊啊啊你怎么被拍了"],["you","我好心累"],["them","啊啊啊怎么昨天刚说完你就被d社发了"],["them","大头照保卫战…"]);}
-function closeChat(id:string):StoryEvent[]{
- const rows:Record<string,Event[]> = {
+function friendChat():StoryStoryEvent[]{return ev(["them","？？？？"],["them","啊啊啊啊你怎么被拍了"],["you","我好心累"],["them","啊啊啊怎么昨天刚说完你就被d社发了"],["them","大头照保卫战…"]);}
+function closeChat(id:string):StoryStoryEvent[]{
+ const rows:Record<string,StoryEvent[]> = {
  shinyu:ev(["them","没事 别怕"],["them","你到家了就好好休息"],["them","我先去公司开会"],["them","晚安"]),
  dohoon:ev(["them","你别看"],["them","你别看手机了"],["them","到家就赶紧休息吧"],["them","今天还叫你出来…"],["them","很累了吧"],["them","晚安"]),
  youngjae:ev(["them","对不起"],["them","是我疏忽"],["them","我应该短时间没法去找你了"],["them","我先去公司了 你早点休息"],["them","今天很高兴"]),
@@ -58,7 +58,7 @@ export function ChapterOne({work,onFinish,onDispatchOpen,onNativeOpen,onNativeIt
  const crush=String(work.variables.storyCrush||"shinyu"), ex=String(work.variables.storyEx||"dohoon"), xp=String(work.variables.storyXp||"BG"), nick=String(work.variables.storyNickname||"你");
  const key="foundphone.chapter1.v3:"+work.id+":"+nick;
  const [stage,setStage]=useState<"crush"|"dispatch"|"friend"|"ex"|"closing"|"done">(()=>{try{const v=JSON.parse(localStorage.getItem(key)||"null");return v?.done?"done":v?.stage||"crush"}catch{return "crush"}});
- const [rows,setRows]=useState<StoryEvent[]>([]);
+ const [rows,setRows]=useState<StoryStoryEvent[]>([]);
  const [cursor,setCursor]=useState(()=>{try{return Number(JSON.parse(localStorage.getItem(key)||"null")?.cursor)||0}catch{return 0}});
  const [draft,setDraft]=useState("");
  const [busy,setBusy]=useState(false);
