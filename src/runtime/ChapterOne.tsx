@@ -135,7 +135,7 @@ export function ChapterOne({work,onFinish,onDispatchOpen,onNativeOpen,onNativeIt
      if(!detail||detail.app!==nativeApp||detail.thread!==nativeThread||!detail.text?.trim())return;
      window.removeEventListener("foundphone-story-send",receive);
      const blockedMessage=stage==="ex"&&xp==="BG"&&ex==="youngjae"&&cursor===events.length-1;
-     const item:Item={id:"chapter1-"+stage+"-"+cursor,title:nativeThread,body:detail.text.trim(),richText:"",meta:{story:"chapter1",...(blockedMessage?{blocked:"true"}:{})},time:stamp,sender:nick||"我",avatar:"",kind:"text",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:true,read:true,likes:0,comments:[]};
+     const item:Item={id:"chapter1-"+stage+"-"+cursor,title:nativeThread,body:detail.text.trim(),richText:"",meta:{story:"chapter1",...(blockedMessage?{blocked:"true"}:{})},time:stamp,sender:nick||"我",avatar:String(work.variables.storyUserAvatar||""),kind:"text",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:true,read:true,likes:0,comments:[]};
      callbacks.current.onNativeItem(nativeApp,item);
      setCursor(v=>v+1);
    };
