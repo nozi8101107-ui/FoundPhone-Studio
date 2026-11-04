@@ -163,15 +163,18 @@ export function MymyKakao(p: SkinProps) {
             onSubmit={(e) => {
               e.preventDefault();
               if (draft.trim()) {
-                setSent([
-                  ...sent,
-                  JSON.stringify([
-                    p.thread,
-                    draft.trim(),
-                    p.virtualTime || "09:41",
-                  ]),
-                ]);
-                p.onStorySend?.(draft.trim());
+                if (p.storyReply) {
+                  p.onStorySend?.(draft.trim());
+                } else {
+                  setSent([
+                    ...sent,
+                    JSON.stringify([
+                      p.thread,
+                      draft.trim(),
+                      p.virtualTime || "09:41",
+                    ]),
+                  ]);
+                }
                 setDraft("");
               }
             }}
