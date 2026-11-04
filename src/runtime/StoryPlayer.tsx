@@ -616,7 +616,7 @@ user 我刚刚路过一家店 看到这个
 
  const buildWechatConversation=(id:string,title:string,raw:string)=>{
   let current="2026-11-04 19:00",minuteOffset=0,index=0;
-  const rows:ReturnType<typeof make>[]=[];
+  const rows:Work["data"][string]=[];
   const add=(sender:string,body:string,kind:"text"|"image"|"transfer"="text",amount="")=>{
    const outgoing=sender==="user";
    const displaySender=outgoing?profile.nickname:sender;
@@ -628,7 +628,7 @@ user 我刚刚路过一家店 看到这个
    }
    rows.push(item);
   };
-  const advance=()=>{const d=new Date(current.replace(" ","T")+":00");d.setMinutes(d.getMinutes()+1);current=d.toISOString().slice(0,16).replace("T"," ");};
+  const advance=()=>{const d=new Date(current.replace(" ","T")+":00Z");d.setUTCMinutes(d.getUTCMinutes()+1);current=d.toISOString().slice(0,16).replace("T"," ");};
   for(const line of raw.split("\n").map(x=>x.trim()).filter(Boolean)){
    if(line.startsWith("@")){current=line.slice(1);continue;}
    const match=line.match(/^([^：:]+)[：:](.*)$/);if(!match)continue;
