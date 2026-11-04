@@ -510,7 +510,7 @@ function PhoneRuntime({
                     if (creator) return true;
                     const chapterPost = item.id.startsWith("chapter-thread-") || item.id.startsWith("chapter-toilet-") || item.id.startsWith("chapter-battle-") || item.id.startsWith("chapter-exfan-") || item.id === "chapter-giveaway" || item.id === "chapter-dispatch";
                     return !chapterPost || storyFinished || (storyActive && item.id === "chapter-dispatch");
-                  })}
+                  }).sort((a,b) => a.id === "chapter-dispatch" ? -1 : b.id === "chapter-dispatch" ? 1 : 0)}
                   initialThread={app === storyApp ? pendingThread : ""}
                   unreadThread={storyUnreadThread}
                   creator={creator}
