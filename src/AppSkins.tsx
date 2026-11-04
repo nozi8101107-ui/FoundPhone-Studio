@@ -166,6 +166,24 @@ function Compose({
     </div>
   );
 }
+function WeChatStoryComposer(p: SkinProps) {
+  const [draft, setDraft] = useState("");
+  useEffect(() => {
+    if (p.storyReply) setDraft(p.storyReply.text);
+  }, [p.storyReply?.token]);
+  return (
+    <form className="skin-compose" onSubmit={(e) => {
+      e.preventDefault();
+      if (!draft.trim()) return;
+      p.onStorySend?.(draft.trim());
+      setDraft("");
+    }}>
+      <Mic size={20} />
+      <input aria-label="微信消息" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="输入消息" style={{flex:1,minWidth:0,border:0,outline:0,background:"transparent",font:"inherit"}} />
+      <button type="submit" disabled={!draft.trim()} style={{border:0,borderRadius:8,padding:"6px 12px",background:draft.trim()?"#07c160":"#ddd",color:"#fff"}}>发送</button>
+    </form>
+  );
+}
 export function WeChatSkin(p: SkinProps) {
   const [tab, setTab] = useState("微信"),
     [query, setQuery] = useState(""),
@@ -316,7 +334,7 @@ export function WeChatSkin(p: SkinProps) {
           {!p.items.some((i) => i.title === p.thread && i.meta.stub !== "true") && (
             <p className="skin-empty">暂无聊天记录</p>
           )}
-          <Compose creator={p.creator} onAdd={p.onAdd} />
+          {p.storyReply ? <WeChatStoryComposer {...p} /> : <Compose creator={p.creator} onAdd={p.onAdd} />}
         </>
       ) : moments ? (
         <div className="wx-moments">
