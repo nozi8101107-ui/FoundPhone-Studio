@@ -612,10 +612,24 @@ const extraThreads=extraThreadTexts.map((body,index)=>{const author=randId();con
  const bigbarComments=["能不能做点正事","评论区在说什么我们大吧已经够好了吧","怎么还有大吧zgk","好帅啊啊啊","萌……","好期待啊啊啊啊啊","这是在哪发的物料呀","笑死我了","好羡慕能去线下的","能不能换个美工"];
  const commonBathComments=["看看缟纻猪肝","美帝实火#"+chooseWeibo(["寻珍","雕勋","锐因","雕年","枪年","队忙"])+"tws唯一美帝#","缟纻别点了","gxjh又让你赚爽了吧","皮下到底审不审稿","完全"+chooseWeibo(["申惟","金道勋","崔英宰","韩振","韩志薰","李炅潣","月表","老蛙","丑人"])+"粉丝","完全。","底下控评的滚回去","只知道#"+chooseWeibo(["申惟","金道勋","崔英宰","韩振","韩志薰","李炅潣"])+"tws唯一top#"];
  const exFanComments=["脱愉","评论区在说什么 这不是花挺多的","羡慕缟纻文采","说的全是实话…","自证上哪偷的","就不能多相信他一点吗","抱着必出神稿的决心就这么做了","拉队友共沉沦什么意思","这不是公司要求的吗怪他干嘛","脱愉宝宝 公司太阴了","宝子你猪肝很明显"];
+ const randomizeWeiboComments=(pool:string[])=>{
+  // 每条微博的评论数量、评论顺序和各条评论出现次数都独立随机。
+  const count=3+Math.floor(Math.random()*9);
+  const weights=pool.map(()=>1+Math.floor(Math.random()*6));
+  const total=weights.reduce((sum,weight)=>sum+weight,0);
+  const result=Array.from({length:count},()=>{
+   let roll=Math.random()*total;
+   let index=weights.findIndex(weight=>(roll-=weight)<0);
+   if(index<0)index=pool.length-1;
+   return weiboName()+": "+pool[index];
+  });
+  for(let i=result.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[result[i],result[j]]=[result[j],result[i]];}
+  return result;
+ };
  const makeWeibo=(id:string,author:string,handle:string,body:string,comments:string[],folder:string)=>{
   const item=make(id,body,body,{handle,reposts:String(Math.floor(Math.random()*1800)),accountType:folder,source:folder});
   item.sender=author;item.folder=folder;item.likes=Math.floor(Math.random()*28000);
-  item.comments=comments.map(text=>weiboName()+": "+text);
+  item.comments=randomizeWeiboComments(comments);
   return item;
  };
  const toiletPosts=[
