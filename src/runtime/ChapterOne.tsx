@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Item, Work } from "../schema";
 
 type Event = { from: "them" | "you"; text: string };
