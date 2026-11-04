@@ -577,7 +577,7 @@ user 我刚刚路过一家店 看到这个
  const hanjinWechatMessages=hanjinSelected?(profile.crush==="hanjin"?hanjinWechat:buildMessages("hanjin",handles.hanjin,breakupText.hanjin,avatarFor("hanjin"))):[];
  const isPlaceholder=(item:Work["data"][string][number])=>/测试(用户|联系人|会话|消息|内容|回复|动态)/.test([item.title,item.body,item.sender].join(" "))||item.body==="这是一条测试内容。"||item.body==="这是一条测试消息。";
  const cleanedData=Object.fromEntries(Object.entries(work.data).map(([app,items])=>[app,items.filter(item=>!isPlaceholder(item))])) as Work["data"];
- cleanedData.instagram=(cleanedData.instagram||[]).filter(item=>item.meta.account==="official");
+ cleanedData.instagram=(cleanedData.instagram||[]).filter(item=>item.meta.account==="official" && item.kind!=="post");
  const taobaoProducts=[
   ["bag-dior-ladydior","Dior Lady Dior 中号手袋",51000,"DIOR 迪奥官方旗舰店","藤格纹羊皮革，经典五格戴妃包。","奢侈品女包"],
   ["bag-dior-toujours","Dior Toujours 小号手袋",29000,"DIOR 迪奥官方旗舰店","小号牛皮革手袋，日常通勤款。","奢侈品女包"],
