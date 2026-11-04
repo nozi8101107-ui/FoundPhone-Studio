@@ -337,7 +337,7 @@ function PhoneRuntime({
       const targetApp = crush === "hanjin" ? "wechat" : "kakao";
       if (!creator && crush && !storyFinished) {
         setStoryApp(targetApp);
-        setStoryUnreadThread(String(work.variables.storyNickname || "user"));
+        setStoryUnreadThreads((v) => ({...v,[storyUnreadKey(targetApp,String(work.variables.storyNickname || "user"))]:true}));
         setApp(targetApp);
         setStoryActive(true);
       }
