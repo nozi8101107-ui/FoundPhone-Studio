@@ -261,7 +261,7 @@ export function WeChatSkin(p: SkinProps) {
         </button>
         <strong>
           {utility ||
-            p.thread ||
+            (p.thread ? threadLabel || p.thread : null) ||
             (moments ? "朋友圈" : tab === "微信" ? p.name : tab)}
         </strong>
         <button
