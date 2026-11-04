@@ -120,15 +120,15 @@ function MessageList({
           )}
           <button
             className="skin-bubble"
-            onClick={() => (creator ? onItem(i) : i.kind === "transfer" ? onTransfer?.(i) : onRead(i.id))}
+            onClick={() => (creator ? onItem(i) : (i.kind === "transfer" || i.kind === "transferReceived") ? onTransfer?.(i) : onRead(i.id))}
           >
             {["image", "audio", "video"].includes(i.kind) ? (
               <ItemMedia item={i} />
-            ) : i.kind === "transfer" ? (
-              <div className="skin-transfer">
+            ) : i.kind === "transfer" || i.kind === "transferReceived" ? (
+              <div className={i.kind === "transferReceived" ? "skin-transfer skin-transfer-received" : "skin-transfer"}>
                 <span className="skin-transfer-icon">¥</span>
-                <span className="skin-transfer-main"><b>¥{i.body}</b><small>{i.meta.transferStatus === "claimed" ? "已收款" : "待领取"}</small></span>
-                <small className="skin-transfer-caption">微信转账</small>
+                <span className="skin-transfer-main"><b>{i.kind === "transferReceived" ? "已接收" : `¥${i.body}`}</b><small>{i.kind === "transferReceived" ? "微信转账" : i.meta.transferStatus === "claimed" ? "已收款" : "待领取"}</small></span>
+                <small className="skin-transfer-caption">{i.kind === "transferReceived" ? "收款通知" : "微信转账"}</small>
               </div>
             ) : (
               i.body
@@ -517,8 +517,8 @@ export function WeChatSkin(p: SkinProps) {
             <button className="wx-transfer-close" aria-label="关闭转账详情" onClick={() => setSelectedTransfer(null)}>×</button>
             <div className="wx-transfer-detail-icon">¥</div>
             <strong>¥{selectedTransfer.meta.transferAmount || selectedTransfer.body}</strong>
-            <p>{selectedTransfer.meta.transferStatus === "claimed" ? "已领取" : "待领取"}</p>
-            <div className="wx-transfer-detail-status">{selectedTransfer.meta.transferStatus === "claimed" ? "已收款" : "等待对方领取"}</div>
+            <p>{selectedTransfer.kind === "transferReceived" ? "已接收" : selectedTransfer.meta.transferStatus === "claimed" ? "已领取" : "待领取"}</p>
+            <div className="wx-transfer-detail-status">{selectedTransfer.kind === "transferReceived" ? "收款方已接收转账" : selectedTransfer.meta.transferStatus === "claimed" ? "已收款" : "等待对方领取"}</div>
             <small>{selectedTransfer.outgoing ? "你发出的转账" : `${selectedTransfer.sender} 转账给你`}</small>
           </section>
         </div>
