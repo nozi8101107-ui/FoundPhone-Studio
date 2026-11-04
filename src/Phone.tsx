@@ -626,9 +626,13 @@ function PhoneRuntime({
               }}
               onNativePrompt={(nativeApp, thread, text, token) => setStoryReply({app:nativeApp,thread,text,token})}
               onNativeNotification={(nativeApp, thread, item) => {
-                setStoryUnreadThread(thread);
-                setStoryNotification({app:nativeApp,thread,item});
-                setBanner("新消息 · "+item.sender+"："+item.body);
+                if (app === nativeApp && storyThread === thread) {
+                  setBanner("新消息 · "+item.sender+"："+item.body);
+                  window.setTimeout(() => setBanner(""), 2600);
+                } else {
+                  setStoryUnreadThread(thread);
+                  setStoryNotification({app:nativeApp,thread,item});
+                }
               }}
               onDispatchOpen={() => {
                 setApp("twitter");
