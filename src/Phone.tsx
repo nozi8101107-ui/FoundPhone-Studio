@@ -66,6 +66,7 @@ import {
 import { dispatch, choose, visible, advance } from "./engine";
 import { db } from "./persistence";
 import { ChapterOne } from "./runtime/ChapterOne";
+import { makeChapterSocial } from "./runtime/ChapterOneSocial";
 function makeChapterDispatch(work: Work, member: string): Item {
   const labels: Record<string,string> = {shinyu:"SHINYU",dohoon:"DOHOON",youngjae:"YOUNGJAE",hanjin:"HANJIN",jihoon:"JIHOON",kyungmin:"KYUNGMIN"};
   const nick: Record<string,string> = {shinyu:"老雕",dohoon:"老牛",youngjae:"丑年",hanjin:"蛤蟆",jihoon:"强子",kyungmin:"娟子"};
@@ -353,6 +354,7 @@ function PhoneRuntime({
   }, []);
   const displayTime = deviceNow.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: false });
   const chapterDispatch = useMemo(() => makeChapterDispatch(work, String(work.variables.storyCrush || "shinyu")), [work.id, work.variables.storyCrush]);
+  const chapterSocial = useMemo(() => makeChapterSocial(work, String(work.variables.storyCrush || "shinyu")), [work.id, work.variables.storyCrush]);
   const plugin = getApp(app);
   useEffect(() => {
     const count = s.notifications.length;
@@ -515,14 +517,19 @@ function PhoneRuntime({
                     work.apps.find((a) => a.id === app)?.name ?? plugin.name
                   }
                   items={[
-                    ...(work.data[app] ?? []).filter((item) => item.id !== "chapter-dispatch"),
+                    ...(work.data[app] ?? []).filter((item) => item.id !== "chapter-dispatch" && !item.id.startsWith("chapter-thread-") && !item.id.startsWith("chapter-toilet-") && !item.id.startsWith("chapter-battle-") && !item.id.startsWith("chapter-exfan-") && item.id !== "chapter-giveaway"),
                     ...(app === "twitter" && storyActive ? [chapterDispatch] : []),
+                    ...(app === "threads" && storyFinished ? chapterSocial.threads : []),
+                    ...(app === "weibo" && storyFinished ? chapterSocial.weibo : []),
                     ...(s.messages[app] ?? []),
                   ].filter((item) => {
                     if (creator) return true;
                     const chapterPost = item.id.startsWith("chapter-thread-") || item.id.startsWith("chapter-toilet-") || item.id.startsWith("chapter-battle-") || item.id.startsWith("chapter-exfan-") || item.id === "chapter-giveaway" || item.id === "chapter-dispatch";
                     return !chapterPost || storyFinished || (storyActive && item.id === "chapter-dispatch");
-                  }).sort((a,b) => a.id === "chapter-dispatch" ? -1 : b.id === "chapter-dispatch" ? 1 : 0)}
+                  }).sort((a,b) => {
+                    const priority = (id:string) => id === "chapter-dispatch" ? 0 : app === "weibo" && id === "chapter-giveaway" ? 1 : 2;
+                    return priority(a.id)-priority(b.id);
+                  })}
                   initialThread={app === storyApp ? pendingThread : ""}
                   unreadThread={storyUnreadThread}
                   creator={creator}
