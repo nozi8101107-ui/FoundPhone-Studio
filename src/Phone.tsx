@@ -541,7 +541,7 @@ function PhoneRuntime({
                   unreadThreads={Object.keys(storyUnreadThreads).filter((key) => key.startsWith(app + "::")).map((key) => key.slice(app.length + 2))}
                   storyReply={storyReply}
                   onStorySend={(text, thread) => {
-                    window.dispatchEvent(new CustomEvent("foundphone-story-send", {detail:{app:app.id,thread,text}}));
+                    window.dispatchEvent(new CustomEvent("foundphone-story-send", {detail:{app,thread,text}}));
                     setStoryReply(null);
                   }}
                   creator={creator}
