@@ -613,6 +613,258 @@ user 我刚刚路过一家店 看到这个
   wechatStub("wechat-ticket","票务 🍂打歌🎫代申",{stub:"true",contact:"true"}),
   wechatStub("wechat-buddy","搭子",{stub:"true",contact:"true"})
  ];
+
+ const buildWechatConversation=(id:string,title:string,raw:string)=>{
+  let current="2026-11-04 19:00",minuteOffset=0,index=0;
+  const rows:ReturnType<typeof make>[]=[];
+  const add=(sender:string,body:string,kind:"text"|"image"|"transfer"="text",amount="")=>{
+   const outgoing=sender==="user";
+   const displaySender=outgoing?profile.nickname:sender;
+   const item=make("wechat-"+id+"-"+(++index),title,body,{chat:"true"},outgoing?profile.avatar:"");
+   item.time=current;item.sender=displaySender;item.outgoing=outgoing;item.read=true;item.kind=kind;
+   if(kind==="transfer"){
+    item.body=amount;
+    item.meta={...item.meta,transferStatus:"claimed",transferAmount:amount,transferDirection:outgoing?"sent":"received",transferRecipient:outgoing?sender:"user"};
+   }
+   rows.push(item);
+  };
+  const advance=()=>{const d=new Date(current.replace(" ","T")+":00");d.setMinutes(d.getMinutes()+1);current=d.toISOString().slice(0,16).replace("T"," ");};
+  for(const line of raw.split("\n").map(x=>x.trim()).filter(Boolean)){
+   if(line.startsWith("@")){current=line.slice(1);continue;}
+   const match=line.match(/^([^：:]+)[：:](.*)$/);if(!match)continue;
+   let sender=match[1].trim(),body=match[2].trim();
+   if(sender==="user"||sender==="User"||sender==="USER")sender="user";
+   body=body.replace(/\bxxx\b/g,exNames[profile.ex]||handles[profile.ex]||"前男友").replace(/\bxx\b/g,crushNames[profile.crush]||handles[profile.crush]||"暧昧对象");
+   const transfer=body.match(/^\[转账\]\s*([\d.]+)元?$/);
+   if(transfer){
+    add(sender,title,"transfer",transfer[1]);
+    if(sender==="user")add("闺蜜","已收款");
+    else add("user","已收款");
+   }else if(body==="[图片]"){
+    add(sender,"图片","image");
+   }else{
+    add(sender,body);
+   }
+   advance();
+  }
+  return rows;
+ };
+ const wechatFamily=buildWechatConversation("family","幸福美满一家人",`@2026-11-04 18:02
+妈咪：闺女 今天首尔降温了吧 多穿点
+user：带了带了 今天出门裹得跟粽子似的
+爸爸：[转账] 3000.00元
+user：？
+User：怎么还有意外之财
+爸爸：天冷了 多买几件暖和衣服
+妈咪：你爸昨天还念叨你呢 说孩子一个人在外面别舍不得花钱
+user：嘿嘿
+妈咪：那你自己看着买啊，别老穿那几件。你爸给你转的钱别存着，该花就花
+user：知道啦知道啦
+妈咪：你多跟你爸说说话，他可想你了，天天问我孩子有没有消息
+爸爸：行了行了，孩子忙`);
+ const wechatMom=buildWechatConversation("mom","妈咪",`@2026-11-02 21:16
+妈咪：闺女 在干嘛呢
+user：刚到家
+妈咪：这么晚才到家啊 吃饭了没
+user：吃了 便利店买的饭团
+妈咪：又吃饭团……对了你看这个包好看不
+妈咪：[图片]
+妈咪：妈最近想换个包 你觉得这个怎么样？会不会太年轻了
+user：挺好看的呀 这个颜色很百搭 你背肯定好看
+妈咪：真的啊？那我下单了啊 哎你最近是不是瘦了 上次视频看着脸都小了
+user：没有吧 可能是镜头角度
+妈咪：哦对 你要不要我给你买些衣服
+user：不用 我自己买就行
+妈咪：算了 你把地址发我 我看到合适的直接寄
+妈咪：对了 你爸最近老念叨你 你有空多跟他说说话 他嘴上不说其实可想了
+user：好 我待会儿就给他发消息
+妈咪：嗯 他昨天还跟我说孩子是不是把他忘了
+妈咪：你爸就这样
+user：我真服了他
+妈咪：行了你忙吧 记得穿厚点 别感冒了`);
+ const wechatDad=buildWechatConversation("dad","爸爸",`@2026-10-28 20:08
+user：爸爸
+爸爸：嗯
+user：那个……生活费快用完了 这个月房租交了之后有点紧
+爸爸：要多少
+user：六千就行 下个月我少花点
+爸爸：[转账] 8000.00元
+user：哇塞转了八千
+爸爸：多的买点好吃的 别老吃便利店
+user：谢谢谢谢 不过爱吃便利店是因为方便来着…
+爸爸：嗯
+爸爸：你妈说你最近瘦了 多吃点
+user：哈哈哈哈哈我妈净瞎说 我胖着呢
+爸爸：行 缺钱再跟我说
+user：好
+@2026-11-03 21:32
+user：爸爸 在吗
+爸爸：在
+user：下个月要交保险 可能得多要一点
+爸爸：多少
+user：一万可以吗 交了保险剩下的我留着当生活费
+爸爸：[转账] 12000.00元
+user：爸爸你转了一万二……
+爸爸：多出来的自己留着 别跟你妈说我又多给了 她该说我惯着你了
+user：哈哈哈哈好 保密！`);
+ const wechatBestie=buildWechatConversation("bestie","闺蜜",`@2026-10-01 23:18
+闺蜜：诡秘你睡了吗睡了吗
+user：没呢 刚刷完物料
+闺蜜：我就知道 我不行了
+闺蜜：TWS那个新团综你看了没 我笑死
+user：看了看了
+User：我真服了一群高校男
+user：搞笑男。
+闺蜜：笑死我了
+user：哦对 我昨天做了个梦 梦见在汉南洞偶遇我担了 还跟他说话了
+闺蜜：笑死 你这是日有所思夜有所梦 不过说真的 你住那边说不定真能碰到呢
+user：别说了 我每天出门都精心打扮 就是怕万一😭 结果一次没遇到过
+@2026-10-02 00:02
+User：我跟你说个事闺蜜 你别生气
+闺蜜：？我很害怕
+User：呃 我跟xxx谈了
+闺蜜：你又做梦了 你担不是xx吗
+User：不是 我说真的
+user：[图片]
+User：给你看合照
+闺蜜：？？？现在ai这么真
+User：你仔细看好了啊！
+闺蜜：。。牛坤
+User：好罪恶啊 跟自担队友谈什么的
+闺蜜：那你岂不是可以拿到你担亲签了
+User：你就这点追求
+User：当然是该去要合影啊
+闺蜜：？这追求就很牛坤吗
+user：呃 嗯嗯
+@2026-10-05 22:10
+User：最近和xxx闹矛盾了。怎么办
+闺蜜：。。。
+User：可是我一看他的脸
+User：我就又原谅他了
+闺蜜：牛坤
+User：我对象给了我两张家属席的票 你能来韩国陪我看吗
+闺蜜：啊啊啊啊真的吗
+闺蜜：可是我没空。
+闺蜜：年末很忙的
+user：好吧
+User：那我问问我搭子
+User：[转账] 1000.00元
+闺蜜：？？？？
+User：我对象给我转了52.0w韩元
+User：分你一些
+闺蜜：我去！！！
+闺蜜：我允许你们白头偕老了
+user：法！
+闺蜜：咋了咋
+User：他又让我生气了 我很那个
+闺蜜：别生气别生气气出病来无人替
+User：唉。这次好像真的
+User：应该要分手了
+闺蜜：。。。
+User：我跟他分了
+闺蜜：没事 下一个更乖
+user：诡秘。。。
+@2026-10-12 20:20
+User：闺蜜来不来看tms
+闺蜜：？你看到你前男友尴不尴尬
+User：呃。专注xx
+闺蜜：哦哦。
+闺蜜：但是 你知道的
+闺蜜：我大概还是去不了
+user：哦。。呜呜
+User：那我去问问我搭子
+user：我靠！！
+闺蜜：咋了咋了这么晚
+闺蜜：你不是刚看完tms吗
+User：对啊 你听我说
+User：我刚刚看完tms 我说我去便利店买点吃的
+User：结果遇见xxx了！！
+闺蜜：？？？？？？？？？？？
+user：我去
+闺蜜：不是 偶遇tms这事还能让你碰上两次？？
+user：不止！
+User：他找我要kkt了
+闺蜜：？？？？？？？？？？？？？？？？
+User：他好像不知道我和xxx的事吧
+User：我去 不过我好想知道为什么他们活动完不老老实实回公司或者宿舍啊
+闺蜜：可能就是猪瘾犯了吧。想吃东西了
+User：啊啊啊 好那个
+User：我们正好都活动结束后好久还没离开这里
+User：然后正好都在这个大半夜走进同一家便利店…
+闺蜜：这真的是缘分吧
+user：请相信
+@2026-10-14 22:16
+闺蜜：诡秘诡秘
+User：怎
+闺蜜：你有进展没 快说快说
+user：就
+User：最近聊得挺多的 他昨天还问我周末有没有空
+闺蜜：！！！要约你
+user：不知道算不算 他说有个展想去看 问我要不要一起
+闺蜜：这还不算约
+user：我也拿不准 他平时对我挺照顾的 但我怕自己想多了
+闺蜜：大姐 您貌似是已经谈过一次恋爱的人了
+闺蜜：还不懂他什么心思吗
+user：…
+user：哎呀
+闺蜜：诡秘你真的是我的人脉了
+闺蜜：我支持你们在一起
+User：现在说这些还早。。。
+@2026-10-18 09:12
+闺蜜：诡秘 你快去看D社今天发的那条
+user：看了看了
+User：我刷到的时候手都在抖
+User：为什么我会这么紧张。。。
+闺蜜：我也是！！点进去之前心脏都停了
+闺蜜：不过说实话 要是哪天真是你和xx 你怎么办
+user：……别问
+User：大头照生成中
+闺蜜：你大头照拍得咋样
+user：别提了
+闺蜜：哈哈哈哈哈哈哈哈`);
+ const wechatBuddy=buildWechatConversation("buddy","搭子",`@2026-10-03 18:20
+搭子：宝 SBS那个预录你去不去
+user：去去去！什么时候
+搭子：下周六凌晨
+user：行。。不过 又凌晨。。。
+搭子：哈哈哈哈哈 到时候见吧
+@2026-10-08 19:02
+搭子：宝宝KBS那个预录你去吗 周五早上那场
+user：周五早上？！几点集合啊
+搭子：说是七点半check
+user：六点多……我得四点半起床😇
+搭子：哈哈哈哈你去不去嘛
+user：去！我定五个闹钟
+搭子：好 到时候kbs本馆碰头
+user：行 你别又睡过头啊
+搭子：放心 这次我定十个闹钟
+搭子：宝宝你到哪了
+user：刚出地铁 还有五分钟
+搭子：快点快点 要开始check了 队伍已经排起来了
+user：来了来了 我在跑
+搭子：我看到你了
+user：赶上了 差点没命
+搭子：让你早点出门哈哈哈 快把证件拿出来 马上查到你那里了
+user：好好好
+@2026-10-16 21:20
+user：宝！我手里有两张TWS的票 你想不想跟我一起去
+搭子：？？？什么票
+user：就那个拼盘演唱会 TWS也去
+搭子：啊啊啊啊啊真的假的 我最近还在可惜没抢到呢
+user：真的 所以第一个就想到你了 去不去
+搭子：去啊！！必须去！！这种好事你还想着我😭
+user：那当然
+搭子：嘿嘿
+@2026-10-22 13:30
+user：宝 刚宣的 去看吗
+搭子：何时呀 我还没看案内
+user：下下个月8号
+搭子：啊……我不行 那天有考试
+user：啊啊啊啊啊那太可惜了
+user：没事没事 那我再问问别人
+搭子：嗯嗯好`);
+ const wechatChatItems=[...wechatFamily,...wechatMom,...wechatDad,...wechatBestie,...wechatBuddy];
+
  const isPlaceholder=(item:Work["data"][string][number])=>/测试(用户|联系人|会话|消息|内容|回复|动态)/.test([item.title,item.body,item.sender].join(" "))||item.body==="这是一条测试内容。"||item.body==="这是一条测试消息。";
  const cleanedData=Object.fromEntries(Object.entries(work.data).map(([app,items])=>[app,items.filter(item=>!isPlaceholder(item))])) as Work["data"];
  cleanedData.instagram=(cleanedData.instagram||[]).filter(item=>item.meta.account==="official" && item.kind!=="post");
@@ -801,7 +1053,7 @@ const extraThreads=extraThreadTexts.map((body,index)=>{const author=randId();con
  const hiddenAppIds=new Set(["appstore","contacts","reminders","spotify","find"]);
  const cleanedApps=work.apps.map(app=>hiddenAppIds.has(app.id)?{...app,installed:false,visible:false,dock:false,folder:""}:app.id==="taobao"?{...app,installed:true,visible:true}:app);
  if(!cleanedApps.some(app=>app.id==="taobao"))cleanedApps.push({id:"taobao",name:"淘宝",installed:true,visible:true,dock:false,folder:"",icon:""});
- const personalized:Work={...work,apps:cleanedApps,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...cleanedData,youtube:[...(cleanedData.youtube||[]),...youtubeVideos],kakao:[...(cleanedData.kakao||[]),...kakaoMessages],wechat:[...(cleanedData.wechat||[]),...hanjinWechatMessages,...wechatGroups,...wechatContacts],instagram:[...(cleanedData.instagram||[]).filter(item=>item.meta.account==="official"),...insta],threads:[...(cleanedData.threads||[]),...threadItems,...extraThreads],twitter:[...(cleanedData.twitter||[]).filter(item=>item.id!=="test-item-twitter"),...xPosts],weibo:[...(cleanedData.weibo||[]).filter(item=>item.id!=="test-item-weibo"),...weiboPosts],taobao:[...(cleanedData.taobao||[]),...taobaoItems,...historicalOrders],alipay:[...(cleanedData.alipay||[]),...historicalBills]}};
+ const personalized:Work={...work,apps:cleanedApps,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...cleanedData,wechat:[...(cleanedData.wechat||[]),...hanjinWechatMessages,...wechatGroups,...wechatContacts,...wechatChatItems],youtube:[...(cleanedData.youtube||[]),...youtubeVideos],kakao:[...(cleanedData.kakao||[]),...kakaoMessages],instagram:[...(cleanedData.instagram||[]).filter(item=>item.meta.account==="official"),...insta],threads:[...(cleanedData.threads||[]),...threadItems,...extraThreads],twitter:[...(cleanedData.twitter||[]).filter(item=>item.id!=="test-item-twitter"),...xPosts],weibo:[...(cleanedData.weibo||[]).filter(item=>item.id!=="test-item-weibo"),...weiboPosts],taobao:[...(cleanedData.taobao||[]),...taobaoItems,...historicalOrders],alipay:[...(cleanedData.alipay||[]),...historicalBills]}};
  return <main className="story-runtime"><Phone key={session} work={personalized}/></main>;
 }
 createRoot(document.getElementById("root")!).render(<StoryPlayer/>);
