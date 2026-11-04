@@ -151,6 +151,12 @@ function PhoneRuntime({
   const [storyUnreadThreads, setStoryUnreadThreads] = useState<Record<string, boolean>>({});
   const [deliveredStoryIds, setDeliveredStoryIds] = useState<string[]>([]);
   const [storyNotification, setStoryNotification] = useState<{app:string;thread:string;item:Item}|null>(null);
+  // Auto-dismiss the incoming-message banner after 2 seconds unless tapped.
+  useEffect(() => {
+    if (!storyNotification) return;
+    const timer = window.setTimeout(() => setStoryNotification(null), 2000);
+    return () => window.clearTimeout(timer);
+  }, [storyNotification]);
   const [chapterItems, setChapterItems] = useState<Record<string,Item[]>>(() => { try { return JSON.parse(localStorage.getItem(chapterItemsKey) || "{}"); } catch { return {}; } });
   const [storyReply, setStoryReply] = useState<{app:string;thread:string;text:string;token:number}|null>(null);
   const [pendingThread, setPendingThread] = useState("");
