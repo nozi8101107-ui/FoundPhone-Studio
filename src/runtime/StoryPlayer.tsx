@@ -7,6 +7,7 @@ import { UserOnboarding, type UserProfile } from "./UserOnboarding";
 import "../styles.css";
 import "./player.css";
 const KEY="foundphone.user-profile.v1";
+const friendNames=["민서","서연","지우","유진","수빈","예린","채원","하린","도연","나연","소희","은서","지민","다은","현아","예지","승아","가은","혜원","시은"];
 const randId=()=>Array.from({length:9},()=>{const chars="abcdefghijklmnopqrstuvwxyz0123456789";return chars[Math.floor(Math.random()*chars.length)];}).join("");
 function readProfile():UserProfile|null{try{const x=JSON.parse(localStorage.getItem(KEY)||"null") as UserProfile|null;return x&&x.nickname&&/^\d{8}$/.test(x.birthday)&&x.avatar&&x.crush&&x.ex&&["BG","GB"].includes(x.xp)?x:null}catch{return null}}
 function StartChoice({onContinue,onRestart}:{onContinue:()=>void;onRestart:()=>void}){
@@ -16,6 +17,21 @@ function StoryPlayer(){
  const [work,setWork]=useState<Work|null>(null),[error,setError]=useState(""),[profile,setProfile]=useState<UserProfile|null>(()=>readProfile());
  const [choice,setChoice]=useState<"setup"|"choose"|"play">(()=>readProfile()?"choose":"setup");
  const [session,setSession]=useState(0);
+ const friends=useMemo(()=>{
+  if(!profile)return [];
+  const storageKey="foundphone.instagram-friends.v1:"+profile.nickname;
+  let handlesForFriends:string[]=[];
+  try{
+   const saved=JSON.parse(localStorage.getItem(storageKey)||"null");
+   if(Array.isArray(saved)&&saved.length===friendNames.length&&saved.every((value)=>typeof value==="string"&&/^[a-z0-9]{9}$/.test(value))&&new Set(saved).size===friendNames.length) handlesForFriends=saved;
+  }catch{}
+  if(!handlesForFriends.length){
+   const used=new Set<string>();
+   handlesForFriends=friendNames.map(()=>{let handle=randId();while(used.has(handle))handle=randId();used.add(handle);return handle;});
+   try{localStorage.setItem(storageKey,JSON.stringify(handlesForFriends));}catch{}
+  }
+  return friendNames.map((name,index)=>{const handle=handlesForFriends[index];return make("ig-friend-"+index,handle,"",{handle,username:name,account:"friend",relationship:"互相关注",mutual:"true"});});
+ },[profile?.nickname]);
  useEffect(()=>{const abort=new AbortController();fetch(new URLSearchParams(location.search).get("preview")==="test"?"./test-work.json":new URLSearchParams(location.search).get("template")==="blank"?"./blank-work.json":"./work.json",{signal:abort.signal}).then(r=>{if(!r.ok)throw Error("缺少作品文件，请运行 npm run story:build");return r.json()}).then(x=>{const w=validateWork(x);document.title=w.title==="捡手机"?"捡手机":w.title+" · 捡手机";setWork(w)}).catch(e=>{if(e.name!=="AbortError")setError(String(e))});return()=>abort.abort()},[]);
  const complete=(p:UserProfile)=>{try{localStorage.setItem(KEY,JSON.stringify(p));setProfile(p);setChoice("play");setSession(v=>v+1)}catch{setError("头像保存失败，请换一张较小的图片后重试。")}};
  const restart=async()=>{if(!work)return;try{await db.saves.delete(work.id);localStorage.removeItem(KEY);setProfile(null);setChoice("setup");setSession(v=>v+1)}catch{setError("无法清除旧进度，请检查浏览器存储权限。")}};
@@ -544,21 +560,7 @@ user 我刚刚路过一家店 看到这个
  const hanjinKakao=exIsHanjin&&!crushIsHanjin?exMessages:crushIsHanjin?crushMessages:[];
  
  const selectedMembers=[...new Set([profile.crush,profile.ex])];
- const friendNames=["민서","서연","지우","유진","수빈","예린","채원","하린","도연","나연","소희","은서","지민","다은","현아","예지","승아","가은","혜원","시은"];
- const friends=useMemo(()=>{
-  const storageKey="foundphone.instagram-friends.v1:"+profile.nickname;
-  let handlesForFriends:string[]=[];
-  try{
-   const saved=JSON.parse(localStorage.getItem(storageKey)||"null");
-   if(Array.isArray(saved)&&saved.length===friendNames.length&&saved.every((value)=>typeof value==="string"&&/^[a-z0-9]{9}$/.test(value))&&new Set(saved).size===friendNames.length) handlesForFriends=saved;
-  }catch{}
-  if(!handlesForFriends.length){
-   const used=new Set<string>();
-   handlesForFriends=friendNames.map(()=>{let handle=randId();while(used.has(handle))handle=randId();used.add(handle);return handle;});
-   try{localStorage.setItem(storageKey,JSON.stringify(handlesForFriends));}catch{}
-  }
-  return friendNames.map((name,index)=>{const handle=handlesForFriends[index];return make("ig-friend-"+index,handle,"",{handle,username:name,account:"friend",relationship:"互相关注",mutual:"true"});});
- },[profile.nickname]);
+
  const selectedAccounts=selectedMembers.map(id=>make("ig-member-"+id,handles[id],"",{handle:handles[id],username:handles[id],account:id===profile.crush?"crush":"ex",member:id,relationship:"互相关注",remark:id===profile.crush?crushNames[id]:exNames[id]},avatarFor(id)));
  const mutualCount=friends.length+selectedAccounts.length;
  const officialIgPostData=[
