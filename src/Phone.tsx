@@ -248,7 +248,7 @@ function PhoneRuntime({
     const bill:Item={id:"alipay-"+(globalThis.crypto?.randomUUID?.()||Date.now()),title:item.title,body:"淘宝订单付款",richText:"",meta:{merchant:"淘宝 · "+item.sender,amount:"-¥"+total.toFixed(2),status:"支付成功",orderNumber:number,quantity:String(quantity)},time,sender:"淘宝",avatar:"",kind:"order",media:"",hidden:false,unlock:"",password:"",folder:"交易",favorite:false,outgoing:false,read:false,likes:0,comments:[]};
     const current=runtimeRef.current;
     update({...current,messages:{...current.messages,taobao:[...(current.messages.taobao||[]),order],alipay:[...(current.messages.alipay||[]),bill]}});
-    setCheckout({...checkout,success:true});
+    setCheckout({...checkout,quantity,success:true});
   };
   useEffect(() => {
     let active = true;
