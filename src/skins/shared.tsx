@@ -132,7 +132,7 @@ export function Avatar({
     : "");
   const imageSrc = resolvedSrc.startsWith("data:image/")
     ? safeMedia(resolvedSrc)
-    : /^(\\/|\\.\\/|people\\/)/.test(resolvedSrc)
+    : /^(\/|\.\/|people\/)/.test(resolvedSrc)
       ? resolvedSrc
       : "";
 
