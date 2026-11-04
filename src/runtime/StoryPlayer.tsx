@@ -561,6 +561,9 @@ user 我刚刚路过一家店 看到这个
  const hanjinKakao=exIsHanjin&&!crushIsHanjin?exMessages:crushIsHanjin?crushMessages:[];
  // 韩振在微信与 KKT 使用同一份备注，避免两个 App 显示不一致。
  const hanjinRemark = profile.crush === "hanjin" ? crushNames.hanjin : exNames.hanjin;
+ const exContact=profile.ex!==profile.crush?(profile.ex==="hanjin"?buildMessages("hanjin","韩振",`@2026-11-04 19:08
+哈咯 user 备注韩振
+你：好的好的`,avatarFor("hanjin")):exMessages):[];
  const kakaoMessages = [...crushMessages, ...exContact].map(item =>
   item.meta.handle === handles.hanjin ? {...item, meta:{...item.meta, remark:hanjinRemark}} : item
  );
@@ -593,9 +596,7 @@ user 我刚刚路过一家店 看到这个
   ...friends,
   make("ig-user-profile",profile.nickname,"",{handle:profile.nickname,username:profile.nickname,account:"user",followers:String(mutualCount),following:String(mutualCount+1),mutuals:String(mutualCount),followingOnly:"tws_pledis"})
  ];
- const exContact=profile.ex!==profile.crush?(profile.ex==="hanjin"?buildMessages("hanjin","韩振",`@2026-11-04 19:08
-哈咯 user 备注韩振
-你：好的好的`,avatarFor("hanjin")):exMessages):[];
+
  const hanjinSelected=profile.crush==="hanjin"||profile.ex==="hanjin";
  const hanjinWechatMessages=hanjinSelected?(profile.crush==="hanjin"?hanjinWechat:buildMessages("hanjin","韩振",breakupText.hanjin,avatarFor("hanjin"))).map(item=>({...item,meta:{...item.meta,remark:hanjinRemark},avatar:item.outgoing?profile.avatar:item.avatar})):[];
  const wechatStub=(id:string,title:string,meta:Record<string,string>={})=>({...make(id,title,"",meta),sender:title,avatar:"",read:true});
@@ -772,11 +773,35 @@ const extraThreads=extraThreadTexts.map((body,index)=>{const author=randId();con
  const xPosts=[...xOfficialPosts,...xRandomPosts].sort(()=>Math.random()-.5);
 
 
+
+ const youtubeVideos=[
+  ["youtube-01","TWS (투어스) '내 이름을 불러줘' Official MV","maxresdefault.jpeg","TWS (투어스) '내 이름을 불러줘' Official MV.mp4","583.7万次观看","57k"],
+  ["youtube-02","TWS (투어스) 'SODA SODA' Official MV","maxresdefault (1).jpeg","TWS (투어스) 'SODA SODA' Official MV (1).mp4","1103.4万次观看","92k"],
+  ["youtube-03","TWS (투어스) '널 따라가 (You, You)' Official MV","maxresdefault (2).jpeg","TWS (투어스) '널 따라가 (You, You)' Official MV.mp4","2297.5万次观看","129k"],
+  ["youtube-04","TWS (투어스) '너의 모든 가능성이 되어 줄게' Official MV","maxresdefault (3).jpeg","TWS (투어스) '너의 모든 가능성이 되어 줄게' Official MV.mp4","688.5万次观看","67k"]
+ ].map(([id,title,thumbnail,video,views,likes])=>({
+  ...make(id,title,"TWS",{
+   channel:"TWS",
+   channelHandle:"TWS_PLEDIS",
+   thumbnail,
+   views,
+   likes,
+   likesCount:likes
+  }),
+  sender:"TWS",
+  avatar:"/youtube/channels4_profile.jpeg",
+  kind:"video" as const,
+  media:"/youtube/"+video,
+  folder:"首页",
+  likes:Number(likes.replace("k",""))*1000,
+  comments:[]
+ }));
+
  const historicalBills=historicalOrders.map(order=>{const bill=make("bill-"+order.id,order.title,"淘宝订单付款",{merchant:"淘宝 · "+order.sender,amount:"-¥"+order.meta.price,status:"支付成功",orderNumber:order.meta.number});bill.sender="淘宝";bill.folder="交易";bill.time=order.time;return bill;});
  const hiddenAppIds=new Set(["appstore","contacts","reminders","spotify","find"]);
  const cleanedApps=work.apps.map(app=>hiddenAppIds.has(app.id)?{...app,installed:false,visible:false,dock:false,folder:""}:app.id==="taobao"?{...app,installed:true,visible:true}:app);
  if(!cleanedApps.some(app=>app.id==="taobao"))cleanedApps.push({id:"taobao",name:"淘宝",installed:true,visible:true,dock:false,folder:"",icon:""});
- const personalized:Work={...work,apps:cleanedApps,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...cleanedData,kakao:[...(cleanedData.kakao||[]),...kakaoMessages],wechat:[...(cleanedData.wechat||[]),...hanjinWechatMessages,...wechatGroups,...wechatContacts],instagram:[...(cleanedData.instagram||[]).filter(item=>item.meta.account==="official"),...insta],threads:[...(cleanedData.threads||[]),...threadItems,...extraThreads],twitter:[...(cleanedData.twitter||[]).filter(item=>item.id!=="test-item-twitter"),...xPosts],weibo:[...(cleanedData.weibo||[]).filter(item=>item.id!=="test-item-weibo"),...weiboPosts],taobao:[...(cleanedData.taobao||[]),...taobaoItems,...historicalOrders],alipay:[...(cleanedData.alipay||[]),...historicalBills]}};
+ const personalized:Work={...work,apps:cleanedApps,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...cleanedData,youtube:[...(cleanedData.youtube||[]),...youtubeVideos],kakao:[...(cleanedData.kakao||[]),...kakaoMessages],wechat:[...(cleanedData.wechat||[]),...hanjinWechatMessages,...wechatGroups,...wechatContacts],instagram:[...(cleanedData.instagram||[]).filter(item=>item.meta.account==="official"),...insta],threads:[...(cleanedData.threads||[]),...threadItems,...extraThreads],twitter:[...(cleanedData.twitter||[]).filter(item=>item.id!=="test-item-twitter"),...xPosts],weibo:[...(cleanedData.weibo||[]).filter(item=>item.id!=="test-item-weibo"),...weiboPosts],taobao:[...(cleanedData.taobao||[]),...taobaoItems,...historicalOrders],alipay:[...(cleanedData.alipay||[]),...historicalBills]}};
  return <main className="story-runtime"><Phone key={session} work={personalized}/></main>;
 }
 createRoot(document.getElementById("root")!).render(<StoryPlayer/>);
