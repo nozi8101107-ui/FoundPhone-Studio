@@ -76,12 +76,21 @@ export function ChapterOne({work,onFinish,onDispatchOpen,onNativeOpen,onNativeIt
    : storyDate+" 23:07";
  const targetId=stage==="ex"?ex:crush;
  const nativeApp=stage==="friend"?"wechat":targetId==="hanjin"?"wechat":"kakao";
- const nativeContact=(work.data[nativeApp]||[]).find(item=>item.meta.handle===handles[targetId]);
+ // Resolve a contact from an incoming message, never from an outgoing
+ // message whose avatar belongs to the phone owner.
+ const findContactProfile=(app:string,id:string)=>{
+   const matches=(work.data[app]||[]).filter(item=>item.meta.handle===handles[id]);
+   return matches.find(item=>!item.outgoing&&!!item.avatar)
+     || matches.find(item=>!item.outgoing)
+     || matches.find(item=>!!item.avatar)
+     || matches[0];
+ };
+ const nativeContact=findContactProfile(nativeApp,targetId);
  const nativeThread=stage==="friend"?"闺蜜":nativeContact?.title||names[targetId];
  const nativeRemark=stage==="friend"?"闺蜜":String(nativeContact?.meta.remark||nativeContact?.title||names[targetId]);
  const nativeAvatar=targetId==="hanjin"?import.meta.env.BASE_URL+"people/IMG_9702.jpeg":nativeContact?.avatar||"";
  const exApp=ex==="hanjin"?"wechat":"kakao";
- const exContact=(work.data[exApp]||[]).find(item=>item.meta.handle===handles[ex]);
+ const exContact=findContactProfile(exApp,ex);
  const exThread=exContact?.title||names[ex];
  const exRemark=String(exContact?.meta.remark||exContact?.title||names[ex]);
  const exAvatar=ex==="hanjin"?import.meta.env.BASE_URL+"people/IMG_9702.jpeg":exContact?.avatar||"";
