@@ -71,9 +71,15 @@ export function ChapterOne({work,onFinish,onDispatchOpen,onNativeOpen,onNativeIt
  const stamp=crush==="dohoon"?"15:30":crush==="hanjin"?"15:25":crush==="youngjae"?"20:30":crush==="jihoon"?"18:50":crush==="kyungmin"?"19:49":"20:03";
  const targetId=stage==="ex"?ex:crush;
  const nativeApp=stage==="friend"?"wechat":targetId==="hanjin"?"wechat":"kakao";
- const nativeThread=stage==="friend"?"闺蜜":(work.data[nativeApp]||[]).find(item=>item.meta.handle===handles[targetId])?.title||names[targetId];
+ const nativeContact=(work.data[nativeApp]||[]).find(item=>item.meta.handle===handles[targetId]);
+ const nativeThread=stage==="friend"?"闺蜜":nativeContact?.title||names[targetId];
+ const nativeRemark=stage==="friend"?"闺蜜":String(nativeContact?.meta.remark||nativeContact?.title||names[targetId]);
+ const nativeAvatar=targetId==="hanjin"?import.meta.env.BASE_URL+"people/IMG_9702.jpeg":nativeContact?.avatar||"";
  const exApp=ex==="hanjin"?"wechat":"kakao";
- const exThread=(work.data[exApp]||[]).find(item=>item.meta.handle===handles[ex])?.title||names[ex];
+ const exContact=(work.data[exApp]||[]).find(item=>item.meta.handle===handles[ex]);
+ const exThread=exContact?.title||names[ex];
+ const exRemark=String(exContact?.meta.remark||exContact?.title||names[ex]);
+ const exAvatar=ex==="hanjin"?import.meta.env.BASE_URL+"people/IMG_9702.jpeg":exContact?.avatar||"";
  const callbacks=useRef({onNativeOpen,onNativeItem,onNativePrompt,onNativeNotification});
  callbacks.current={onNativeOpen,onNativeItem,onNativePrompt,onNativeNotification};
  useEffect(()=>{if(stage!=="done"&&stage!=="dispatch")callbacks.current.onNativeOpen(nativeApp,nativeThread)},[stage,nativeApp,nativeThread]);
@@ -86,7 +92,7 @@ export function ChapterOne({work,onFinish,onDispatchOpen,onNativeOpen,onNativeIt
    const first=exChat(ex,crush,xp)[0];
    if(!first)return;
    const t=window.setTimeout(()=>{
-     const item:Item={id:"chapter1-ex-0",title:exThread,body:first.text,richText:"",meta:{story:"chapter1"},time:stamp,sender:names[ex],avatar:(work.data[exApp]||[]).find(v=>v.meta.handle===handles[ex])?.avatar||"",kind:"text",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:false,read:false,likes:0,comments:[]};
+     const item:Item={id:"chapter1-ex-0",title:exThread,body:first.text,richText:"",meta:{story:"chapter1",handle:handles[ex],remark:exRemark},time:stamp,sender:exRemark,avatar:exAvatar,kind:"text",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:false,read:false,likes:0,comments:[]};
      callbacks.current.onNativeItem(exApp,item);
      callbacks.current.onNativeNotification(exApp,exThread,item);
      setExFirstDelivered(true);
@@ -122,7 +128,7 @@ export function ChapterOne({work,onFinish,onDispatchOpen,onNativeOpen,onNativeIt
      setBusy(true);
      const t=window.setTimeout(()=>{
        setBusy(false);
-       const item:Item={id:"chapter1-"+stage+"-"+cursor,title:nativeThread,body:e.text,richText:"",meta:{story:"chapter1"},time:stamp,sender:stage==="friend"?"闺蜜":names[targetId],avatar:(work.data[nativeApp]||[]).find(v=>v.meta.handle===handles[targetId])?.avatar||"",kind:"text",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:false,read:false,likes:0,comments:[]};
+       const item:Item={id:"chapter1-"+stage+"-"+cursor,title:nativeThread,body:e.text,richText:"",meta:{story:"chapter1",...(stage!=="friend"?{handle:handles[targetId]}:{}),remark:nativeRemark},time:stamp,sender:nativeRemark,avatar:nativeAvatar,kind:"text",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:false,read:false,likes:0,comments:[]};
        callbacks.current.onNativeItem(nativeApp,item);
        callbacks.current.onNativeNotification(nativeApp,nativeThread,item);
        setCursor(v=>v+1);
@@ -135,7 +141,7 @@ export function ChapterOne({work,onFinish,onDispatchOpen,onNativeOpen,onNativeIt
      if(!detail||detail.app!==nativeApp||detail.thread!==nativeThread||!detail.text?.trim())return;
      window.removeEventListener("foundphone-story-send",receive);
      const blockedMessage=stage==="ex"&&xp==="BG"&&ex==="youngjae"&&cursor===events.length-1;
-     const item:Item={id:"chapter1-"+stage+"-"+cursor,title:nativeThread,body:detail.text.trim(),richText:"",meta:{story:"chapter1",...(blockedMessage?{blocked:"true"}:{})},time:stamp,sender:nick||"我",avatar:String(work.variables.storyUserAvatar||""),kind:"text",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:true,read:true,likes:0,comments:[]};
+     const item:Item={id:"chapter1-"+stage+"-"+cursor,title:nativeThread,body:detail.text.trim(),richText:"",meta:{story:"chapter1",...(stage!=="friend"?{handle:handles[targetId]}:{}),remark:nativeRemark,...(blockedMessage?{blocked:"true"}:{})},time:stamp,sender:nick||"我",avatar:String(work.variables.storyUserAvatar||""),kind:"text",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:true,read:true,likes:0,comments:[]};
      callbacks.current.onNativeItem(nativeApp,item);
      setCursor(v=>v+1);
    };
