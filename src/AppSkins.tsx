@@ -97,12 +97,14 @@ function MessageList({
   creator,
   onItem,
   onRead,
+  onTransfer,
   whatsapp = false,
 }: {
   items: Item[];
   creator: boolean;
   onItem: (i: Item) => void;
   onRead: (id: string) => void;
+  onTransfer?: (item: Item) => void;
   whatsapp?: boolean;
 }) {
   return (
@@ -118,14 +120,15 @@ function MessageList({
           )}
           <button
             className="skin-bubble"
-            onClick={() => (creator ? onItem(i) : onRead(i.id))}
+            onClick={() => (creator ? onItem(i) : i.kind === "transfer" ? onTransfer?.(i) : onRead(i.id))}
           >
             {["image", "audio", "video"].includes(i.kind) ? (
               <ItemMedia item={i} />
             ) : i.kind === "transfer" ? (
               <div className="skin-transfer">
-                ¥ {i.body}
-                <small>转账记录 · 虚构</small>
+                <span className="skin-transfer-icon">¥</span>
+                <span className="skin-transfer-main"><b>¥{i.body}</b><small>{i.meta.transferStatus === "claimed" ? "已收款" : "待领取"}</small></span>
+                <small className="skin-transfer-caption">微信转账</small>
               </div>
             ) : (
               i.body
@@ -167,6 +170,7 @@ export function WeChatSkin(p: SkinProps) {
     [menu, setMenu] = useState(false),
     [searchOpen, setSearchOpen] = useState(false),
     [utility, setUtility] = useState("");
+  const [selectedTransfer, setSelectedTransfer] = useState<Item | null>(null);
   const [readThreads, setReadThreads] = useSkinState<string[]>(
     p,
     "readThreads",
@@ -304,6 +308,7 @@ export function WeChatSkin(p: SkinProps) {
             creator={p.creator}
             onItem={p.onItem}
             onRead={p.onRead}
+            onTransfer={setSelectedTransfer}
           />
           {!p.items.some((i) => i.title === p.thread && i.meta.stub !== "true") && (
             <p className="skin-empty">暂无聊天记录</p>
@@ -504,6 +509,18 @@ export function WeChatSkin(p: SkinProps) {
               )}
             </>
           )}
+        </div>
+      )}
+      {selectedTransfer && (
+        <div className="wx-transfer-overlay" role="presentation" onClick={() => setSelectedTransfer(null)}>
+          <section className="wx-transfer-detail" role="dialog" aria-modal="true" aria-label="转账详情" onClick={(e) => e.stopPropagation()}>
+            <button className="wx-transfer-close" aria-label="关闭转账详情" onClick={() => setSelectedTransfer(null)}>×</button>
+            <div className="wx-transfer-detail-icon">¥</div>
+            <strong>¥{selectedTransfer.meta.transferAmount || selectedTransfer.body}</strong>
+            <p>{selectedTransfer.meta.transferStatus === "claimed" ? "已领取" : "待领取"}</p>
+            <div className="wx-transfer-detail-status">{selectedTransfer.meta.transferStatus === "claimed" ? "已收款" : "等待对方领取"}</div>
+            <small>{selectedTransfer.outgoing ? "你发出的转账" : `${selectedTransfer.sender} 转账给你`}</small>
+          </section>
         </div>
       )}
       {!p.thread && !moments && !utility && (
