@@ -619,7 +619,7 @@ function PhoneRuntime({
                 setStoryApp(nativeApp);
                 setPendingThread(thread);
                 setStoryThread(thread);
-                setStoryUnreadThreads({});
+                setStoryUnreadThreads((v) => { const next={...v}; delete next[storyUnreadKey(nativeApp,thread)]; return next; });
                 setStoryNotification(null);
                 setApp(nativeApp);
                 setRecent((v) => [nativeApp, ...v.filter((a) => a !== nativeApp)].slice(0, 8));
@@ -644,7 +644,7 @@ function PhoneRuntime({
               onFinish={() => {
                 setStoryActive(false);
                 setStoryFinished(true);
-                setStoryUnreadThread("");
+                setStoryUnreadThreads({});
                 setStoryNotification(null);
                 setApp("");
               }}
@@ -657,7 +657,7 @@ function PhoneRuntime({
               onClick={() => {
                 const notice = storyNotification;
                 setPendingThread(notice.thread);
-                setStoryUnreadThread("");
+                setStoryUnreadThreads((v) => { const next={...v}; delete next[storyUnreadKey(notice.app,notice.thread)]; return next; });
                 setStoryNotification(null);
                 open(notice.app);
               }}
@@ -681,7 +681,7 @@ function PhoneRuntime({
                   .filter((a) => a.folder === folder)
                   .map((a) => (
                     <button key={a.id} onClick={() => open(a.id)}>
-                      <AppIcon id={a.id} name={a.name} custom={a.icon} unread={a.id === storyApp && !!storyUnreadThread} />
+                      <AppIcon id={a.id} name={a.name} custom={a.icon} unread={appHasStoryUnread(a.id)} />
                     </button>
                   ))}
               </div>
