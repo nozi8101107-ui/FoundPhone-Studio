@@ -114,7 +114,7 @@ export function TaobaoSkin(p: Props) {
         {tab === "商品" ? (
           <div className="taobao-products">
             {list.map((i) => (
-              <button key={i.id} onClick={() => {setSelected(i);setQuantity(/避孕套|安全套|condom/i.test(i.title+" "+i.body)?1:1);setPaymentStep(false);}}>
+              <button key={i.id} onClick={() => {setSelected(i);setQuantity(1);setPaymentStep(false);}}>
                 <Media item={i} />
                 <strong>{i.title}</strong>
                 <p>
