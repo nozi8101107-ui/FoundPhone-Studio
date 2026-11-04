@@ -39,14 +39,14 @@ function exChat(ex:string, crush:string, xp:string):StoryEvent[] {
  return (xp==="GB"?gb:bg)[ex] || (xp==="GB"?gb.shinyu:bg.shinyu);
 }
 function friendChat():StoryEvent[]{return ev(["them","？？？？"],["them","啊啊啊啊你怎么被拍了"],["you","我好心累"],["them","啊啊啊怎么昨天刚说完你就被d社发了"],["them","大头照保卫战…"]);}
-function closeChat(id:string):StoryEvent[]{
+function closeChat(id:string,nick:string):StoryEvent[]{
  const rows:Record<string,StoryEvent[]> = {
  shinyu:ev(["them","没事 别怕"],["them","你到家了就好好休息"],["them","我先去公司开会"],["them","晚安"]),
  dohoon:ev(["them","你别看"],["them","你别看手机了"],["them","到家就赶紧休息吧"],["them","今天还叫你出来…"],["them","很累了吧"],["them","晚安"]),
  youngjae:ev(["them","对不起"],["them","是我疏忽"],["them","我应该短时间没法去找你了"],["them","我先去公司了 你早点休息"],["them","今天很高兴"]),
  hanjin:ev(["them","啊啊啊你先别看手机了"],["them","对不起"],["them","微博、x什么的 都先别看了"],["them","到家了先好好休息吧"],["them","唉 我先去公司啦"],["them","早睡噢 有进展我再跟你说"]),
  jihoon:ev(["them","你先"],["them","你先别看手机了"],["them","好好休息..."],["them","也真是的 我们又不是情侣 它瞎爆料什么"],["them","…"],["them","对吧？"],["them","…算了 你先休息 晚安"]),
- kyungmin:ev(["them","user"],["them","我先去公司了"],["them","你到家之后好好休息"],["them","明早再联系"],["them","晚安"])
+ kyungmin:ev(["them",nick],["them","我先去公司了"],["them","你到家之后好好休息"],["them","明早再联系"],["them","晚安"])
  };
  return rows[id]||rows.shinyu;
 }
@@ -66,7 +66,7 @@ export function ChapterOne({work,onFinish,onDispatchOpen,onNativeOpen,onNativeIt
  const [comments,setComments]=useState(()=>{try{return !!JSON.parse(localStorage.getItem(key)||"null")?.comments}catch{return false}});
  const [xOpened,setXOpened]=useState(()=>{try{return !!JSON.parse(localStorage.getItem(key)||"null")?.xOpened}catch{return false}});
  const [blocked,setBlocked]=useState(()=>{try{return !!JSON.parse(localStorage.getItem(key)||"null")?.blocked}catch{return false}});
- const current=stage==="crush"?crushChat(crush):stage==="friend"?friendChat():stage==="ex"?exChat(ex,crush,xp):stage==="closing"?closeChat(crush):[];
+ const current=stage==="crush"?crushChat(crush):stage==="friend"?friendChat():stage==="ex"?exChat(ex,crush,xp):stage==="closing"?closeChat(crush,nick):[];
  const stamp=crush==="dohoon"?"15:30":crush==="hanjin"?"15:25":crush==="youngjae"?"20:30":crush==="jihoon"?"18:50":crush==="kyungmin"?"19:49":"20:03";
  const targetId=stage==="ex"?ex:crush;
  const nativeApp=stage==="friend"?"wechat":targetId==="hanjin"?"wechat":"kakao";
@@ -119,7 +119,7 @@ export function ChapterOne({work,onFinish,onDispatchOpen,onNativeOpen,onNativeIt
      if(!detail||detail.app!==nativeApp||detail.thread!==nativeThread||!detail.text?.trim())return;
      window.removeEventListener("foundphone-story-send",receive);
      const blockedMessage=stage==="ex"&&xp==="BG"&&ex==="youngjae"&&cursor===events.length-1;
-     const item:Item={id:"chapter1-"+stage+"-"+cursor,title:nativeThread,body:detail.text.trim(),richText:"",meta:{story:"chapter1",...(blockedMessage?{blocked:"true"}:{})},time:stamp,sender:work.phone.owner||"我",avatar:"",kind:"text",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:true,read:true,likes:0,comments:[]};
+     const item:Item={id:"chapter1-"+stage+"-"+cursor,title:nativeThread,body:detail.text.trim(),richText:"",meta:{story:"chapter1",...(blockedMessage?{blocked:"true"}:{})},time:stamp,sender:nick||"我",avatar:"",kind:"text",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:true,read:true,likes:0,comments:[]};
      callbacks.current.onNativeItem(nativeApp,item);
      setCursor(v=>v+1);
    };
