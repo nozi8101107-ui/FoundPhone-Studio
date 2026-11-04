@@ -67,6 +67,9 @@ export function MymyKakao(p: SkinProps) {
     [draft, setDraft] = useState(""),
     [query, setQuery] = useState(""),
     [menu, setMenu] = useState(false);
+  useEffect(() => {
+    if (p.storyReply) setDraft(p.storyReply.text);
+  }, [p.storyReply?.token]);
   const list = grouped(p.items),
     messages = [
       ...p.items.filter((i) => i.title === p.thread),
@@ -168,6 +171,7 @@ export function MymyKakao(p: SkinProps) {
                     p.virtualTime || "09:41",
                   ]),
                 ]);
+                p.onStorySend?.(draft.trim());
                 setDraft("");
               }
             }}
