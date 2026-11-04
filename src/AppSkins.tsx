@@ -141,6 +141,7 @@ function MessageList({
               {whatsapp && i.outgoing && <CheckCheck size={11} />}
             </small>
           </button>
+          {i.meta.blocked === "true" && <small style={{color:"#b42318",fontSize:11,margin:"2px 8px",maxWidth:180}}>消息已发出，但被对方拒收了</small>}
           {!whatsapp && i.outgoing && <Avatar name={i.sender} src={i.avatar} />}
         </div>
       ))}
