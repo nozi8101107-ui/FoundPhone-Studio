@@ -537,7 +537,7 @@ function PhoneRuntime({
                   unreadThread={storyUnreadThread}
                   storyReply={storyReply}
                   onStorySend={(text, thread) => {
-                    window.dispatchEvent(new CustomEvent("foundphone-story-send", {detail:{app,thread,text}}));
+                    window.dispatchEvent(new CustomEvent("foundphone-story-send", {detail:{app:app.id,thread,text}}));
                     setStoryReply(null);
                   }}
                   creator={creator}
@@ -1188,7 +1188,7 @@ function AppContent({
               thread={thread}
               onThread={(value) => { setThread(value); if (value === unreadThread) onRead(value); }}
               unreadThread={unreadThread}
-              storyReply={storyReply?.app === app && storyReply.thread === thread ? {text:storyReply.text,token:storyReply.token} : null}
+              storyReply={storyReply?.app === app.id && storyReply.thread === thread ? {text:storyReply.text,token:storyReply.token} : null}
               onStorySend={(text) => onStorySend?.(text, thread)}
             />
           </Suspense>
