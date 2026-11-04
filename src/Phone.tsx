@@ -324,17 +324,18 @@ function PhoneRuntime({
     if (!work.phone.passcode || pin === work.phone.passcode) {
       setLocked(false);
       setPinOpen(false);
-      const crush = String(work.variables.storyCrush || "");
-      if (!creator && crush && !storyFinished) {
-        // Deliver story messages in the background; the player chooses when to open the app.
-        setStoryActive(true);
-      }
       event("password", pin);
     } else {
       setPinError("密码不正确");
       setPinOpen(true);
     }
   };
+  useEffect(() => {
+    if (!creator && !locked && work.variables.storyCrush && !storyFinished) {
+      // Start Chapter 1 whenever a fresh playthrough is unlocked.
+      setStoryActive(true);
+    }
+  }, [creator, locked, work.variables.storyCrush, storyFinished]);
   useEffect(() => {
     if (app && !work.apps.some((a) => a.id === app && a.installed)) setApp("");
   }, [app, work.apps]);
@@ -1300,7 +1301,9 @@ function AppContent({
                 className={`message-row ${i.outgoing ? "outgoing" : ""}`}
                 onClick={() => (creator ? onEdit(i) : onRead(i.id))}
               >
-                <span className="avatar">{i.sender.slice(0, 1)}</span>
+                <span className="avatar">
+                  {i.avatar ? <img src={safeMedia(i.avatar)} alt="" /> : i.sender.slice(0, 1)}
+                </span>
                 <span className="bubble">
                   {i.kind === "image" ||
                   i.kind === "audio" ||
@@ -1350,7 +1353,8 @@ function AppContent({
           {app.engine === "messaging" ? (
             chats.map((t) => {
               const list = shown.filter((i) => i.title === t),
-                last = list[list.length - 1];
+                last = list[list.length - 1],
+                contactAvatar = list.find((i) => !i.outgoing && i.avatar)?.avatar || list.find((i) => i.avatar)?.avatar || "";
               return (
                 <button
                   className="contact-row"
@@ -1361,7 +1365,7 @@ function AppContent({
                   }}
                 >
                   <span className="avatar" style={{ background: app.color }}>
-                    {t.slice(0, 1)}
+                    {contactAvatar ? <img src={safeMedia(contactAvatar)} alt="" /> : t.slice(0, 1)}
                   </span>
                   <span>
                     <strong>{t}</strong>
