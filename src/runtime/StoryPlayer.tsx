@@ -611,7 +611,7 @@ const extraThreads=extraThreadTexts.map((body,index)=>{const author=randId();con
  const sixGen=["ILLIT","BABYMONSTER","Hearts2Hearts","RESCENE","A2O LITE"];
  const bigbarComments=["能不能做点正事","评论区在说什么我们大吧已经够好了吧","怎么还有大吧zgk","好帅啊啊啊","萌……","好期待啊啊啊啊啊","这是在哪发的物料呀","笑死我了","好羡慕能去线下的","能不能换个美工"];
  const commonBathComments=["看看缟纻猪肝","美帝实火#"+chooseWeibo(["寻珍","雕勋","锐因","雕年","枪年","队忙"])+"tws唯一美帝#","缟纻别点了","gxjh又让你赚爽了吧","皮下到底审不审稿","完全"+chooseWeibo(["申惟","金道勋","崔英宰","韩振","韩志薰","李炅潣","月表","老蛙","丑人"])+"粉丝","完全。","底下控评的滚回去","只知道#"+chooseWeibo(["申惟","金道勋","崔英宰","韩振","韩志薰","李炅潣"])+"tws唯一top#"];
- const脱粉评论=["脱愉","评论区在说什么 这不是花挺多的","羡慕缟纻文采","说的全是实话…","自证上哪偷的","就不能多相信他一点吗","抱着必出神稿的决心就这么做了","拉队友共沉沦什么意思","这不是公司要求的吗怪他干嘛","脱愉宝宝 公司太阴了","宝子你猪肝很明显"];
+ const exFanComments=["脱愉","评论区在说什么 这不是花挺多的","羡慕缟纻文采","说的全是实话…","自证上哪偷的","就不能多相信他一点吗","抱着必出神稿的决心就这么做了","拉队友共沉沦什么意思","这不是公司要求的吗怪他干嘛","脱愉宝宝 公司太阴了","宝子你猪肝很明显"];
  const makeWeibo=(id:string,author:string,handle:string,body:string,comments:string[],folder:string)=>{
   const item=make(id,body,body,{handle,reposts:String(Math.floor(Math.random()*1800)),accountType:folder,source:folder});
   item.sender=author;item.folder=folder;item.likes=Math.floor(Math.random()*28000);
@@ -645,7 +645,7 @@ const extraThreads=extraThreadTexts.map((body,index)=>{const author=randId();con
   ["我真的看不下去了 你很好 但是追你太累了","exfan_01"],
   ["滚吧负心汉 去下地狱","exfan_02"],
   ["我曾经那么爱你…你太伤粉丝心了 学生党花得不多 别审判我","exfan_03"]
- ].map(([body,id])=>makeWeibo(id,"脱粉回踩救钱包","脱粉回踩救钱包",body,脱粉评论,"厕所"));
+ ].map(([body,id])=>makeWeibo(id,"脱粉回踩救钱包","脱粉回踩救钱包",body,exFanComments,"厕所"));
  const bigbarAccounts=[
   ["申惟shinyu_申吧","shinyu_bar"],["金道勋_sweet海","dohoon_bar"],["崔英宰_time","youngjae_bar"],
   ["韩振_heart海","hanjin_bar"],["韩志薰_farm","jihoon_bar"],["李炅潣_happy","kyungmin_bar"]
