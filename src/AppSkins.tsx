@@ -68,20 +68,29 @@ function Avatar({
   );
 }
 function ItemMedia({ item }: { item: Item }) {
-  const src = safeMedia(item.media);
-  return src ? (
-    item.kind === "audio" ? (
-      <audio controls src={src} />
-    ) : item.kind === "video" ? (
-      <video controls playsInline src={src} />
-    ) : (
-      <img loading="lazy" alt={item.title} src={src} />
-    )
-  ) : (
-    <div className="skin-photo">
-      <span>{item.title}</span>
+  const [imageIndex, setImageIndex] = useState(0);
+  let imageList: string[] = [];
+  try {
+    const parsed = JSON.parse(item.meta.images || "[]");
+    if (Array.isArray(parsed)) imageList = parsed.filter((x): x is string => typeof x === "string");
+  } catch { imageList = []; }
+  const rawSrc = imageList.length ? imageList[imageIndex % imageList.length] : item.media;
+  const src = safeMedia(rawSrc) || (/^(\/|\.\/|ig\/|people\/)/.test(rawSrc) ? rawSrc : "");
+  const resolvedSrc = src && !/^(data:|https?:\/\/)/.test(src)
+    ? `${import.meta.env.BASE_URL}${src.replace(/^\//, "")}`
+    : src;
+  return resolvedSrc ? (
+    item.kind === "audio" ? <audio controls src={resolvedSrc} /> :
+    item.kind === "video" ? <video controls playsInline src={resolvedSrc} /> :
+    <div className="ig-media-carousel" style={{ position: "relative", width: "100%" }}>
+      <img loading="lazy" alt={item.title} src={resolvedSrc} style={{ display: "block", width: "100%" }} />
+      {imageList.length > 1 && <>
+        <button type="button" aria-label="上一张图片" onClick={(e) => { e.stopPropagation(); setImageIndex((v) => (v + imageList.length - 1) % imageList.length); }} style={{ position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)" }}>‹</button>
+        <button type="button" aria-label="下一张图片" onClick={(e) => { e.stopPropagation(); setImageIndex((v) => (v + 1) % imageList.length); }} style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)" }}>›</button>
+        <small style={{ position: "absolute", right: 10, top: 10, padding: "3px 7px", borderRadius: 12, background: "rgba(0,0,0,.55)", color: "#fff" }}>{imageIndex + 1}/{imageList.length}</small>
+      </>}
     </div>
-  );
+  ) : <div className="skin-photo"><span>{item.title}</span></div>;
 }
 function MessageList({
   items,
@@ -722,270 +731,79 @@ export function InstagramSkin(p: SkinProps) {
     [query, setQuery] = useState(""),
     [likes, setLikes] = useSkinState<string[]>(p, "likes", []),
     [saved, setSaved] = useSkinState<string[]>(p, "saved", []),
-    [showSaved, setShowSaved] = useState(false);
-  const posts = p.items.filter(
-      (i) =>
-        i.kind === "post" ||
-        !["私信", "Story", "Reels", "个人主页"].includes(i.folder),
-    ),
+    [showSaved, setShowSaved] = useState(false),
+    [profileHandle, setProfileHandle] = useState(p.owner ?? "我");
+  const posts = p.items.filter((i) => i.kind === "post" || !["私信", "Story", "Reels", "个人主页"].includes(i.folder)),
     stories = p.items.filter((i) => i.folder === "Story"),
     reels = p.items.filter((i) => i.kind === "video" || i.folder === "Reels"),
     messages = p.items.filter((i) => i.folder === "私信");
-  const tabs = [
-    { label: "首页", icon: Home },
-    { label: "搜索", icon: Search },
-    { label: "Reels", icon: Play },
-    { label: "个人主页", icon: User },
-  ];
-  const shown = (
-    showSaved ? posts.filter((i) => saved.includes(i.id)) : posts
-  ).filter((i) => (i.title + i.body + i.sender).includes(query));
+  const tabs = [{ label: "首页", icon: Home }, { label: "搜索", icon: Search }, { label: "Reels", icon: Play }, { label: "个人主页", icon: User }];
+  const shown = (showSaved ? posts.filter((i) => saved.includes(i.id)) : posts).filter((i) => (i.title + i.body + i.sender).includes(query));
+  const profilePosts = posts.filter((i) => i.sender === profileHandle);
+  const account = p.items.find((i) => i.meta.handle === profileHandle);
+  const openProfile = (handle: string) => { setProfileHandle(handle); setShowSaved(false); setTab("个人主页"); setDm(false); };
   return (
     <div className="instagram-ui independent-skin">
       <div className="app-nav ig-nav">
-        <button
-          aria-label="返回"
-          onClick={() => (dm ? setDm(false) : p.onBack())}
-        >
-          <ChevronLeft size={22} />
-        </button>
-        <strong>{dm ? "私信" : p.name}</strong>
+        <button aria-label="返回" onClick={() => (dm ? setDm(false) : tab === "个人主页" && profileHandle !== (p.owner ?? "我") ? openProfile(p.owner ?? "我") : p.onBack())}><ChevronLeft size={22} /></button>
+        <strong>{dm ? "私信" : tab === "个人主页" ? profileHandle : p.name}</strong>
         <div>
-          {p.creator && (
-            <button aria-label="新增内容" onClick={p.onAdd}>
-              <Plus size={21} />
-            </button>
-          )}
-          <button aria-label="Instagram 私信" onClick={() => setDm(!dm)}>
-            <Send size={20} />
-          </button>
+          {p.creator && <button aria-label="新增内容" onClick={p.onAdd}><Plus size={21} /></button>}
+          <button aria-label="Instagram 私信" onClick={() => setDm(!dm)}><Send size={20} /></button>
         </div>
       </div>
       <div className="skin-scroll ig-scroll">
-        {dm ? (
-          <>
-            {messages.map((i) => (
-              <button
-                key={i.id}
-                className="ig-dm-row"
-                onClick={() => p.onItem(i)}
-              >
-                <Avatar name={i.sender} round />
-                <div>
-                  <strong>{i.sender}</strong>
-                  <p>{i.body}</p>
-                </div>
-              </button>
-            ))}
-            {!messages.length && <p className="skin-empty">暂无私信</p>}
-            {p.creator && (
-              <button className="phone-add" onClick={p.onAdd}>
-                添加私信
-              </button>
-            )}
-          </>
-        ) : tab === "首页" ? (
-          <>
-            <div className="ig-stories">
-              <button
-                className="ig-story"
-                onClick={
-                  p.creator
-                    ? p.onAdd
-                    : () => {
-                        if (stories[0]) p.onItem(stories[0]);
-                      }
-                }
-                disabled={!p.creator && !stories.length}
-              >
-                <span>
-                  <Avatar name="我" round />
-                </span>
-                <small>你的快拍</small>
-              </button>
-              {stories.map((i) => (
-                <button
-                  key={i.id}
-                  className="ig-story"
-                  onClick={() => p.onItem(i)}
-                >
-                  <span>
-                    <Avatar name={i.sender} round />
-                  </span>
-                  <small>{i.sender}</small>
-                </button>
-              ))}
+        {dm ? <>
+          {messages.map((i) => <button key={i.id} className="ig-dm-row" onClick={() => p.onItem(i)}><Avatar name={i.sender} round /><div><strong>{i.sender}</strong><p>{i.body}</p></div></button>)}
+          {!messages.length && <p className="skin-empty">暂无私信</p>}
+          {p.creator && <button className="phone-add" onClick={p.onAdd}>添加私信</button>}
+        </> : tab === "首页" ? <>
+          <div className="ig-stories">
+            <button className="ig-story" onClick={p.creator ? p.onAdd : () => { if (stories[0]) p.onItem(stories[0]); }} disabled={!p.creator && !stories.length}><span><Avatar name="我" round /></span><small>你的快拍</small></button>
+            {stories.map((i) => <button key={i.id} className="ig-story" onClick={() => p.onItem(i)}><span><Avatar name={i.sender} round /></span><small>{i.sender}</small></button>)}
+          </div>
+          {posts.map((i) => <article className="ig-post" key={i.id}>
+            <div className="ig-post-author">
+              <button type="button" className="ig-author-link" onClick={() => openProfile(i.sender)}><Avatar name={i.sender} round /><strong>{i.sender}</strong></button>
+              <button aria-label={`帖子详情${i.title}`} onClick={() => p.onItem(i)}><MoreHorizontal size={19} /></button>
             </div>
-            {posts.map((i) => (
-              <article className="ig-post" key={i.id}>
-                <div className="ig-post-author">
-                  <Avatar name={i.sender} round />
-                  <strong>{i.sender}</strong>
-                  <button
-                    aria-label={`帖子详情${i.title}`}
-                    onClick={() => p.onItem(i)}
-                  >
-                    <MoreHorizontal size={19} />
-                  </button>
-                </div>
-                <button className="ig-post-media" onClick={() => p.onItem(i)}>
-                  <ItemMedia item={i} />
-                </button>
-                <div className="ig-post-controls">
-                  <button
-                    aria-label={`喜欢${i.title}`}
-                    onClick={() =>
-                      setLikes(
-                        likes.includes(i.id)
-                          ? likes.filter((x) => x !== i.id)
-                          : [...likes, i.id],
-                      )
-                    }
-                  >
-                    <Heart
-                      size={23}
-                      fill={likes.includes(i.id) ? "#ed4956" : "none"}
-                      color={likes.includes(i.id) ? "#ed4956" : "currentColor"}
-                    />
-                  </button>
-                  <button
-                    aria-label={`评论${i.title}`}
-                    onClick={() => p.onItem(i)}
-                  >
-                    <MessageCircle size={22} />
-                  </button>
-                  <button
-                    aria-label={`查看${i.title}`}
-                    onClick={() => p.onItem(i)}
-                  >
-                    <Send size={21} />
-                  </button>
-                  <button
-                    aria-label={`收藏${i.title}`}
-                    onClick={() =>
-                      setSaved(
-                        saved.includes(i.id)
-                          ? saved.filter((x) => x !== i.id)
-                          : [...saved, i.id],
-                      )
-                    }
-                  >
-                    <Bookmark
-                      size={22}
-                      fill={saved.includes(i.id) ? "currentColor" : "none"}
-                    />
-                  </button>
-                </div>
-                <div className="ig-post-caption">
-                  <strong>
-                    {i.likes + (likes.includes(i.id) ? 1 : 0)} 次赞
-                  </strong>
-                  <p>
-                    <b>{i.sender}</b> {i.body}
-                  </p>
-                  <button onClick={() => p.onItem(i)}>
-                    查看全部 {i.comments.length} 条评论
-                  </button>
-                  <time>{i.time}</time>
-                </div>
-              </article>
-            ))}
-          </>
-        ) : tab === "搜索" ? (
-          <>
-            <label className="ig-search">
-              <Search size={15} />
-              <input
-                value={query}
-                aria-label="搜索Instagram"
-                placeholder="搜索"
-                onChange={(e) => setQuery(e.target.value)}
-              />
-            </label>
-            <div className="ig-explore">
-              {shown.map((i) => (
-                <button key={i.id} onClick={() => p.onItem(i)}>
-                  <ItemMedia item={i} />
-                </button>
-              ))}
+            <button className="ig-post-media" onClick={() => p.onItem(i)}><ItemMedia item={i} /></button>
+            <div className="ig-post-controls">
+              <button aria-label={`喜欢${i.title}`} onClick={() => setLikes(likes.includes(i.id) ? likes.filter((x) => x !== i.id) : [...likes, i.id])}><Heart size={23} fill={likes.includes(i.id) ? "#ed4956" : "none"} color={likes.includes(i.id) ? "#ed4956" : "currentColor"} /></button>
+              <button aria-label={`评论${i.title}`} onClick={() => p.onItem(i)}><MessageCircle size={22} /></button>
+              <button aria-label={`查看${i.title}`} onClick={() => p.onItem(i)}><Send size={21} /></button>
+              <button aria-label={`收藏${i.title}`} onClick={() => setSaved(saved.includes(i.id) ? saved.filter((x) => x !== i.id) : [...saved, i.id])}><Bookmark size={22} fill={saved.includes(i.id) ? "currentColor" : "none"} /></button>
             </div>
-          </>
-        ) : tab === "Reels" ? (
-          <>
-            {reels.map((i) => (
-              <div className="ig-reel" key={i.id}>
-                <ItemMedia item={i} />
-                <button onClick={() => p.onItem(i)}>
-                  {i.sender} · {i.title}
-                </button>
-              </div>
-            ))}
-            {!reels.length && <p className="skin-empty">暂无 Reels</p>}
-          </>
-        ) : (
-          <>
-            <div className="ig-profile">
-              <Avatar name={posts[0]?.sender ?? "我"} round />
-              <div>
-                <strong>{posts.length}</strong>
-                <small>帖子</small>
-              </div>
-              <div>
-                <strong>0</strong>
-                <small>关注者</small>
-              </div>
-              <div>
-                <strong>0</strong>
-                <small>正在关注</small>
-              </div>
+            <div className="ig-post-caption">
+              <strong>{(i.likes + (likes.includes(i.id) ? 1 : 0)).toLocaleString("en-US")} 次赞</strong>
+              <p><b>{i.sender}</b> {i.body}</p>
+              <button onClick={() => p.onItem(i)}>查看全部 {i.comments.length} 条评论</button>
+              <time>{i.time}</time>
             </div>
-            <h3 className="ig-profile-name">{posts[0]?.sender ?? "我"}</h3>
-            <div className="ig-profile-tabs">
-              <button aria-label="帖子网格" onClick={() => setShowSaved(false)}>
-                <Grid size={21} />
-              </button>
-              <button
-                aria-label="已收藏帖子"
-                onClick={() => setShowSaved(true)}
-              >
-                <Bookmark size={21} />
-              </button>
-              <button
-                aria-label="资料内容"
-                onClick={() => {
-                  const i = p.items.find((i) => i.folder === "个人主页");
-                  if (i) p.onItem(i);
-                  else if (p.creator) p.onAdd();
-                }}
-              >
-                <AtSign size={21} />
-              </button>
-            </div>
-            <div className="ig-explore">
-              {shown.map((i) => (
-                <button key={i.id} onClick={() => p.onItem(i)}>
-                  <ItemMedia item={i} />
-                </button>
-              ))}
-            </div>
-          </>
-        )}
+          </article>)}
+        </> : tab === "搜索" ? <>
+          <label className="ig-search"><Search size={15} /><input value={query} aria-label="搜索Instagram" placeholder="搜索" onChange={(e) => setQuery(e.target.value)} /></label>
+          <div className="ig-explore">{shown.map((i) => <button key={i.id} onClick={() => p.onItem(i)}><ItemMedia item={i} /></button>)}</div>
+        </> : tab === "Reels" ? <>
+          {reels.map((i) => <div className="ig-reel" key={i.id}><ItemMedia item={i} /><button onClick={() => p.onItem(i)}>{i.sender} · {i.title}</button></div>)}
+          {!reels.length && <p className="skin-empty">暂无 Reels</p>}
+        </> : <>
+          <div className="ig-profile">
+            <Avatar name={profileHandle} round />
+            <div><strong>{profilePosts.length}</strong><small>帖子</small></div>
+            <div><strong>{account?.meta.followers ?? "0"}</strong><small>关注者</small></div>
+            <div><strong>{account?.meta.following ?? "0"}</strong><small>正在关注</small></div>
+          </div>
+          <h3 className="ig-profile-name">{account?.meta.username ?? profileHandle}</h3>
+          <div className="ig-profile-tabs">
+            <button aria-label="帖子网格" onClick={() => setShowSaved(false)}><Grid size={21} /></button>
+            <button aria-label="已收藏帖子" onClick={() => setShowSaved(true)}><Bookmark size={21} /></button>
+            <button aria-label="资料内容" onClick={() => { const i = p.items.find((i) => i.folder === "个人主页"); if (i) p.onItem(i); else if (p.creator) p.onAdd(); }}><AtSign size={21} /></button>
+          </div>
+          <div className="ig-explore">{(showSaved ? posts.filter((i) => saved.includes(i.id)) : profilePosts).map((i) => <button key={i.id} onClick={() => p.onItem(i)}><ItemMedia item={i} /></button>)}</div>
+        </>}
       </div>
-      <nav className="ig-bottom">
-        {tabs.map((t) => (
-          <button
-            key={t.label}
-            className={tab === t.label ? "selected" : ""}
-            aria-label={`Instagram ${t.label}`}
-            onClick={() => {
-              setTab(t.label);
-              setDm(false);
-            }}
-          >
-            <t.icon size={23} />
-          </button>
-        ))}
-      </nav>
+      <nav className="ig-bottom">{tabs.map((t) => <button key={t.label} className={tab === t.label ? "selected" : ""} aria-label={`Instagram ${t.label}`} onClick={() => { setTab(t.label); setDm(false); if (t.label === "个人主页") { setProfileHandle(p.owner ?? "我"); setShowSaved(false); } }}><t.icon size={23} /></button>)}</nav>
     </div>
   );
 }
