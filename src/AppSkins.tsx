@@ -1,6 +1,6 @@
 import { NativeComposer } from "./DeviceSystem";
 import { useSkinState } from "./skinState";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ChevronLeft,
   Plus,
@@ -48,6 +48,8 @@ export type SkinProps = {
   thread: string;
   onThread: (s: string) => void;
   unreadThread?: string;
+  storyReply?: { text: string; token: number } | null;
+  onStorySend?: (text: string) => void;
 };
 function Avatar({
   name,
