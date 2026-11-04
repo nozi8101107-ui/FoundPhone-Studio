@@ -103,7 +103,7 @@ export function ChapterOne({work,onFinish,onDispatchOpen,onNativeOpen,onNativeIt
      return()=>clearTimeout(t);
    }
    callbacks.current.onNativePrompt(nativeApp,nativeThread,e.text,cursor+1);
-   const receive=(event:Event)=>{
+   const receive=(event:globalThis.Event)=>{
      const detail=(event as unknown as CustomEvent<{app:string;thread:string;text:string}>).detail;
      if(!detail||detail.app!==nativeApp||detail.thread!==nativeThread||!detail.text?.trim())return;
      window.removeEventListener("foundphone-story-send",receive);
