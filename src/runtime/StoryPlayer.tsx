@@ -30,7 +30,7 @@ function StoryPlayer(){
    handlesForFriends=friendNames.map(()=>{let handle=randId();while(used.has(handle))handle=randId();used.add(handle);return handle;});
    try{localStorage.setItem(storageKey,JSON.stringify(handlesForFriends));}catch{}
   }
-  return friendNames.map((name,index)=>{const handle=handlesForFriends[index];return make("ig-friend-"+index,handle,"",{handle,username:name,account:"friend",relationship:"互相关注",mutual:"true"});});
+  return friendNames.map((name,index)=>{const handle=handlesForFriends[index];return {id:"ig-friend-"+index,title:handle,body:"",richText:"",meta:{handle,username:name,account:"friend",relationship:"互相关注",mutual:"true"},time:"2026-11-03 09:41",sender:handle,avatar:"",kind:"text" as const,media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:false,read:false,likes:0,comments:[] as string[]};});
  },[profile?.nickname]);
  useEffect(()=>{const abort=new AbortController();fetch(new URLSearchParams(location.search).get("preview")==="test"?"./test-work.json":new URLSearchParams(location.search).get("template")==="blank"?"./blank-work.json":"./work.json",{signal:abort.signal}).then(r=>{if(!r.ok)throw Error("缺少作品文件，请运行 npm run story:build");return r.json()}).then(x=>{const w=validateWork(x);document.title=w.title==="捡手机"?"捡手机":w.title+" · 捡手机";setWork(w)}).catch(e=>{if(e.name!=="AbortError")setError(String(e))});return()=>abort.abort()},[]);
  const complete=(p:UserProfile)=>{try{localStorage.setItem(KEY,JSON.stringify(p));setProfile(p);setChoice("play");setSession(v=>v+1)}catch{setError("头像保存失败，请换一张较小的图片后重试。")}};
