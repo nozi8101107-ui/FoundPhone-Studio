@@ -325,10 +325,8 @@ function PhoneRuntime({
       setLocked(false);
       setPinOpen(false);
       const crush = String(work.variables.storyCrush || "");
-      const targetApp = crush === "hanjin" ? "wechat" : "kakao";
       if (!creator && crush && !storyFinished) {
-        setStoryApp(targetApp);
-        setApp(targetApp);
+        // Deliver story messages in the background; the player chooses when to open the app.
         setStoryActive(true);
       }
       event("password", pin);
@@ -622,7 +620,7 @@ function PhoneRuntime({
               }}
               onNativeNotification={(nativeApp, thread, item) => {
                 if (app === nativeApp && storyThread === thread) {
-                  setBanner("新消息 · "+item.sender+"："+item.body);
+                  setBanner((nativeApp === "kakao" ? "KakaoTalk" : "微信")+": "+item.sender+"："+item.body);
                   window.setTimeout(() => setBanner(""), 2600);
                 } else {
                   setStoryUnreadThreads((v) => ({...v,[storyUnreadKey(nativeApp,thread)]:true}));
