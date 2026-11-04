@@ -750,9 +750,33 @@ function PhoneRuntime({
               <p>{s.endings[s.endings.length - 1]}</p>
               <button
                 onClick={() => {
-                  update(dispatch(work, initialRuntime(work), "start"));
+                  // A restart must clear both the normal phone save and every Chapter 1
+                  // sidecar save; otherwise old chats and the previous story cursor leak
+                  // into the newly configured playthrough.
+                  if (storyTimer.current) {
+                    clearTimeout(storyTimer.current);
+                    storyTimer.current = null;
+                  }
+                  try {
+                    localStorage.removeItem(storyFlowKey);
+                    localStorage.removeItem(storyKey);
+                    localStorage.removeItem(chapterItemsKey);
+                  } catch {}
+                  setChapterItems({});
+                  setStoryActive(false);
+                  setStoryFinished(false);
+                  setStoryThread("");
+                  setStoryApp("");
+                  setStoryUnreadThreads({});
+                  setDeliveredStoryIds([]);
+                  setStoryNotification(null);
+                  setStoryReply(null);
+                  setPendingThread("");
                   setApp("");
+                  setPanel("");
+                  setFolder("");
                   setLocked(true);
+                  update(dispatch(work, initialRuntime(work), "start"));
                 }}
               >
                 重新开始
