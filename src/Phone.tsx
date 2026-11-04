@@ -555,7 +555,7 @@ function PhoneRuntime({
               />
             )}
           </AnimatePresence>
-          {openingStory && !locked && <OpeningStory work={work} onFinish={() => { localStorage.setItem(storyKey, "1"); setOpeningStory(false); }} />}
+          {openingStory && !locked && <OpeningStory work={work} onFinish={() => { localStorage.setItem(storyKey, "1"); localStorage.removeItem("foundphone.chapter1.progress:" + work.id + ":" + String(work.variables.storyNickname || "")); setOpeningStory(false); }} />}
           {folder && (
             <div className="folder-overlay" onClick={() => setFolder("")}>
               <h2>{folder}</h2>
