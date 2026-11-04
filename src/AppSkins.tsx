@@ -1,6 +1,6 @@
 import { NativeComposer } from "./DeviceSystem";
 import { useSkinState } from "./skinState";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ChevronLeft,
   Plus,
@@ -103,6 +103,7 @@ function MessageList({
   onRead,
   onTransfer,
   whatsapp = false,
+  autoScroll = false,
 }: {
   items: Item[];
   creator: boolean;
@@ -110,9 +111,16 @@ function MessageList({
   onRead: (id: string) => void;
   onTransfer?: (item: Item) => void;
   whatsapp?: boolean;
+  autoScroll?: boolean;
 }) {
+  const listRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (autoScroll && listRef.current) {
+      listRef.current.scrollTop = listRef.current.scrollHeight;
+    }
+  }, [autoScroll, items.length]);
   return (
-    <div className={`skin-messages ${whatsapp ? "wa-wallpaper" : ""}`}>
+    <div ref={listRef} className={`skin-messages ${whatsapp ? "wa-wallpaper" : ""}`}>
       <div className="skin-date">{items[0]?.time.slice(0, 10)}</div>
       {items.map((i) => (
         <div
@@ -333,6 +341,7 @@ export function WeChatSkin(p: SkinProps) {
             onItem={p.onItem}
             onRead={p.onRead}
             onTransfer={setSelectedTransfer}
+            autoScroll
           />
           {!p.items.some((i) => i.title === p.thread && i.meta.stub !== "true") && (
             <p className="skin-empty">暂无聊天记录</p>
