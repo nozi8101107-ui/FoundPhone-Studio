@@ -776,9 +776,9 @@ const extraThreads=extraThreadTexts.map((body,index)=>{const author=randId();con
 
  const youtubeVideos=[
   ["youtube-01","TWS (투어스) '내 이름을 불러줘' Official MV","maxresdefault.jpeg","TWS (투어스) '내 이름을 불러줘' Official MV.mp4","583.7万次观看","57k"],
-  ["youtube-02","TWS (투어스) 'SODA SODA' Official MV","maxresdefault (1).jpeg","TWS (투어스) 'SODA SODA' Official MV (1).mp4","1103.4万次观看","92k"],
-  ["youtube-03","TWS (투어스) '널 따라가 (You, You)' Official MV","maxresdefault (2).jpeg","TWS (투어스) '널 따라가 (You, You)' Official MV.mp4","2297.5万次观看","129k"],
-  ["youtube-04","TWS (투어스) '너의 모든 가능성이 되어 줄게' Official MV","maxresdefault (3).jpeg","TWS (투어스) '너의 모든 가능성이 되어 줄게' Official MV.mp4","688.5万次观看","67k"]
+  ["youtube-02","TWS (투어스) 'SODA SODA' Official MV","maxresdefault (1).jpeg","TWS (투어스) 'SODA SODA' Official MV (1).mp4","1103.4万次观看","92k"],
+  ["youtube-03","TWS (투어스) '널 따라가 (You, You)' Official MV","maxresdefault (2).jpeg","TWS (투어스) '널 따라가 (You, You)' Official MV.mp4","2297.5万次观看","129k"],
+  ["youtube-04","TWS (투어스) '너의 모든 가능성이 되어 줄게' Official MV","maxresdefault (3).jpeg","TWS (투어스) '너의 모든 가능성이 되어 줄게' Official MV.mp4","688.5万次观看","67k"]
  ].map(([id,title,thumbnail,video,views,likes])=>({
   ...make(id,title,"TWS",{
    channel:"TWS",
