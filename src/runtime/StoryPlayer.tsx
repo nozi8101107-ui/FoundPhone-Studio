@@ -350,7 +350,7 @@ user 我刚看到一个东西 特别像你
 你：ok`
  };
  const buildMessages=(id:string,title:string,text:string,avatar:string)=>{let current="2026-10-01 09:00",n=0;return text.split("\n").flatMap((line)=>{if(!line.trim())return [];if(line.startsWith("@")){current=line.slice(1);return [];}const outgoing=line.startsWith("你：");let body=outgoing?line.slice(2):line;if(!outgoing)body=body.replaceAll("user",profile.nickname+(olderThan(id)?"":(id==="hanjin"?"姐姐":"怒那")));const item=make(id,title,body,{handle:handles[id]||"",remark:profile.crush===id?(crushNames[id]||""):(exNames[id]||"")},avatar);item.id="personal-"+id+"-"+(++n);item.time=current;item.sender=outgoing?profile.nickname:(handles[id]||labels[id]);item.outgoing=outgoing;item.read=false;return [item];});};
- const avatarFor=(id:string)=>`${import.meta.env.BASE_URL}people/${id}.jpg`;
+ const avatarFor=(id:string)=>`${import.meta.env.BASE_URL}people/${({shinyu:"IMG_9696",dohoon:"IMG_9697",youngjae:"IMG_9701",hanjin:"IMG_9702",jihoon:"IMG_9703",kyungmin:"IMG_9704"} as Record<string,string>)[id]||"IMG_9696"}.jpeg`;
  const crushTitle=handles[profile.crush]||labels[profile.crush];
  const contacts=buildMessages(profile.crush,crushNames[profile.crush]||crushTitle,chatText[profile.crush]||"",avatarFor(profile.crush));
  const breakupText:Record<string,string>={
@@ -546,7 +546,7 @@ user 我刚刚路过一家店 看到这个
  const selectedMembers=[...new Set([profile.crush,profile.ex])];
  const friendNames=["민서","서연","지우","유진","수빈","예린","채원","하린","도연","나연","소희","은서","지민","다은","현아","예지","승아","가은","혜원","시은"];
  const friends=friendNames.map((name,index)=>{const handle=randId();return make("ig-friend-"+index,handle,"",{handle,username:name,account:"friend",relationship:"互相关注",mutual:"true"});});
- const selectedAccounts=selectedMembers.map(id=>make("ig-member-"+id,handles[id],"",{handle:handles[id],username:handles[id],account:id===profile.crush?"crush":"ex",member:id,relationship:"互相关注",remark:id===profile.crush?crushNames[id]:exNames[id]}));
+ const selectedAccounts=selectedMembers.map(id=>make("ig-member-"+id,handles[id],"",{handle:handles[id],username:handles[id],account:id===profile.crush?"crush":"ex",member:id,relationship:"互相关注",remark:id===profile.crush?crushNames[id]:exNames[id]},avatarFor(id)));
  const mutualCount=friends.length+selectedAccounts.length;
  const insta=[
   make("tws","TWS (투어스)","",{handle:"tws_pledis",username:"TWS (투어스)",posts:"2540",followers:"363w",following:"1",account:"official",relationship:"关注"}),
