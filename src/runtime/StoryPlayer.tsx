@@ -614,7 +614,7 @@ const extraThreads=extraThreadTexts.map((body,index)=>{const author=randId();con
  const exFanComments=["脱愉","评论区在说什么 这不是花挺多的","羡慕缟纻文采","说的全是实话…","自证上哪偷的","就不能多相信他一点吗","抱着必出神稿的决心就这么做了","拉队友共沉沦什么意思","这不是公司要求的吗怪他干嘛","脱愉宝宝 公司太阴了","宝子你猪肝很明显"];
  const randomizeWeiboComments=(pool:string[])=>{
   // 每条微博的评论数量、评论顺序和各条评论出现次数都独立随机。
-  const count=3+Math.floor(Math.random()*9);
+  const count=3+Math.floor(Math.random()*28);
   const weights=pool.map(()=>1+Math.floor(Math.random()*6));
   const total=weights.reduce((sum,weight)=>sum+weight,0);
   const result=Array.from({length:count},()=>{
@@ -628,7 +628,9 @@ const extraThreads=extraThreadTexts.map((body,index)=>{const author=randId();con
  };
  const makeWeibo=(id:string,author:string,handle:string,body:string,comments:string[],folder:string)=>{
   const item=make(id,body,body,{handle,reposts:String(Math.floor(Math.random()*1800)),accountType:folder,source:folder});
-  item.sender=author;item.folder=folder;item.likes=Math.floor(Math.random()*28000);
+  item.sender=author;item.folder=folder;
+  const likeRange=folder==="大吧"?(body.startsWith("【应援】")?[400,5000]:[90,500]):[300,30000];
+  item.likes=likeRange[0]+Math.floor(Math.random()*(likeRange[1]-likeRange[0]+1));
   item.comments=randomizeWeiboComments(comments);
   return item;
  };
