@@ -592,7 +592,21 @@ user 我刚刚路过一家店 看到这个
 哈咯 user 备注韩振
 你：好的好的`,avatarFor("hanjin")):exMessages):[];
  const hanjinSelected=profile.crush==="hanjin"||profile.ex==="hanjin";
- const hanjinWechatMessages=hanjinSelected?(profile.crush==="hanjin"?hanjinWechat:buildMessages("hanjin",handles.hanjin,breakupText.hanjin,avatarFor("hanjin"))).map(item=>({...item,avatar:item.outgoing?profile.avatar:item.avatar})):[];
+ const hanjinWechatMessages=hanjinSelected?(profile.crush==="hanjin"?hanjinWechat:buildMessages("hanjin","韩振",breakupText.hanjin,avatarFor("hanjin"))).map(item=>({...item,avatar:item.outgoing?profile.avatar:item.avatar})):[];
+ const wechatStub=(id:string,title:string,meta:Record<string,string>={})=>({...make(id,title,"",meta),sender:title,avatar:"",read:true});
+ const wechatGroups=[
+  wechatStub("wechat-family","幸福美满一家人",{stub:"true",pinned:"true",groupMembers:JSON.stringify([profile.nickname,"妈咪","爸爸"]),memberCount:"3"}),
+  wechatStub("wechat-tour","tws💙tour蹲蹲",{stub:"true",groupMembers:JSON.stringify([profile.nickname]),memberCount:"182"}),
+  wechatStub("wechat-yearend","拼盘年末🎫大杂烩",{stub:"true",groupMembers:JSON.stringify([profile.nickname]),memberCount:"223"}),
+  wechatStub("wechat-prerecord","🍂的预录打歌2群",{stub:"true",groupMembers:JSON.stringify([profile.nickname]),memberCount:"79"})
+ ];
+ const wechatContacts=[
+  wechatStub("wechat-mom","妈咪",{stub:"true",contact:"true",pinned:"true"}),
+  wechatStub("wechat-dad","爸爸",{stub:"true",contact:"true",pinned:"true"}),
+  wechatStub("wechat-bestie","闺蜜",{stub:"true",contact:"true",pinned:"true"}),
+  wechatStub("wechat-ticket","票务 🍂打歌🎫代申",{stub:"true",contact:"true"}),
+  wechatStub("wechat-buddy","搭子",{stub:"true",contact:"true"})
+ ];
  const isPlaceholder=(item:Work["data"][string][number])=>/测试(用户|联系人|会话|消息|内容|回复|动态)/.test([item.title,item.body,item.sender].join(" "))||item.body==="这是一条测试内容。"||item.body==="这是一条测试消息。";
  const cleanedData=Object.fromEntries(Object.entries(work.data).map(([app,items])=>[app,items.filter(item=>!isPlaceholder(item))])) as Work["data"];
  cleanedData.instagram=(cleanedData.instagram||[]).filter(item=>item.meta.account==="official" && item.kind!=="post");
@@ -757,7 +771,7 @@ const extraThreads=extraThreadTexts.map((body,index)=>{const author=randId();con
  const hiddenAppIds=new Set(["appstore","contacts","reminders","spotify","find"]);
  const cleanedApps=work.apps.map(app=>hiddenAppIds.has(app.id)?{...app,installed:false,visible:false,dock:false,folder:""}:app.id==="taobao"?{...app,installed:true,visible:true}:app);
  if(!cleanedApps.some(app=>app.id==="taobao"))cleanedApps.push({id:"taobao",name:"淘宝",installed:true,visible:true,dock:false,folder:"",icon:""});
- const personalized:Work={...work,apps:cleanedApps,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...cleanedData,kakao:[...(cleanedData.kakao||[]),...crushMessages,...exContact],wechat:[...(cleanedData.wechat||[]),...hanjinWechatMessages],instagram:[...(cleanedData.instagram||[]).filter(item=>item.meta.account==="official"),...insta],threads:[...(cleanedData.threads||[]),...threadItems,...extraThreads],twitter:[...(cleanedData.twitter||[]).filter(item=>item.id!=="test-item-twitter"),...xPosts],weibo:[...(cleanedData.weibo||[]).filter(item=>item.id!=="test-item-weibo"),...weiboPosts],taobao:[...(cleanedData.taobao||[]),...taobaoItems,...historicalOrders],alipay:[...(cleanedData.alipay||[]),...historicalBills]}};
+ const personalized:Work={...work,apps:cleanedApps,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...cleanedData,kakao:[...(cleanedData.kakao||[]),...crushMessages,...exContact],wechat:[...(cleanedData.wechat||[]),...hanjinWechatMessages,...wechatGroups,...wechatContacts],instagram:[...(cleanedData.instagram||[]).filter(item=>item.meta.account==="official"),...insta],threads:[...(cleanedData.threads||[]),...threadItems,...extraThreads],twitter:[...(cleanedData.twitter||[]).filter(item=>item.id!=="test-item-twitter"),...xPosts],weibo:[...(cleanedData.weibo||[]).filter(item=>item.id!=="test-item-weibo"),...weiboPosts],taobao:[...(cleanedData.taobao||[]),...taobaoItems,...historicalOrders],alipay:[...(cleanedData.alipay||[]),...historicalBills]}};
  return <main className="story-runtime"><Phone key={session} work={personalized}/></main>;
 }
 createRoot(document.getElementById("root")!).render(<StoryPlayer/>);
