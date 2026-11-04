@@ -55,9 +55,10 @@ export function makeChapterSocial(work: Work, member: string): { threads: Item[]
     hidden: false, unlock: "", password: "", folder: "", favorite: false,
     outgoing: false, read: false, likes, comments,
   });
-  const threads = threadBodies.map((body, i) => {
-    const start = (i + seed) % threadComments.length;
-    const comments = Array.from({ length: 3 + ((seed + i) % 3) }, (_, n) => threadComments[(start + n) % threadComments.length]);
+  const shuffledBodies = [...threadBodies].sort(() => Math.random() - 0.5);
+  const threads = shuffledBodies.map((body, i) => {
+    const start = Math.floor(Math.random() * threadComments.length);
+    const comments = Array.from({ length: 3 + Math.floor(Math.random() * 3) }, (_, n) => threadComments[(start + n) % threadComments.length]);
     const likes = 12000 + i * 137;
     const reposts = 16000 + i * 211;
     return mk("chapter-thread-" + i, body, "路人网友", comments, likes, reposts, { topic: "TWS", reposts: String(reposts) });
