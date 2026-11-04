@@ -159,6 +159,8 @@ function PhoneRuntime({
   const [storyUnreadThread, setStoryUnreadThread] = useState("");
   const [deliveredStoryIds, setDeliveredStoryIds] = useState<string[]>([]);
   const [storyNotification, setStoryNotification] = useState<{app:string;thread:string;item:Item}|null>(null);
+  const [chapterItems, setChapterItems] = useState<Record<string,Item[]>>({});
+  const [storyReply, setStoryReply] = useState<{app:string;thread:string;text:string;token:number}|null>(null);
   const [pendingThread, setPendingThread] = useState("");
   const storyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [pinOpen, setPinOpen] = useState(false);
@@ -522,6 +524,7 @@ function PhoneRuntime({
                     ...(app === "threads" && storyFinished ? chapterSocial.threads : []),
                     ...(app === "weibo" && storyFinished ? chapterSocial.weibo : []),
                     ...(s.messages[app] ?? []),
+                    ...(chapterItems[app] ?? []),
                   ].filter((item) => {
                     if (creator) return true;
                     const chapterPost = item.id.startsWith("chapter-thread-") || item.id.startsWith("chapter-toilet-") || item.id.startsWith("chapter-battle-") || item.id.startsWith("chapter-exfan-") || item.id === "chapter-giveaway" || item.id === "chapter-dispatch";
@@ -532,6 +535,11 @@ function PhoneRuntime({
                   })}
                   initialThread={app === storyApp ? pendingThread : ""}
                   unreadThread={storyUnreadThread}
+                  storyReply={storyReply}
+                  onStorySend={(text, thread) => {
+                    window.dispatchEvent(new CustomEvent("foundphone-story-send", {detail:{app,thread,text}}));
+                    setStoryReply(null);
+                  }}
                   creator={creator}
                   state={s}
                   onRead={(id) => { event("read", id); if (id === storyThread) setStoryUnreadThread(""); }}
@@ -604,6 +612,24 @@ function PhoneRuntime({
             <ChapterOne
               key={storyFlowKey}
               work={work}
+              onNativeOpen={(nativeApp, thread) => {
+                setStoryApp(nativeApp);
+                setPendingThread(thread);
+                setStoryThread(thread);
+                setStoryUnreadThread("");
+                setStoryNotification(null);
+                setApp(nativeApp);
+                setRecent((v) => [nativeApp, ...v.filter((a) => a !== nativeApp)].slice(0, 8));
+              }}
+              onNativeItem={(nativeApp, item) => {
+                setChapterItems((v) => ({...v,[nativeApp]:[...(v[nativeApp]||[]),item]}));
+              }}
+              onNativePrompt={(nativeApp, thread, text, token) => setStoryReply({app:nativeApp,thread,text,token})}
+              onNativeNotification={(nativeApp, thread, item) => {
+                setStoryUnreadThread(thread);
+                setStoryNotification({app:nativeApp,thread,item});
+                setBanner("新消息 · "+item.sender+"："+item.body);
+              }}
               onDispatchOpen={() => {
                 setApp("twitter");
                 setRecent((v) => ["twitter", ...v.filter((a) => a !== "twitter")].slice(0, 8));
@@ -1017,6 +1043,8 @@ function AppContent({
   work,
   initialThread = "",
   unreadThread = "",
+  storyReply = null,
+  onStorySend,
 }: {
   app: AppPlugin;
   name: string;
@@ -1032,6 +1060,8 @@ function AppContent({
   work: Work;
   initialThread?: string;
   unreadThread?: string;
+  storyReply?: { app: string; thread: string; text: string; token: number } | null;
+  onStorySend?: (text: string, thread: string) => void;
 }) {
   const [detail, setDetail] = useState<Item | null>(null);
   const [thread, setThread] = useState(initialThread);
@@ -1154,6 +1184,8 @@ function AppContent({
               thread={thread}
               onThread={(value) => { setThread(value); if (value === unreadThread) onRead(value); }}
               unreadThread={unreadThread}
+              storyReply={storyReply?.app === app && storyReply.thread === thread ? {text:storyReply.text,token:storyReply.token} : null}
+              onStorySend={(text) => onStorySend?.(text, thread)}
             />
           </Suspense>
         </div>
