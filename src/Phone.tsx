@@ -138,6 +138,7 @@ function PhoneRuntime({
   const [locked, setLocked] = useState(!creator);
   const storyKey = "foundphone.chapter1.done:" + work.id + ":" + String(work.variables.storyNickname || "");
   const [openingStory, setOpeningStory] = useState(false);
+  const [storyPrompt, setStoryPrompt] = useState(false);
   const [pinOpen, setPinOpen] = useState(false);
   const [quickCamera, setQuickCamera] = useState(false);
   const [keyboard, setKeyboard] = useState(false);
@@ -307,7 +308,9 @@ function PhoneRuntime({
     if (!work.phone.passcode || pin === work.phone.passcode) {
       setLocked(false);
       setPinOpen(false);
-      if (!creator && work.variables.storyCrush && !localStorage.getItem(storyKey)) setOpeningStory(true);
+      if (!creator && work.variables.storyCrush && !localStorage.getItem(storyKey)) {
+        window.setTimeout(() => setStoryPrompt(true), 900);
+      }
       event("password", pin);
     } else {
       setPinError("密码不正确");
@@ -555,6 +558,19 @@ function PhoneRuntime({
               />
             )}
           </AnimatePresence>
+          {storyPrompt && !openingStory && !locked && (
+            <div style={{position:"absolute",inset:0,zIndex:55,pointerEvents:"none",display:"flex",justifyContent:"center",alignItems:"flex-start",padding:"62px 14px 0"}}>
+              <section role="dialog" aria-label="新消息通知" style={{pointerEvents:"auto",width:"100%",maxWidth:350,borderRadius:18,background:"rgba(250,250,252,.96)",backdropFilter:"blur(24px)",boxShadow:"0 12px 38px #0003",padding:15,color:"#222",border:"1px solid #ffffffaa"}}>
+                <div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:38,height:38,borderRadius:11,background:"#f4d76b",display:"grid",placeItems:"center",fontSize:19}}>💬</div><div style={{flex:1}}><strong style={{fontSize:13}}>新消息</strong><div style={{fontSize:11,color:"#888"}}>刚刚</div></div><span style={{fontSize:11,color:"#999"}}>通知</span></div>
+                <div style={{fontWeight:650,fontSize:14,marginTop:10}}>{({shinyu:"申惟",dohoon:"金道勋",youngjae:"崔英宰",hanjin:"韩振",jihoon:"韩志薰",kyungmin:"李炅潣"} as Record<string,string>)[String(work.variables.storyCrush)] || "新联系人"}</div>
+                <p style={{fontSize:13,color:"#555",margin:"4px 0 14px"}}>发来了一条新消息。要现在查看吗？</p>
+                <div style={{display:"flex",gap:9}}>
+                  <button onClick={()=>setStoryPrompt(false)} style={{flex:1,height:38,border:0,borderRadius:10,background:"#ececf0",color:"#333",fontSize:13}}>先自由探索</button>
+                  <button onClick={()=>{setStoryPrompt(false);setOpeningStory(true);}} style={{flex:1,height:38,border:0,borderRadius:10,background:"#202124",color:"white",fontSize:13,fontWeight:600}}>打开 KKT / 微信</button>
+                </div>
+              </section>
+            </div>
+          )}
           {openingStory && !locked && <OpeningStory work={work} onFinish={() => { localStorage.setItem(storyKey, "1"); localStorage.removeItem("foundphone.chapter1.progress:" + work.id + ":" + String(work.variables.storyNickname || "")); setOpeningStory(false); }} />}
           {folder && (
             <div className="folder-overlay" onClick={() => setFolder("")}>
