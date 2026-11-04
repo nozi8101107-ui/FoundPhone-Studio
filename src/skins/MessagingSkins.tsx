@@ -354,7 +354,7 @@ export function DiscordSkin(p: Props) {
                     className="discord-message"
                     onClick={() => p.onItem(i)}
                   >
-                    <Avatar name={i.sender} />
+                    <Avatar name={i.sender} src={i.avatar} />
                     <div>
                       <strong>{i.sender}</strong>
                       <time>{i.time.slice(-5)}</time>
@@ -482,7 +482,7 @@ export function MessengerSkin(p: Props) {
               <div className="messenger-contacts">
                 {items.map((i) => (
                   <button key={i.id} onClick={() => p.onItem(i)}>
-                    <Avatar name={i.sender} />
+                    <Avatar name={i.sender} src={i.avatar} />
                     <strong>{i.sender}</strong>
                     <small>{i.title}</small>
                   </button>
