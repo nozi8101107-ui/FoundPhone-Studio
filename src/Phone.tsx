@@ -84,7 +84,7 @@ export function AppIcon({
   const a = getApp(id);
   const Icon = a.icon;
   return (
-    <span className={`app-icon-wrap ${small ? "small" : ""}`}>
+    <span className={`app-icon-wrap ${small ? "small" : ""}`} style={{position:"relative"}}>
       <span className="app-icon" style={{ background: a.color }}>
         {custom ? (
           safeMedia(custom) ? (
@@ -635,7 +635,7 @@ function PhoneRuntime({
                   .filter((a) => a.folder === folder)
                   .map((a) => (
                     <button key={a.id} onClick={() => open(a.id)}>
-                      <AppIcon id={a.id} name={a.name} custom={a.icon} />
+                      <AppIcon id={a.id} name={a.name} custom={a.icon} unread={a.id === storyApp && !!storyUnreadThread} />
                     </button>
                   ))}
               </div>
