@@ -263,20 +263,24 @@ export function MymyKakao(p: SkinProps) {
               .filter((g) => g.title.includes(query.trim()))
               .map((g) => {
                 const last = g.items.at(-1)!;
+                const hasStoryUnread = p.unreadThread === g.title;
                 return (
                   <button
                     className="kzkr kzkcr"
                     key={g.title}
-                    onClick={() => p.onThread(g.title)}
+                    onClick={() => { p.onThread(g.title); if (hasStoryUnread) p.onRead(g.title); }}
                   >
-                    <Avatar name={last.sender || g.title} src={last.avatar} />
+                    <span style={{position:"relative",display:"inline-flex"}}>
+                      <Avatar name={last.sender || g.title} src={last.avatar} />
+                      {hasStoryUnread && <i aria-label="未读消息" style={{position:"absolute",right:-1,top:-1,width:9,height:9,borderRadius:"50%",background:"#ff3b30",border:"1.5px solid white"}} />}
+                    </span>
                     <span className="kzkn">
                       <b>{g.title}</b>
                       <small>{tab === "好友" ? last.sender : last.body}</small>
                     </span>
                     <span className="kzkmt">
                       {last.time.slice(-5)}
-                      {last.meta.unread && (
+                      {last.meta.unread && !hasStoryUnread && (
                         <i className="kzkbd">{last.meta.unread}</i>
                       )}
                     </span>
