@@ -616,16 +616,16 @@ user 我刚刚路过一家店 看到这个
 
  const realNames:Record<string,string>={shinyu:"申惟",dohoon:"金道勋",youngjae:"崔英宰",hanjin:"韩振",jihoon:"韩志薰",kyungmin:"李炅潣"};
  const buildWechatConversation=(id:string,title:string,raw:string)=>{
-  let current="2026-11-04 19:00",index=0;
+  let current="2026-11-04 19:00",index=0,lastTransferAmount="";
   const rows:Work["data"][string]=[];
-  const add=(sender:string,body:string,kind:"text"|"image"|"transfer"="text",amount="")=>{
+  const add=(sender:string,body:string,kind:"text"|"image"|"transfer"|"transferReceived"="text",amount="")=>{
    const outgoing=sender==="user";
    const displaySender=outgoing?profile.nickname:sender;
    const item={...make("wechat-"+id+"-"+(++index),title,body,{chat:"true"},outgoing?profile.avatar:""),kind};
    item.time=current;item.sender=displaySender;item.outgoing=outgoing;item.read=true;
-   if(kind==="transfer"){
-    item.body=amount;
-    item.meta={...item.meta,transferStatus:"claimed",transferAmount:amount,transferDirection:outgoing?"sent":"received",transferRecipient:outgoing?sender:"user"};
+   if(kind==="transfer"||kind==="transferReceived"){
+    item.body=amount||body;
+    item.meta={...item.meta,transferStatus:"claimed",transferAmount:amount||lastTransferAmount,transferDirection:kind==="transferReceived"?"received":(outgoing?"sent":"received"),transferRecipient:kind==="transferReceived"?sender:(outgoing?"闺蜜":"user")};
    }
    rows.push(item);
   };
