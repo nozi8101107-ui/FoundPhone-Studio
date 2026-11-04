@@ -638,9 +638,10 @@ user 我刚刚路过一家店 看到这个
    body=body.replace(/结果遇见xxx了/g,"结果遇见"+(realNames[profile.crush]||"暧昧对象")+"了").replace(/\bxxx\b/g,realNames[profile.ex]||"前男友").replace(/\bxx\b/g,realNames[profile.crush]||"暧昧对象");
    const transfer=body.match(/^\[转账\]\s*([\d.]+)元?$/);
    if(transfer){
+    lastTransferAmount=transfer[1];
     add(sender,title,"transfer",transfer[1]);
-    if(sender==="user")add("闺蜜","已收款");
-    else add("user","已收款");
+    if(sender==="user")add("闺蜜","已接收","transferReceived",transfer[1]);
+    else add("user","已接收","transferReceived",transfer[1]);
    }else if(body==="[图片]"){
     add(sender,"图片","image");
    }else{
