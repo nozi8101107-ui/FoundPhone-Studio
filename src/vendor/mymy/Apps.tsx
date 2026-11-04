@@ -272,6 +272,15 @@ export function MymyKakao(p: SkinProps) {
               .filter((g) => g.title.includes(query.trim()))
               .map((g) => {
                 const last = g.items.at(-1)!;
+                // A contact's profile must come from their own incoming/profile
+                // record, never from the latest message (which may be sent by the phone owner).
+                const profile =
+                  g.items.find((item) => !item.outgoing && !!item.avatar) ||
+                  g.items.find((item) => !item.outgoing) ||
+                  g.items[0];
+                const contactAvatar = profile?.avatar || "";
+                const realName = g.title;
+                const chatRemark = String(profile?.meta?.remark || realName);
                 const hasStoryUnread = p.unreadThread === g.title || !!p.unreadThreads?.includes(g.title);
                 return (
                   <button
@@ -280,12 +289,12 @@ export function MymyKakao(p: SkinProps) {
                     onClick={() => { p.onThread(g.title); if (hasStoryUnread) p.onRead(g.title); }}
                   >
                     <span style={{position:"relative",display:"inline-flex"}}>
-                      <Avatar name={last.sender || g.title} src={last.avatar} />
+                      <Avatar name={realName} src={contactAvatar} />
                       {hasStoryUnread && <i aria-label="未读消息" style={{position:"absolute",right:-1,top:-1,width:9,height:9,borderRadius:"50%",background:"#ff3b30",border:"1.5px solid white"}} />}
                     </span>
                     <span className="kzkn">
-                      <b>{g.title}</b>
-                      <small>{tab === "好友" ? last.sender : last.body}</small>
+                      <b>{tab === "好友" ? realName : chatRemark}</b>
+                      {tab !== "好友" && <small>{last.body}</small>}
                     </span>
                     <span className="kzkmt">
                       {last.time.slice(-5)}
