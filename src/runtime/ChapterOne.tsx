@@ -3,7 +3,7 @@ import type { Item, Work } from "../schema";
 
 type StoryEvent = { from: "them" | "you"; text: string };
 const names: Record<string,string> = { shinyu:"申惟", dohoon:"金道勋", youngjae:"崔英宰", hanjin:"韩振", jihoon:"韩志薰", kyungmin:"李炅潣" };
-const english: Record<string,string> = { shinyu:"SHINYU", dohoon:"DOHOON", youngjae:"YOUNGJAE", hanjin:"HANJIN", jihoon:"JIHOON", kyungmin:"KYUNGMIN" };
+const english: Record<string,string> = { shinyu:"shinyu", dohoon:"dohoon", youngjae:"youngjae", hanjin:"hanjin", jihoon:"jihoon", kyungmin:"kyungmin" };
 const handles: Record<string,string> = { shinyu:"tlswjdghks", dohoon:"doking", youngjae:"jae_e", hanjin:"henan_prince", jihoon:"ahoooon", kyungmin:"kyungman_lee" };
 const appFor = (id:string) => id === "hanjin" ? "微信" : "KakaoTalk";
 const ev = (...rows:[ "them"|"you", string ][]):StoryEvent[] => rows.map(([from,text])=>({from,text}));
