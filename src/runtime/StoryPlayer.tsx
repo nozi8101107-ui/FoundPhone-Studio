@@ -548,8 +548,26 @@ user 我刚刚路过一家店 看到这个
  const friends=friendNames.map((name,index)=>{const handle=randId();return make("ig-friend-"+index,handle,"",{handle,username:name,account:"friend",relationship:"互相关注",mutual:"true"});});
  const selectedAccounts=selectedMembers.map(id=>make("ig-member-"+id,handles[id],"",{handle:handles[id],username:handles[id],account:id===profile.crush?"crush":"ex",member:id,relationship:"互相关注",remark:id===profile.crush?crushNames[id]:exNames[id]},avatarFor(id)));
  const mutualCount=friends.length+selectedAccounts.length;
+ const officialIgPostData=[
+  ["ig-tws-01",["IMG_9827.jpeg","IMG_9828.jpeg","IMG_9829.jpeg"]],
+  ["ig-tws-02",["IMG_9833.jpeg","IMG_9832.jpeg","IMG_9831.jpeg"]],
+  ["ig-tws-03",["IMG_9837.jpeg","IMG_9838.jpeg","IMG_9839.jpeg"]],
+  ["ig-tws-04",["IMG_9842.jpeg","IMG_9843.jpeg","IMG_9844.jpeg"]],
+  ["ig-tws-05",["IMG_9845.jpeg","IMG_9846.jpeg","IMG_9847.jpeg"]],
+  ["ig-tws-06",["IMG_9852.jpeg","IMG_9853.jpeg","IMG_9854.jpeg"]]
+ ] as const;
+ const officialIgPosts=officialIgPostData.map(([id,images],index)=>({
+  ...make(id,"TWS : '내 이름을 불러줘'", "TWS official update",{handle:"tws_pledis",username:"TWS (투어스)",account:"official",postNumber:String(index+1),images:JSON.stringify(images)}),
+  sender:"tws_pledis",
+  avatar:`${import.meta.env.BASE_URL}ig/IMG_9849.jpeg`,
+  kind:"post" as const,
+  media:`${import.meta.env.BASE_URL}ig/${images[0]}`,
+  likes:42000,
+  folder:"官方帖子"
+ }));
  const insta=[
   make("tws","TWS (투어스)","",{handle:"tws_pledis",username:"TWS (투어스)",posts:"2540",followers:"363w",following:"1",account:"official",relationship:"关注"}),
+  ...officialIgPosts,
   ...selectedAccounts,
   ...friends,
   make("ig-user-profile",profile.nickname,"",{handle:profile.nickname,username:profile.nickname,account:"user",followers:String(mutualCount),following:String(mutualCount+1),mutuals:String(mutualCount),followingOnly:"tws_pledis"})
