@@ -337,7 +337,6 @@ function PhoneRuntime({
       const targetApp = crush === "hanjin" ? "wechat" : "kakao";
       if (!creator && crush && !storyFinished) {
         setStoryApp(targetApp);
-        setStoryUnreadThreads((v) => ({...v,[storyUnreadKey(targetApp,String(work.variables.storyNickname || "user"))]:true}));
         setApp(targetApp);
         setStoryActive(true);
       }
@@ -641,8 +640,9 @@ function PhoneRuntime({
                 }
               }}
               onDispatchOpen={() => {
-                setApp("twitter");
-                setRecent((v) => ["twitter", ...v.filter((a) => a !== "twitter")].slice(0, 8));
+                setStoryUnreadThreads((v) => ({...v,[storyUnreadKey("twitter","Dispatch")]:true}));
+                setStoryNotification({app:"twitter",thread:"Dispatch",item:chapterDispatch});
+                setBanner("X · Dispatch 发布了一条独家报道");
               }}
               onFinish={() => {
                 setStoryActive(false);
@@ -663,14 +663,18 @@ function PhoneRuntime({
                 setStoryThread(notice.thread);
                 setStoryUnreadThreads((v) => { const next={...v}; delete next[storyUnreadKey(notice.app,notice.thread)]; return next; });
                 setStoryNotification(null);
-                open(notice.app);
+                if (notice.app === "twitter") {
+                  setApp("twitter");
+                  setRecent((v) => ["twitter", ...v.filter((a) => a !== "twitter")].slice(0, 8));
+                  window.dispatchEvent(new CustomEvent("foundphone-open-dispatch"));
+                } else open(notice.app);
               }}
               style={{position:"absolute",zIndex:90,top:12,left:12,right:12,width:"calc(100% - 24px)",maxWidth:390,margin:"0 auto",border:0,borderRadius:18,padding:"12px 14px",background:"rgba(250,250,252,.96)",backdropFilter:"blur(24px)",boxShadow:"0 8px 28px #0003",color:"#202124",textAlign:"left",display:"flex",gap:11,alignItems:"center"}}
             >
               <AppIcon id={storyNotification.app} small />
               <span style={{minWidth:0,flex:1}}>
                 <span style={{display:"flex",justifyContent:"space-between",gap:8,fontSize:12,color:"#555"}}>
-                  <strong>{storyNotification.app === "kakao" ? "KakaoTalk" : "微信"}</strong><span>刚刚</span>
+                  <strong>{storyNotification.app === "kakao" ? "KakaoTalk" : storyNotification.app === "twitter" ? "X" : "微信"}</strong><span>刚刚</span>
                 </span>
                 <strong style={{display:"block",fontSize:14,marginTop:2}}>{storyNotification.item.meta.remark || storyNotification.item.sender}</strong>
                 <span style={{display:"block",fontSize:13,marginTop:2,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{storyNotification.item.body}</span>
