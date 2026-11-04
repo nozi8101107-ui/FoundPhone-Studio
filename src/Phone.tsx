@@ -509,7 +509,7 @@ function PhoneRuntime({
                   ].filter((item) => {
                     if (creator) return true;
                     const chapterPost = item.id.startsWith("chapter-thread-") || item.id.startsWith("chapter-toilet-") || item.id.startsWith("chapter-battle-") || item.id.startsWith("chapter-exfan-") || item.id === "chapter-giveaway" || item.id === "chapter-dispatch";
-                    return !chapterPost || storyFinished;
+                    return !chapterPost || storyFinished || (storyActive && item.id === "chapter-dispatch");
                   })}
                   initialThread={app === storyApp ? pendingThread : ""}
                   unreadThread={storyUnreadThread}
@@ -585,6 +585,10 @@ function PhoneRuntime({
             <ChapterOne
               key={storyFlowKey}
               work={work}
+              onDispatchOpen={() => {
+                setApp("twitter");
+                setRecent((v) => ["twitter", ...v.filter((a) => a !== "twitter")].slice(0, 8));
+              }}
               onFinish={() => {
                 setStoryActive(false);
                 setStoryFinished(true);
