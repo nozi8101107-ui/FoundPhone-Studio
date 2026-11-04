@@ -272,7 +272,7 @@ export function MymyKakao(p: SkinProps) {
               .filter((g) => g.title.includes(query.trim()))
               .map((g) => {
                 const last = g.items.at(-1)!;
-                const hasStoryUnread = p.unreadThread === g.title;
+                const hasStoryUnread = p.unreadThread === g.title || !!p.unreadThreads?.includes(g.title);
                 return (
                   <button
                     className="kzkr kzkcr"
