@@ -603,11 +603,69 @@ const randomThreadComment=()=>Math.random()<0.8?highFrequencyComments[Math.floor
  const shuffledThreadTexts=[...threadTexts].sort(()=>Math.random()-.5); const threadItems=shuffledThreadTexts.map((body,index)=>{const author=randId();const item=make("thread-"+index,body,body,{handle:author,reposts:String(Math.floor(Math.random()*900)),shares:String(Math.floor(Math.random()*500))});item.sender=author;item.folder="正在关注";item.likes=Math.floor(Math.random()*12000);item.comments=Array.from({length:Math.floor(Math.random()*180)},()=>randId()+": "+randomThreadComment());return item;});
  const extraThreadTexts=["美咖也太火了吧我觉得会登顶换代","猪肝红99新诚心出","zgk姐姐别来飒飒飒了","苹果这事应该给所有苹果用户赔一部ip18pm","一个暴论：t开头的男团都很贱","我发现喜欢了很久的女生是拉拉怎么办","感觉我舍敌有病","今天买了一件好大的衣服感觉我爸爸（不是申惟）都能穿上","打包出tws站台 直接dm","感觉宰比是呆比","好想哭好想我家明星","有没有给我讲讲那个qsz的瓜","我有一个小众怒点","冷静下来想想道牛会怎么做","唯粉活不起了是吧","这次回归新歌好好听啊啊啊","我怎么感觉收录曲比主打好听","现在的脆好难看","我的爸呀大哥去做做医美吧","不是战场在哪我怎么没刷到","自从知道泡菜妹在韩语里是拜金女的意思之后我再也没用过这个词，，","人真的得追一个长得好看的爱豆 追线下拍视频发pyq都有面儿","我自己麻辣一下我心肝就算了你们dyf在飒什么","我爱上top时：啊啊啊怎么又爱上top了 我不要拼车带人啊\\n我爱上mid时：他/她凭啥不是top啊 她比top好多了吧\\n我爱上back时 没有爱上过back。","女孩们一定不要粉一个性格和长相都完美契合你理想型的爱豆 万一他哪天犯了什么错让你很难过甚至于泪洒当场你也是脱不了粉的。我现在每天都被我前心肝儿折磨得一会神一会鬼 这么久了我还在想要不要原谅他因为他真的只是犯了所有人都会犯的错呀。但又没法回去粉他因为我一想到他做的事我就膈应 我觉得要精神分裂了","哎其实在粉圈待久了就会对一些事有敏锐的直觉了。比如我经常在看物料的时候能分别代入唯粉公公嬷嬷cp粉对家粉视角来分析一下这件事之后会往哪个方向吵😳","我每天都要熬到在床上翻个身都能觉得到头晕的程度才肯放下手坤睡觉","人们到底对微胖有什么误解啊 叶舒华以前那也能叫微胖吗 以前那只是正常身材 现在反而瘦得可怜人儿了😳","韩国到底研究出什么新科技了 之前出现一堆暴瘦的爱豆的时候你们说韩国有新减肥技术我没信 现在看到方时赫也瘦了之后我信了","到底什么是开荤感啊 又研究面相又研究什么身形体态穿搭气质语气眼神的 样本在哪对照在哪 没有数据支撑的话难道不只是在自己的认知半径里的主观推断吗😳我比起两年前也成熟不少 穿衣风格一夜之间变化巨大 体态变好了 面相也变了 待人处事方式更是大相径庭 我也没开荤啊。。","不看预录的你申它干嘛","完了预录开始卡中文名了","人脸上自然的纹路 黑眼圈 痘坑 毛孔 绒毛 皱纹 痣 疤痕 这些瑕疵是最性感最生动的东西","无条件相信所有男爱豆非母胎solo 现下非单身状态 坤坤使用次数大于等于一 但是你要真发个文字瓜出来咯噔的话那不就是造黄谣吗😳","女孩们我怎么感觉我对我心肝完全是生理性喜欢。","其实我最佩服柳智敏的不是她生日会唱了中文歌 而是她中英日韩的歌都唱了","你再讨厌张妮妮 她也只是一只萌兔子而已 你放下偏见看看她的脸 都是很可爱的宝宝","别再问我属性了连我自己到现在也不知道我到底是我担的公公嬷嬷梦女妈粉还是cpf"];
 const extraThreads=extraThreadTexts.map((body,index)=>{const author=randId();const item=make("thread-extra-"+index,body,body,{handle:author,reposts:String(Math.floor(Math.random()*900)),shares:String(Math.floor(Math.random()*500))});item.sender=author;item.folder="正在关注";item.likes=Math.floor(Math.random()*12000);item.comments=Array.from({length:Math.floor(Math.random()*80)},()=>randId()+": "+randomThreadComment());return item;});
+
+ const weiboRandomNames=["小狗不困","椰椰乌龙","momo","BlueHour","小林同学","cloudnine","今天也要早睡","Luna_07","海盐芝士","Nana酱","一颗糖","yuki_22","晚风不晚","Ming","橘子汽水","noah_kk","小熊软糖","April","睡不醒的鱼","阿布"];
+ const weiboName=()=>weiboRandomNames[Math.floor(Math.random()*weiboRandomNames.length)];
+ const chooseWeibo=(xs:string[])=>xs[Math.floor(Math.random()*xs.length)];
+ const toiletComments=["看看缟纻猪肝","这不是挺好看的吗","评论区zgk来了","评论区别挽尊了","丑的好像另有其人","安利帖吧","长得好猥琐","这谁啊怎么长这样","面相好可怕…","这谁啊怎么出道的"];
+ const sixGen=["ILLIT","BABYMONSTER","Hearts2Hearts","RESCENE","A2O LITE"];
+ const bigbarComments=["能不能做点正事","评论区在说什么我们大吧已经够好了吧","怎么还有大吧zgk","好帅啊啊啊","萌……","好期待啊啊啊啊啊","这是在哪发的物料呀","笑死我了","好羡慕能去线下的","能不能换个美工"];
+ const commonBathComments=["看看缟纻猪肝","美帝实火#"+chooseWeibo(["寻珍","雕勋","锐因","雕年","枪年","队忙"])+"tws唯一美帝#","缟纻别点了","gxjh又让你赚爽了吧","皮下到底审不审稿","完全"+chooseWeibo(["申惟","金道勋","崔英宰","韩振","韩志薰","李炅潣","月表","老蛙","丑人"])+"粉丝","完全。","底下控评的滚回去","只知道#"+chooseWeibo(["申惟","金道勋","崔英宰","韩振","韩志薰","李炅潣"])+"tws唯一top#"];
+ const脱粉评论=["脱愉","评论区在说什么 这不是花挺多的","羡慕缟纻文采","说的全是实话…","自证上哪偷的","就不能多相信他一点吗","抱着必出神稿的决心就这么做了","拉队友共沉沦什么意思","这不是公司要求的吗怪他干嘛","脱愉宝宝 公司太阴了","宝子你猪肝很明显"];
+ const makeWeibo=(id:string,author:string,handle:string,body:string,comments:string[],folder:string)=>{
+  const item=make(id,body,body,{handle,reposts:String(Math.floor(Math.random()*1800)),accountType:folder,source:folder});
+  item.sender=author;item.folder=folder;item.likes=Math.floor(Math.random()*28000);
+  item.comments=comments.map(text=>weiboName()+": "+text);
+  return item;
+ };
+ const toiletPosts=[
+  ["老公你现在好像流浪汉","不脱先踩丑老公","toilet_01"],
+  ["这谁啊","不脱先踩丑老公","toilet_02"],
+  ["月表怎么会来","不脱先踩丑老公","toilet_03"],
+  ["能不能少吃点啊你这大脸盘子站队友旁边不觉得自卑吗","不脱先踩丑老公","toilet_04"],
+  ["肥成啥了还想着吃","不脱先踩丑老公","toilet_05"],
+  ["谁给他整的发型","不脱先踩丑老公","toilet_06"]
+ ].map(([body,author,id])=>makeWeibo(id,author,"不脱先踩丑老公",body,toiletComments,"厕所"));
+ const bathPosts=[
+  ["大家觉得六代最有可能登顶的是哪个女团？\nILLIT、BABYMONSTER、Hearts2Hearts、RESCENE、A2O LITE","浴血奋战","bath_01"],
+  ["李涛一下tms路人缘最好的是谁","浴血奋战","bath_02"],
+  ["五颜一候选人杂志销量🈶 谁赢了？","浴血奋战","bath_03"],
+  ["hybe真是顶级公关","浴血奋战","bath_04"],
+  ["aespa生日会数据拉表来了","浴血奋战","bath_05"],
+  ["李涛tms出道曲到底注没注","浴血奋战","bath_06"],
+  ["tms十月wvs拉表","浴血奋战","bath_07"],
+  ["KPOP六代男团十月破塔产出数排名","浴血奋战","bath_08"]
+ ].map(([body,author,id],index)=>{
+  const comments=index===0?[
+   "注水的粉丝能不能别来沾边了","六团一是那个吧","缟纻别点了","看看缟纻猪肝","笑死我了","都不是","#"+chooseWeibo(sixGen)+"六团一#"
+  ]:commonBathComments;
+  return makeWeibo(id,author,"浴血奋战",body,comments,"厕所");
+ });
+ const exFanPosts=[
+  ["我真的看不下去了 你很好 但是追你太累了","exfan_01"],
+  ["滚吧负心汉 去下地狱","exfan_02"],
+  ["我曾经那么爱你…你太伤粉丝心了 学生党花得不多 别审判我","exfan_03"]
+ ].map(([body,id])=>makeWeibo(id,"脱粉回踩救钱包","脱粉回踩救钱包",body,脱粉评论,"厕所"));
+ const bigbarAccounts=[
+  ["申惟shinyu_申吧","shinyu_bar"],["金道勋_sweet海","dohoon_bar"],["崔英宰_time","youngjae_bar"],
+  ["韩振_heart海","hanjin_bar"],["韩志薰_farm","jihoon_bar"],["李炅潣_happy","kyungmin_bar"]
+ ];
+ const bigbarPosts=bigbarAccounts.flatMap(([author,handle],index)=>{
+  const key=["shinyu","dohoon","youngjae","hanjin","jihoon","kyungmin"][index];
+  const base="bar_"+key+"_";
+  return [
+   makeWeibo(base+"1",author,handle,"【饭拍】今日饭拍更新 #tws唯一门面#\n好帅呀…\ncr：logo\n近期大事汇总：微博正文",bigbarComments,"大吧"),
+   makeWeibo(base+"2",author,handle,"【wvs】wvs回复更新\nwvs回复相关\n近期大事汇总：微博正文\n安利：微博正文",bigbarComments,"大吧"),
+   makeWeibo(base+"3",author,handle,"【应援】\n仁川机场大屏\n应援已经上线～欢迎大家积极打卡\n近期大事汇总：微博正文\n安利：微博正文",bigbarComments,"大吧")
+  ];
+ });
+ const weiboPosts=[...toiletPosts,...bathPosts,...exFanPosts,...bigbarPosts].sort(()=>Math.random()-.5);
+
  const historicalBills=historicalOrders.map(order=>{const bill=make("bill-"+order.id,order.title,"淘宝订单付款",{merchant:"淘宝 · "+order.sender,amount:"-¥"+order.meta.price,status:"支付成功",orderNumber:order.meta.number});bill.sender="淘宝";bill.folder="交易";bill.time=order.time;return bill;});
  const hiddenAppIds=new Set(["appstore","contacts","reminders","spotify","find"]);
  const cleanedApps=work.apps.map(app=>hiddenAppIds.has(app.id)?{...app,installed:false,visible:false,dock:false,folder:""}:app.id==="taobao"?{...app,installed:true,visible:true}:app);
  if(!cleanedApps.some(app=>app.id==="taobao"))cleanedApps.push({id:"taobao",name:"淘宝",installed:true,visible:true,dock:false,folder:"",icon:""});
- const personalized:Work={...work,apps:cleanedApps,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...cleanedData,kakao:[...(cleanedData.kakao||[]),...crushMessages,...exContact],wechat:[...(cleanedData.wechat||[]),...hanjinWechatMessages],instagram:[...(cleanedData.instagram||[]).filter(item=>item.meta.account==="official"),...insta],threads:[...(cleanedData.threads||[]),...threadItems,...extraThreads],taobao:[...(cleanedData.taobao||[]),...taobaoItems,...historicalOrders],alipay:[...(cleanedData.alipay||[]),...historicalBills]}};
+ const personalized:Work={...work,apps:cleanedApps,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...cleanedData,kakao:[...(cleanedData.kakao||[]),...crushMessages,...exContact],wechat:[...(cleanedData.wechat||[]),...hanjinWechatMessages],instagram:[...(cleanedData.instagram||[]).filter(item=>item.meta.account==="official"),...insta],threads:[...(cleanedData.threads||[]),...threadItems,...extraThreads],weibo:[...(cleanedData.weibo||[]).filter(item=>item.id!=="test-item-weibo"),...weiboPosts],taobao:[...(cleanedData.taobao||[]),...taobaoItems,...historicalOrders],alipay:[...(cleanedData.alipay||[]),...historicalBills]}};
  return <main className="story-runtime"><Phone key={session} work={personalized}/></main>;
 }
 createRoot(document.getElementById("root")!).render(<StoryPlayer/>);
