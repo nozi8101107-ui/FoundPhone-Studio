@@ -45,7 +45,7 @@ function StoryPlayer(){
 
  const make=(id:string,title:string,body:string,meta:Record<string,string>={},avatar="")=>({id,title,body,richText:"",meta,time:"2026-11-03 09:41",sender:labels[id]||title,avatar,kind:"text" as const,media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:false,read:false,likes:0,comments:[] as string[]});
  const birthdayCompare=(a:string,b:string)=>a.localeCompare(b);
- const olderThan=(id:string)=>birthdayCompare(profile.birthday,({shinyu:"20031107",dohoon:"20050130",youngjae:"20050531",hanjin:"20060205",jihoon:"20060328",kyungmin:"20071002"} as Record<string,string>)[id]||"99999999")<0;
+ const olderThan=(id:string)=>birthdayCompare(profile.birthday,({shinyu:"20031107",dohoon:"20050130",youngjae:"20050531",hanjin:"20060105",jihoon:"20060328",kyungmin:"20071002"} as Record<string,string>)[id]||"99999999")<0;
  
  const chatText:Record<string,string>={
  shinyu:`@2026-10-01 01:47
