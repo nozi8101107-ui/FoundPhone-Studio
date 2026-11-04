@@ -1259,7 +1259,7 @@ function AppContent({
           <ChevronLeft size={23} />
           {detail || thread ? "返回" : ""}
         </button>
-        <strong>{thread || name}</strong>
+        <strong>{thread ? (shown.find((i) => i.title === thread && i.meta?.remark)?.meta.remark || thread) : name}</strong>
         <button
           onClick={
             creator
@@ -1305,7 +1305,7 @@ function AppContent({
                 onClick={() => (creator ? onEdit(i) : onRead(i.id))}
               >
                 <span className="avatar">
-                  {(!i.outgoing && i.meta?.handle === "henan_prince")
+                  {(!i.outgoing && (i.meta?.handle === "henan_prince" || shown.some((v) => v.title === thread && v.meta?.handle === "henan_prince")))
                     ? <img src={`${import.meta.env.BASE_URL}people/IMG_9702.jpeg`} alt="" />
                     : i.avatar ? <img src={safeMedia(i.avatar)} alt="" /> : i.sender.slice(0, 1)}
                 </span>
@@ -1376,7 +1376,7 @@ function AppContent({
                     {contactAvatar ? <img src={safeMedia(contactAvatar)} alt="" /> : t.slice(0, 1)}
                   </span>
                   <span>
-                    <strong>{t}</strong>
+                    <strong>{list.find((i) => i.meta?.remark)?.meta.remark || t}</strong>
                     <p>{last.body}</p>
                   </span>
                   <small>{last.time.slice(-5)}</small>
