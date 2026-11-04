@@ -152,6 +152,7 @@ function PhoneRuntime({
   const [locked, setLocked] = useState(!creator);
   const storyKey = "foundphone.chapter1.v2.done:" + work.id + ":" + String(work.variables.storyNickname || "");
   const storyFlowKey = "foundphone.chapter1.v3:" + work.id + ":" + String(work.variables.storyNickname || "");
+  const chapterItemsKey = "foundphone.chapter1.messages:" + work.id;
   const [storyActive, setStoryActive] = useState(false);
   const [storyFinished, setStoryFinished] = useState(() => { try { return !!JSON.parse(localStorage.getItem(storyFlowKey) || "null")?.done; } catch { return false; } });
   const [storyThread, setStoryThread] = useState("");
@@ -159,7 +160,7 @@ function PhoneRuntime({
   const [storyUnreadThreads, setStoryUnreadThreads] = useState<Record<string, boolean>>({});
   const [deliveredStoryIds, setDeliveredStoryIds] = useState<string[]>([]);
   const [storyNotification, setStoryNotification] = useState<{app:string;thread:string;item:Item}|null>(null);
-  const [chapterItems, setChapterItems] = useState<Record<string,Item[]>>({});
+  const [chapterItems, setChapterItems] = useState<Record<string,Item[]>>(() => { try { return JSON.parse(localStorage.getItem(chapterItemsKey) || "{}"); } catch { return {}; } });
   const [storyReply, setStoryReply] = useState<{app:string;thread:string;text:string;token:number}|null>(null);
   const [pendingThread, setPendingThread] = useState("");
   const storyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -357,6 +358,7 @@ function PhoneRuntime({
   const displayTime = deviceNow.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: false });
   const chapterDispatch = useMemo(() => makeChapterDispatch(work, String(work.variables.storyCrush || "shinyu")), [work.id, work.variables.storyCrush]);
   const chapterSocial = useMemo(() => makeChapterSocial(work, String(work.variables.storyCrush || "shinyu")), [work.id, work.variables.storyCrush]);
+  useEffect(() => { try { localStorage.setItem(chapterItemsKey, JSON.stringify(chapterItems)); } catch {} }, [chapterItemsKey, chapterItems]);
   const storyUnreadKey = (appId:string, threadId:string) => appId + "::" + threadId;
   const unreadThreadForApp = Object.keys(storyUnreadThreads).find((key) => key.startsWith(app + "::"))?.slice(app.length + 2) || "";
   const appHasStoryUnread = (appId:string) => Object.keys(storyUnreadThreads).some((key) => key.startsWith(appId + "::"));
