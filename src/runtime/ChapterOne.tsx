@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Item, Work } from "../schema";
 
-type Event = { from: "them" | "you"; text: string };
+type StoryEvent = { from: "them" | "you"; text: string };
 const names: Record<string,string> = { shinyu:"申惟", dohoon:"金道勋", youngjae:"崔英宰", hanjin:"韩振", jihoon:"韩志薰", kyungmin:"李炅潣" };
 const english: Record<string,string> = { shinyu:"SHINYU", dohoon:"DOHOON", youngjae:"YOUNGJAE", hanjin:"HANJIN", jihoon:"JIHOON", kyungmin:"KYUNGMIN" };
 const handles: Record<string,string> = { shinyu:"tlswjdghks", dohoon:"doking", youngjae:"jae_e", hanjin:"henan_prince", jihoon:"ahoooon", kyungmin:"kyungman_lee" };
 const appFor = (id:string) => id === "hanjin" ? "微信" : "KakaoTalk";
-const ev = (...rows:[ "them"|"you", string ][]):Event[] => rows.map(([from,text])=>({from,text}));
+const ev = (...rows:[ "them"|"you", string ][]):StoryEvent[] => rows.map(([from,text])=>({from,text}));
 function crushChat(id:string):Event[] {
- const chats:Record<string,Event[]> = {
+ const chats:Record<string,StoryEvent[]> = {
  shinyu:ev(["them","准备好了吗"],["them","我到了"],["them","下来吧"],["you","好啦好啦"],["you","我马上来"]),
  dohoon:ev(["them","你来了吗"],["you","我马上"],["them","好"],["them","等下拍摄结束 我们去吃点什么吧"],["you","好呀好呀"]),
  youngjae:ev(["them","你到了吗"],["you","我到了！你在哪呀"],["them","回头"],["you","！"]),
@@ -38,8 +38,8 @@ function exChat(ex:string, crush:string, xp:string):Event[] {
  };
  return (xp==="GB"?gb:bg)[ex] || (xp==="GB"?gb.shinyu:bg.shinyu);
 }
-function friendChat():Event[]{return ev(["them","？？？？"],["them","啊啊啊啊你怎么被拍了"],["you","我好心累"],["them","啊啊啊怎么昨天刚说完你就被d社发了"],["them","大头照保卫战…"]);}
-function closeChat(id:string):Event[]{
+function friendChat():StoryEvent[]{return ev(["them","？？？？"],["them","啊啊啊啊你怎么被拍了"],["you","我好心累"],["them","啊啊啊怎么昨天刚说完你就被d社发了"],["them","大头照保卫战…"]);}
+function closeChat(id:string):StoryEvent[]{
  const rows:Record<string,Event[]> = {
  shinyu:ev(["them","没事 别怕"],["them","你到家了就好好休息"],["them","我先去公司开会"],["them","晚安"]),
  dohoon:ev(["them","你别看"],["them","你别看手机了"],["them","到家就赶紧休息吧"],["them","今天还叫你出来…"],["them","很累了吧"],["them","晚安"]),
@@ -58,7 +58,7 @@ export function ChapterOne({work,onFinish,onDispatchOpen,onNativeOpen,onNativeIt
  const crush=String(work.variables.storyCrush||"shinyu"), ex=String(work.variables.storyEx||"dohoon"), xp=String(work.variables.storyXp||"BG"), nick=String(work.variables.storyNickname||"你");
  const key="foundphone.chapter1.v3:"+work.id+":"+nick;
  const [stage,setStage]=useState<"crush"|"dispatch"|"friend"|"ex"|"closing"|"done">(()=>{try{const v=JSON.parse(localStorage.getItem(key)||"null");return v?.done?"done":v?.stage||"crush"}catch{return "crush"}});
- const [rows,setRows]=useState<Event[]>([]);
+ const [rows,setRows]=useState<StoryEvent[]>([]);
  const [cursor,setCursor]=useState(()=>{try{return Number(JSON.parse(localStorage.getItem(key)||"null")?.cursor)||0}catch{return 0}});
  const [draft,setDraft]=useState("");
  const [busy,setBusy]=useState(false);
@@ -104,7 +104,7 @@ export function ChapterOne({work,onFinish,onDispatchOpen,onNativeOpen,onNativeIt
    }
    callbacks.current.onNativePrompt(nativeApp,nativeThread,e.text,cursor+1);
    const receive=(event:Event)=>{
-     const detail=(event as CustomEvent<{app:string;thread:string;text:string}>).detail;
+     const detail=(event as unknown as CustomEvent<{app:string;thread:string;text:string}>).detail;
      if(!detail||detail.app!==nativeApp||detail.thread!==nativeThread||!detail.text?.trim())return;
      window.removeEventListener("foundphone-story-send",receive);
      const blockedMessage=stage==="ex"&&xp==="BG"&&ex==="youngjae"&&cursor===events.length-1;
@@ -115,22 +115,16 @@ export function ChapterOne({work,onFinish,onDispatchOpen,onNativeOpen,onNativeIt
    window.addEventListener("foundphone-story-send",receive);
    return()=>window.removeEventListener("foundphone-story-send",receive);
  },[stage,cursor,events.length,nativeApp,nativeThread,stamp,targetId,ex,xp,work]);
- const visibleRows=events.slice(0,cursor);
- const send=()=>{const e=events[cursor];if(!e||e.from!=="you"||!draft.trim())return;if(stage==="ex"&&xp==="BG"&&ex==="youngjae"&&cursor===events.length-1)setBlocked(true);setBusy(false);setCursor(v=>v+1);setDraft("");};
- const fill=()=>{const e=events[cursor];if(e?.from==="you")setDraft(e.text)};
- const goDispatch=()=>{setComments(false);setStage("friend");setRows([]);setCursor(0);setBanner("微信：闺蜜发来新消息 · "+names[ex]+"：发来新消息");};
- useEffect(()=>{if(stage!=="dispatch")return;setXOpened(true);onDispatchOpen();const t=window.setTimeout(goDispatch,2000);return()=>clearTimeout(t)},[stage]);
- const allDone=stage==="done";
- const heading=stage==="crush"||stage==="closing"?names[crush]:stage==="friend"?"闺蜜":stage==="ex"?names[ex]:"Dispatch";
- const displayStage:string=stage;
 
- if(displayStage!=="done")return null;
- return <div className="chapter-one-overlay" style={{position:"absolute",inset:0,zIndex:120,background:"#f5f5f7",color:"#19191d",display:"flex",flexDirection:"column",fontFamily:"-apple-system,BlinkMacSystemFont,sans-serif"}}>
- <style>{".chapter-one-overlay button{font:inherit}.chapter-one-head{height:58px;flex:none;background:#fff;border-bottom:1px solid #e7e7eb;display:flex;align-items:center;justify-content:space-between;padding:0 16px}.chapter-one-scroll{overflow:auto;flex:1;padding:14px 12px}.chapter-one-bubble{max-width:82%;padding:11px 13px;border-radius:17px;margin:8px 0;white-space:pre-wrap;line-height:1.45;font-size:14px;background:white;box-shadow:0 1px 2px #0001}.chapter-one-bubble.you{margin-left:auto;background:#a8e6a0}.chapter-one-composer{background:#fff;padding:10px;display:flex;gap:8px;border-top:1px solid #e5e5e9}.chapter-one-composer button{border:0;border-radius:18px;padding:10px 14px;background:#222;color:white}.chapter-one-composer button:disabled{opacity:.35}.chapter-one-feed{background:#fff;border-radius:16px;padding:18px;white-space:pre-wrap;line-height:1.65;font-size:14px}.chapter-one-modal{position:absolute;inset:0;background:#0007;display:grid;place-items:center;padding:24px}.chapter-one-modal section{background:white;border-radius:20px;padding:24px;text-align:center;width:100%;max-width:310px}.chapter-one-modal button,.chapter-one-primary{border:0;background:#171717;color:#fff;border-radius:12px;padding:12px 20px;margin-top:16px}.chapter-one-muted{color:#777;font-size:12px}"}</style>
- <header className="chapter-one-head"><strong>{displayStage==="dispatch"?"X":(stage==="friend"?"微信":appFor(stage==="ex"?ex:crush))+" · "+heading}</strong><small>{stage==="crush"?"1-1":displayStage==="dispatch"?"1-2":stage==="friend"||stage==="ex"?"1-3":stage==="closing"?"1-4":"完成"}</small></header>
- {displayStage==="dispatch"?<div className="chapter-one-scroll">{!xOpened?<div className="chapter-one-feed"><b>X · 新推送</b><p>Dispatch 发布了一条与你关注的账号相关的独家报道。</p><button className="chapter-one-primary" style={{width:"100%"}} onClick={()=>{setXOpened(true);setComments(true)}}>打开 X</button></div>:<><div className="chapter-one-muted">为你推荐 · 刚刚</div><article className="chapter-one-feed"><b>Dispatch</b><p>{dispatchBody(crush)}</p><div className="chapter-one-muted">♡ 3.2万　↻ 5.4万　评论 2000+</div>{comments&&<div style={{marginTop:16}}>{["让粉丝成天飒飒飒 回旋镖了吧","啊啊啊大晚上睡不着了",names[crush]+"你对得起谁","d社依旧权威","蹲pledis回应","等公司公告吧","等公司公告的 冷知识 那个谁当年也发公告了","上升期谈恋爱 "+names[crush]+"你要死吗",names[crush]+"十年老粉脱粉了","一直烦串不串 出道才几年就十年老粉","是路人你就给我路过","这么真的料不信的有了","今晚hybe将灯火通明",names[crush]+"你对得起谁 退团！","今年谈恋爱的好多啊","黄泉路人都滚","这是ai的吧",names[crush]+" tws唯一恋爱咖"].sort(()=>Math.random()-.5).slice(0,15+Math.floor(Math.random()*11)).map((x,i)=><p key={i} style={{borderBottom:"1px solid #eee",padding:"8px 0"}}>{x}</p>)}</div>}</article><div className="chapter-one-muted" style={{textAlign:"center",padding:12}}>你正在浏览 X…</div></>}</div>
- :stage==="done"?<div className="chapter-one-modal"><section><h2>剧情1已结束</h2><p>可以自由探索手机啦！</p><button onClick={onFinish}>确定</button></section></div>
- :<><div className="chapter-one-scroll"><div className="chapter-one-muted" style={{textAlign:"center",marginBottom:14}}>{stage==="crush"?stamp:stage==="friend"?"微信 · 刚刚":stage==="ex"?"刚刚": "今天"}</div>{history.map((item,i)=><div key={"history-"+item.id} className={"chapter-one-bubble "+(item.outgoing?"you":"")}>{item.body}</div>)}{history.length>0&&<div className="chapter-one-muted" style={{textAlign:"center",padding:8}}>以下为新收到的剧情消息</div>}{visibleRows.map((e,i)=><div key={i} className={"chapter-one-bubble "+(e.from==="you"?"you":"")}>{blocked&&i===visibleRows.length-1?"❗ ":""}{e.text}</div>)}{blocked&&<div className="chapter-one-muted" style={{textAlign:"right",color:"#b42318"}}>消息已发出，但被对方拒收了</div>}{busy&&<div className="chapter-one-muted">对方正在输入…</div>}</div><div className="chapter-one-composer"><button onClick={fill} disabled={events[cursor]?.from!=="you"} style={{background:"#f1f1f3",color:"#333",flex:1,textAlign:"left"}}>{draft||"点击输入框填入剧情回复"}</button><button onClick={send} disabled={events[cursor]?.from!=="you"||!draft.trim()}>发送</button></div></>}
- {banner&&stage!=="done"&&<div style={{position:"absolute",top:8,left:10,right:10,zIndex:5,background:"#fffffff2",borderRadius:15,padding:12,boxShadow:"0 5px 20px #0002",fontSize:13}}>新消息　{banner}</div>}
- </div>;
+ if(stage!=="done")return null;
+ return (
+   <div className="chapter-one-modal" style={{position:"absolute",inset:0,zIndex:120,background:"rgba(0,0,0,.42)",display:"grid",placeItems:"center",padding:24}}>
+     <section style={{background:"#fff",borderRadius:20,padding:24,textAlign:"center",width:"100%",maxWidth:310,color:"#19191d"}}>
+       <h2>剧情1已结束</h2>
+       <p>可以自由探索手机啦！</p>
+       <button onClick={onFinish} style={{border:0,background:"#171717",color:"#fff",borderRadius:12,padding:"12px 24px",marginTop:16}}>确定</button>
+     </section>
+   </div>
+ );
+
 }
