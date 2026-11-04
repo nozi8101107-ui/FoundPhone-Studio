@@ -325,6 +325,7 @@ export function MymyInstagram(p: SkinProps) {
     [draft, setDraft] = useState(""),
     [pop, setPop] = useState("");
   const [accountList, setAccountList] = useState<"粉丝" | "关注" | "">("");
+  const [carouselIndex, setCarouselIndex] = useState<Record<string, number>>({});
   const [profileHandle, setProfileHandle] = useState(p.owner || "机主");
   const posts = p.items.filter(
       (i) => i.folder !== "私信" && i.meta.story !== "true",
@@ -380,7 +381,19 @@ export function MymyInstagram(p: SkinProps) {
           setPop(i.id);
         }}
       >
-        <Media item={i} />
+        {i.meta.images ? (() => {
+          let images: string[] = [];
+          try { images = JSON.parse(i.meta.images) as string[]; } catch { images = []; }
+          const index = carouselIndex[i.id] || 0;
+          return images.length ? <div className="ig-carousel">
+            <img src={`${import.meta.env.BASE_URL}ig/${images[index]}`} alt={i.title} />
+            {images.length > 1 && <>
+              <button aria-label="上一张" disabled={index === 0} onClick={() => setCarouselIndex(v => ({...v,[i.id]:Math.max(0,index-1)}))}>‹</button>
+              <button aria-label="下一张" disabled={index === images.length-1} onClick={() => setCarouselIndex(v => ({...v,[i.id]:Math.min(images.length-1,index+1)}))}>›</button>
+              <small>{index+1}/{images.length}</small>
+            </>}
+          </div> : <Media item={i} />;
+        })() : <Media item={i} />}
         {pop === i.id && (
           <Heart
             className="mymy-heart-pop"
@@ -421,7 +434,7 @@ export function MymyInstagram(p: SkinProps) {
           <Bookmark fill={saved.includes(i.id) ? "currentColor" : "none"} />
         </button>
       </div>
-      <p className="lk2">{i.likes + (liked.includes(i.id) ? 1 : 0)} 次赞</p>
+      <p className="lk2">{i.meta.postNumber ? "4.2w" : i.likes + (liked.includes(i.id) ? 1 : 0)} 次赞</p>
       <button
         className="igc"
         onClick={() => {
