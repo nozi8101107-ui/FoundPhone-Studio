@@ -126,6 +126,7 @@ function MessageList({
             className="skin-bubble"
             onClick={() => (creator ? onItem(i) : (i.kind === "transfer" || i.kind === "transferReceived") ? onTransfer?.(i) : onRead(i.id))}
           >
+            {i.meta.blocked === "true" && <span aria-label="消息发送失败" style={{position:"absolute",left:-19,top:"50%",transform:"translateY(-50%)",width:15,height:15,borderRadius:"50%",background:"#d93025",color:"#fff",fontSize:11,fontWeight:700,lineHeight:"15px",textAlign:"center"}}>!</span>}
             {["image", "audio", "video"].includes(i.kind) ? (
               <ItemMedia item={i} />
             ) : i.kind === "transfer" || i.kind === "transferReceived" ? (
