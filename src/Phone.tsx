@@ -530,6 +530,9 @@ function PhoneRuntime({
                     window.dispatchEvent(new CustomEvent("foundphone-story-send", {detail:{app,thread,text}}));
                     setStoryReply(null);
                   }}
+                  onStoryThreadChange={(thread) => {
+                    if (app === storyApp) setStoryThread(thread);
+                  }}
                   creator={creator}
                   state={s}
                   onRead={(id) => { event("read", id); setStoryUnreadThreads((v) => { const next={...v}; delete next[storyUnreadKey(app,id)]; return next; }); }}
@@ -1045,6 +1048,7 @@ function AppContent({
   unreadThreads = [],
   storyReply = null,
   onStorySend,
+  onStoryThreadChange,
 }: {
   app: AppPlugin;
   name: string;
@@ -1063,6 +1067,7 @@ function AppContent({
   unreadThreads?: string[];
   storyReply?: { app: string; thread: string; text: string; token: number } | null;
   onStorySend?: (text: string, thread: string) => void;
+  onStoryThreadChange?: (thread: string) => void;
 }) {
   const [detail, setDetail] = useState<Item | null>(null);
   const [thread, setThread] = useState(initialThread);
@@ -1183,7 +1188,7 @@ function AppContent({
               onAdd={onAdd}
               onBack={onBack}
               thread={thread}
-              onThread={(value) => { setThread(value); if (value === unreadThread || unreadThreads.includes(value)) onRead(value); }}
+              onThread={(value) => { setThread(value); onStoryThreadChange?.(value); if (value === unreadThread || unreadThreads.includes(value)) onRead(value); }}
               unreadThread={unreadThread}
               unreadThreads={unreadThreads}
               storyReply={storyReply?.app === app.id && storyReply.thread === thread ? {text:storyReply.text,token:storyReply.token} : null}
