@@ -1052,10 +1052,39 @@ const extraThreads=extraThreadTexts.map((body,index)=>{const author=randId();con
  }));
 
  const historicalBills=historicalOrders.map(order=>{const bill=make("bill-"+order.id,order.title,"淘宝订单付款",{merchant:"淘宝 · "+order.sender,amount:"-¥"+order.meta.price,status:"支付成功",orderNumber:order.meta.number});bill.sender="淘宝";bill.folder="交易";bill.time=order.time;return bill;});
+
+ const chapterRealNames:Record<string,string>={shinyu:"申惟",dohoon:"金道勋",youngjae:"崔英宰",hanjin:"韩振",jihoon:"韩志薰",kyungmin:"李炅潣"};
+ const chapterBlack:Record<string,string>={shinyu:"老雕",dohoon:"老牛",youngjae:"丑年",hanjin:"蛤蟆",jihoon:"强子",kyungmin:"娟子"};
+ const chapterCaught:Record<string,string>={shinyu:"晶㬊申晶㬊",dohoon:"道勋金道勋",youngjae:"英宰崔英宰",hanjin:"韩振朴韩振",jihoon:"志薰韩志薰",kyungmin:"炅潣李炅潣"};
+ const chapterMember=chapterRealNames[profile.crush]||"申惟", chapterAlias=labels[profile.crush]||"SHINYU";
+ const chapterThreadTexts=[
+  "wtf我的河道好精彩","别吵了烦不烦","黄泉路人能不能滚","纳尼","我就说他面相看起来会很爱谈的",
+  "我让"+chapterBlack[profile.crush]+"粉丝成天飒飒飒 回旋镖了吧","啊啊啊大晚上睡不着了好坤动",
+  chapterMember+"你对得起谁","等公司公告的 冷知识 那个谁当年也发公告了",
+  "上升期谈恋爱 "+chapterMember+"你要死吗","是路人你就给我路过","这么真的料不信的有了",
+  "今晚hybe将灯火通明",chapterMember+"你对得起谁","今年谈恋爱的好多啊",
+  "我的舍友是看我是"+chapterMember+"粉丝 刚刚听说了这件事 然后刚刚塞给我一堆零食。。我真的要爱上她了",
+  "这是ai的吧",chapterMember+" tws唯一恋爱咖"
+ ];
+ const chapterThreadComments=["笑死我了","wtf","dnys","佛","留友看","起初人们没有在意",chapterCaught[profile.crush]+"你被捕了","黄泉路人能不能滚","纳尼","纳尼。","啊啊啊啊啊啊","坤续"];
+ const chapterThreads=chapterThreadTexts.map((body,index)=>{const author=randId();const item=make("chapter-thread-"+index,body,body,{handle:author,reposts:String(18000+Math.floor(Math.random()*90000)),shares:String(18000+Math.floor(Math.random()*90000))});item.sender=author;item.folder="正在关注";item.likes=5000+Math.floor(Math.random()*30000);item.comments=randomizeWeiboComments(chapterThreadComments);return item;});
+ const toiletChapterComments=["wtf","我的法 他生图这么丑啊","评论区的造谣很有意思？","啊啊啊啊啊啊","纳尼。","闹麻",chapterCaught[profile.crush]+"你被捕了","黄泉路人能不能滚"];
+ const battleChapterComments=["看看缟纻猪肝","都澄清了 是ai 造谣的4000+","缟纻别点了","gxjh又让你赚爽了吧","皮下到底审不审稿"];
+ const exChapterComments=["脱愉","评论区在说什么 这不是花挺多的","羡慕缟纻文采","说的全是实话…","自证上哪偷的","就不能多相信他一点吗","抱着必出神稿的决心就这么做了","拉队友共沉沦什么意思"];
+ const giveawayComments=["严肃参与","就是就是 都澄清了","相信"+chapterMember,"参与！！","大家都转一转呀","414","我就知道是假的"];
+ const chapterWeibo=[
+  ...["【心灵丑】恋爱咖滚","【心灵丑】为什么这么漂亮的皮囊底下是这么没有内涵的灵魂 你很丑陋","脸丑就算了 还心灵丑 谈谈谈 谈你爸 放生几张生图 姥子再也不替你捂了"].map((body,i)=>makeWeibo("chapter-toilet-"+i,"不脱先踩丑老公","不脱先踩丑老公",body,toiletChapterComments,"厕所")),
+  ...["事已至此tws top是不是可以换人了","不要让"+chapterBlack[profile.crush]+"粉丝太嚣张","等着看hybe顶级公关","tws恋爱拉表来了 有一个人高居榜首"].map((body,i)=>makeWeibo("chapter-battle-"+i,"浴血奋战","浴血奋战",body,battleChapterComments,"厕所")),
+  ...["恋爱咖滚","滚吧负心汉 和嫂子一起下地狱","你太伤粉丝的心了 学生党花得不多 别审判我"].map((body,i)=>makeWeibo("chapter-exfan-"+i,"脱粉回踩救钱包","脱粉回踩救钱包",body,exChapterComments,"厕所")),
+  makeWeibo("chapter-giveaway",weiboName(),weiboName(),"【抽奖博】"+chapterAlias+"的敬业和职业素养我们有目共睹 恋爱传闻纯属造谣 图片已澄清 详情见：微博正文\n转发+评论抽5个人188元🧧、10个人52元🧧 自动开奖\n要求没有嘴过"+chapterAlias+" 会查主页",giveawayComments,"推荐")
+ ];
+ const dispatchComments=["让"+chapterBlack[profile.crush]+"粉丝成天飒飒飒 回旋镖了吧","啊啊啊大晚上睡不着了",chapterMember+"你对得起谁","d社依旧权威","蹲pledis回应","等公司公告吧","等公司公告的 冷知识 那个谁当年也发公告了","上升期谈恋爱 "+chapterMember+"你要死吗",chapterMember+"十年老粉脱粉了","一直烦串不串 出道才几年就十年老粉","是路人你就给我路过","这么真的料不信的有了","今晚hybe将灯火通明",chapterMember+"你对得起谁 退团！","今年谈恋爱的好多啊","黄泉路人都滚","这是ai的吧",chapterMember+" tws唯一恋爱咖"];
+ const chapterDispatch=xPost("chapter-dispatch","Dispatch","dispatch","【独家】TWS成员"+chapterAlias+"深夜密会素人女性 汉南洞街头举止亲密疑似恋爱中\n\nDispatch独家报道\nD社今日晚间独家捕捉到TWS成员"+chapterAlias+"与一名素人女性在首尔深夜约会，两人举止亲密，疑似恋爱中。\n据本社记者追踪，当晚21时40分许，"+chapterAlias+"身着黑色卫衣、佩戴棒球帽和口罩，与一名素人女性一同离开，两人自然并肩而行，"+chapterAlias+"主动接过女方手中的纸袋，途中多次低头靠近女方耳边交谈，笑容明显。"+chapterAlias+"轻拍女方背部，随后两人分别乘车离开。\n据本社掌握的信息，该女性为圈外素人，尚未知两人通过何种渠道认识。身边人士向D社透露：“"+chapterAlias+"对这段关系非常谨慎，私下对女方很体贴”\n截至发稿时，"+chapterAlias+"所属公司PLEDIS Entertainment尚未就此事发表官方立场。",true);
+ chapterDispatch.likes=30000+Math.floor(Math.random()*9000);chapterDispatch.meta.reposts="50000+";chapterDispatch.meta.commentCount="2000+";chapterDispatch.comments=dispatchComments.sort(()=>Math.random()-.5).slice(0,15+Math.floor(Math.random()*11)).map((body)=>weiboName()+": "+body);
  const hiddenAppIds=new Set(["appstore","contacts","reminders","spotify","find"]);
  const cleanedApps=work.apps.map(app=>hiddenAppIds.has(app.id)?{...app,installed:false,visible:false,dock:false,folder:""}:app.id==="taobao"?{...app,installed:true,visible:true}:app);
  if(!cleanedApps.some(app=>app.id==="taobao"))cleanedApps.push({id:"taobao",name:"淘宝",installed:true,visible:true,dock:false,folder:"",icon:""});
- const personalized:Work={...work,apps:cleanedApps,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...cleanedData,wechat:[...(cleanedData.wechat||[]),...hanjinWechatMessages,...wechatGroups,...wechatContacts,...wechatChatItems],youtube:[...(cleanedData.youtube||[]),...youtubeVideos],kakao:[...(cleanedData.kakao||[]),...kakaoMessages],instagram:[...(cleanedData.instagram||[]).filter(item=>item.meta.account==="official"),...insta],threads:[...(cleanedData.threads||[]),...threadItems,...extraThreads],twitter:[...(cleanedData.twitter||[]).filter(item=>item.id!=="test-item-twitter"),...xPosts],weibo:[...(cleanedData.weibo||[]).filter(item=>item.id!=="test-item-weibo"),...weiboPosts],taobao:[...(cleanedData.taobao||[]),...taobaoItems,...historicalOrders],alipay:[...(cleanedData.alipay||[]),...historicalBills]}};
+ const personalized:Work={...work,variables:{...work.variables,storyCrush:profile.crush,storyEx:profile.ex,storyXp:profile.xp,storyNickname:profile.nickname},apps:cleanedApps,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...cleanedData,wechat:[...(cleanedData.wechat||[]),...hanjinWechatMessages,...wechatGroups,...wechatContacts,...wechatChatItems],youtube:[...(cleanedData.youtube||[]),...youtubeVideos],kakao:[...(cleanedData.kakao||[]),...kakaoMessages],instagram:[...(cleanedData.instagram||[]).filter(item=>item.meta.account==="official"),...insta],threads:[...(cleanedData.threads||[]),...threadItems.filter(()=>Math.random()<0.3),...extraThreads.filter(()=>Math.random()<0.3),...chapterThreads],twitter:[...(cleanedData.twitter||[]).filter(item=>item.id!=="test-item-twitter"),chapterDispatch,...xPosts],weibo:[...(cleanedData.weibo||[]).filter(item=>item.id!=="test-item-weibo"),...weiboPosts.filter(()=>Math.random()<0.45),...chapterWeibo],taobao:[...(cleanedData.taobao||[]),...taobaoItems,...historicalOrders],alipay:[...(cleanedData.alipay||[]),...historicalBills]}};
  return <main className="story-runtime"><Phone key={session} work={personalized}/></main>;
 }
 createRoot(document.getElementById("root")!).render(<StoryPlayer/>);
