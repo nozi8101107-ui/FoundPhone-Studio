@@ -75,7 +75,7 @@ export function ChapterOne({work,onFinish,onDispatchOpen}:{work:Work;onFinish:()
  const send=()=>{const e=events[cursor];if(!e||e.from!=="you"||!draft.trim())return;if(stage==="ex"&&xp==="BG"&&ex==="youngjae"&&cursor===events.length-1)setBlocked(true);setBusy(false);setCursor(v=>v+1);setDraft("");};
  const fill=()=>{const e=events[cursor];if(e?.from==="you")setDraft(e.text)};
  const goDispatch=()=>{setComments(false);setStage("friend");setRows([]);setCursor(0);setBanner("微信：闺蜜发来新消息 · "+names[ex]+"：发来新消息");};
- useEffect(()=>{if(stage!=="dispatch")return;setXOpened(true);onDispatchOpen();const t=window.setTimeout(goDispatch,12000);return()=>clearTimeout(t)},[stage]);
+ useEffect(()=>{if(stage!=="dispatch")return;setXOpened(true);onDispatchOpen();const t=window.setTimeout(goDispatch,2000);return()=>clearTimeout(t)},[stage]);
  const allDone=stage==="done";
  const heading=stage==="crush"||stage==="closing"?names[crush]:stage==="friend"?"闺蜜":stage==="ex"?names[ex]:"Dispatch";
  const displayStage:string=stage;
