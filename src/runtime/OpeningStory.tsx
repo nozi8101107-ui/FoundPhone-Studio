@@ -79,7 +79,10 @@ function Message({mine,text}:{mine:boolean;text:string}) {
 export function OpeningStory({work,onFinish}:{work:Work;onFinish:()=>void}) {
  const id=String(work.variables.storyCrush||"shinyu"), ex=String(work.variables.storyEx||"youngjae"), xp=String(work.variables.storyXp||"BG"), nickname=String(work.variables.storyNickname||"你");
  const member=names[id]||"申惟", alias=aliases[id]||"SHINYU";
- const [stage,setStage]=useState<Stage>("crush"),[thread,setThread]=useState(""),[messages,setMessages]=useState<Turn[]>([]),[cursor,setCursor]=useState(0),[draft,setDraft]=useState(""),[friendDone,setFriendDone]=useState(false),[exDone,setExDone]=useState(false);
+ const progressKey="foundphone.chapter1.progress:"+work.id+":"+nickname;
+ const [saved]=useState(()=>{try{return JSON.parse(localStorage.getItem(progressKey)||"null") as {stage?:Stage;thread?:string;messages?:Turn[];cursor?:number;friendDone?:boolean;exDone?:boolean}|null}catch{return null}});
+ const [stage,setStage]=useState<Stage>(saved?.stage||"crush"),[thread,setThread]=useState(saved?.thread||""),[messages,setMessages]=useState<Turn[]>(saved?.messages||[]),[cursor,setCursor]=useState(saved?.cursor||0),[draft,setDraft]=useState(""),[friendDone,setFriendDone]=useState(saved?.friendDone||false),[exDone,setExDone]=useState(saved?.exDone||false),[xOpening,setXOpening]=useState(false);
+ useEffect(()=>{try{localStorage.setItem(progressKey,JSON.stringify({stage,thread,messages,cursor,friendDone,exDone}))}catch{}},[progressKey,stage,thread,messages,cursor,friendDone,exDone]);
  const activeFlow=useMemo(()=>stage==="crush"?crushFlow(id):stage==="friend"?friendFlow:stage==="ex"?exFlow(ex,xp):stage==="crush_end"?endFlow(id):[],[stage,id,ex,xp]);
  const current=activeFlow[cursor];
  useEffect(()=>{
@@ -123,7 +126,7 @@ export function OpeningStory({work,onFinish}:{work:Work;onFinish:()=>void}) {
   <div style={header}><b>𝕏</b><span style={{fontSize:13,color:"#666"}}>为你推荐</span><span>◉</span></div>
   <div style={{padding:14,background:"#fff",borderBottom:"1px solid #eee"}}><div style={{fontWeight:700,fontSize:14}}>Dispatch <small style={{color:"#777",fontWeight:400}}>· @dispatch</small></div><h3 style={{fontSize:17,lineHeight:1.45,margin:"12px 0"}}>【独家】TWS成员{alias}深夜密会素人女性 汉南洞街头举止亲密疑似恋爱中</h3><p style={{fontSize:13,lineHeight:1.65,color:"#333"}}>Dispatch独家报道<br/>D社今日晚间独家捕捉到TWS成员{alias}与一名素人女性在首尔深夜约会，两人举止亲密，疑似恋爱中。<br/>据本社记者追踪，当晚21时40分许，{alias}身着黑色卫衣、佩戴棒球帽和口罩，与一名素人女性一同离开，两人自然并肩而行，{alias}主动接过女方手中的纸袋，途中多次低头靠近女方耳边交谈，笑容明显。{alias}轻拍女方背部，随后两人分别乘车离开。<br/>据本社掌握的信息，该女性为圈外素人，尚未知两人通过何种渠道认识。身边人士向D社透露：“{alias}对这段关系非常谨慎，私下对女方很体贴”<br/>截至发稿时，{alias}所属公司PLEDIS Entertainment尚未就此事发表官方立场。</p><div style={{fontSize:12,color:"#777",marginTop:10}}>转发 5w+　评论 2000+　♥ 3w+</div></div>
   <div style={{padding:14,overflow:"auto",flex:1}}><b style={{fontSize:14}}>热门评论</b>{["让"+(black[id]?.[0]||member)+"粉丝成天飒飒飒 回旋镖了吧","啊啊啊大晚上睡不着了",member+"你对得起谁","d社依旧权威","蹲pledis回应","等公司公告吧","等公司公告的 冷知识 那个谁当年也发公告了","上升期谈恋爱 "+member+"你要死吗",member+"十年老粉脱粉了","一直烦串不串 出道才几年就十年老粉","是路人你就给我路过","这么真的料不信的有了","今晚hybe将灯火通明",member+"你对得起谁 退团！","今年谈恋爱的好多啊","黄泉路人都滚","这是ai的吧",member+" tws唯一恋爱咖"].sort(()=>Math.random()-.5).slice(0,15+Math.floor(Math.random()*11)).map((x,i)=><p key={i} style={{fontSize:13,padding:"7px 0",borderBottom:"1px solid #e8e8e8",margin:0}}><span style={{color:"#75808c"}}>@user_{i+13}</span><br/>{x}</p>)}</div>
-  <button onClick={()=>{setStage("friend");setMessages([]);setCursor(0);}} style={{margin:12,height:44,border:0,borderRadius:22,background:"#111",color:"#fff",fontWeight:700}}>打开 X 推送　→</button>
+  <button disabled={xOpening} onClick={()=>{setXOpening(true);window.setTimeout(()=>{setStage("friend");setMessages([]);setCursor(0);},2000);}} style={{margin:12,height:44,border:0,borderRadius:22,background:"#111",color:"#fff",fontWeight:700,opacity:xOpening?.6:1}}>{xOpening?"正在打开…":"打开 X 推送　→"}</button>
  </div>;
  const contact=stage==="crush"||stage==="crush_end"?member:stage==="friend"?"闺蜜":names[ex]||"前男友";
  const isWechat=(stage==="friend"||id==="hanjin"&&stage!=="crush_end"||ex==="hanjin"&&stage==="ex");
