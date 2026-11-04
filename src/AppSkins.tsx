@@ -277,6 +277,9 @@ export function WeChatSkin(p: SkinProps) {
                   <small>{name}</small>
                 </div>
               ))}
+              {p.items.find((i) => i.title === p.thread)?.meta.memberCount && (
+                <p className="skin-empty">共 {p.items.find((i) => i.title === p.thread)?.meta.memberCount} 位成员</p>
+              )}
             </div>
           )}
           {p.items
