@@ -17,6 +17,7 @@ export const itemSchema = z.object({
       "video",
       "file",
       "transfer",
+      "transferReceived",
       "call",
       "order",
       "note",
