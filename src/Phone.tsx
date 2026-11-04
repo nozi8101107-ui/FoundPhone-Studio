@@ -534,7 +534,7 @@ function PhoneRuntime({
                     const chapterPost = item.id.startsWith("chapter-thread-") || item.id.startsWith("chapter-toilet-") || item.id.startsWith("chapter-battle-") || item.id.startsWith("chapter-exfan-") || item.id === "chapter-giveaway" || item.id === "chapter-dispatch";
                     return !chapterPost || storyFinished || (storyActive && item.id === "chapter-dispatch");
                   }).sort((a,b) => {
-                    const priority = (id:string) => id === "chapter-dispatch" ? 0 : app === "weibo" && id === "chapter-giveaway" ? 1 : 2;
+                    const priority = (id:string) => id === "chapter-dispatch" ? 0 : app === "threads" && id.startsWith("chapter-thread-") ? 0 : app === "weibo" && id === "chapter-giveaway" ? 0 : app === "weibo" && (id.startsWith("chapter-toilet-") || id.startsWith("chapter-battle-") || id.startsWith("chapter-exfan-")) ? 1 : 2;
                     return priority(a.id)-priority(b.id);
                   })}
                   initialThread={app === storyApp ? pendingThread : ""}
