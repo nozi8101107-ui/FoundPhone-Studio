@@ -1126,6 +1126,29 @@ function AppContent({
     if (!i.password || unlocks.includes(i.id)) onRead(i.id);
   };
   const chats = [...new Set(shown.map((i) => i.title))];
+  // Resolve Hanjin's KakaoTalk contact from the original seeded contact data,
+  // not only from story messages (which belong to WeChat).
+  const kakaoSeed = work.data.kakao || [];
+  const isHanjinItem = (i: Item) =>
+    i.meta?.handle === "henan_prince" ||
+    i.sender === "韩振" ||
+    i.meta?.remark === "韩振" ||
+    i.title === "韩振";
+  const hanjinSeed = kakaoSeed.find((i) =>
+    i.meta?.handle === "henan_prince" ||
+    i.sender === "韩振" ||
+    i.meta?.remark === "韩振" ||
+    i.title === "韩振"
+  );
+  const hanjinRemark = String(hanjinSeed?.meta?.remark || hanjinSeed?.sender || "韩振");
+  const hanjinAvatar = import.meta.env.BASE_URL + "people/IMG_9702.jpeg";
+  const isHanjinThread = (title: string, list: Item[]) =>
+    app.id === "kakao" &&
+    (list.some(isHanjinItem) ||
+      kakaoSeed.some((i) =>
+        i.title === title &&
+        (i.meta?.handle === "henan_prince" || i.sender === "韩振" || i.meta?.remark === "韩振")
+      ));
   const back = () => {
     if (detail) setDetail(null);
     else if (thread) setThread("");
@@ -1259,7 +1282,7 @@ function AppContent({
           <ChevronLeft size={23} />
           {detail || thread ? "返回" : ""}
         </button>
-        <strong>{thread ? (shown.find((i) => i.title === thread && i.meta?.remark)?.meta.remark || thread) : name}</strong>
+        <strong>{thread ? (isHanjinThread(thread, shown.filter((i) => i.title === thread)) ? hanjinRemark : shown.find((i) => i.title === thread && i.meta?.remark)?.meta.remark || thread) : name}</strong>
         <button
           onClick={
             creator
@@ -1305,8 +1328,8 @@ function AppContent({
                 onClick={() => (creator ? onEdit(i) : onRead(i.id))}
               >
                 <span className="avatar">
-                  {(!i.outgoing && (i.meta?.handle === "henan_prince" || shown.some((v) => v.title === thread && v.meta?.handle === "henan_prince")))
-                    ? <img src={`${import.meta.env.BASE_URL}people/IMG_9702.jpeg`} alt="" />
+                  {(!i.outgoing && (isHanjinThread(thread, shown.filter((v) => v.title === thread))))
+                    ? <img src={hanjinAvatar} alt="" />
                     : i.avatar ? <img src={safeMedia(i.avatar)} alt="" /> : i.sender.slice(0, 1)}
                 </span>
                 <span className="bubble">
@@ -1359,10 +1382,13 @@ function AppContent({
             chats.map((t) => {
               const list = shown.filter((i) => i.title === t),
                 last = list[list.length - 1],
-                isHanjin = list.some((i) => i.meta?.handle === "henan_prince"),
+                isHanjin = isHanjinThread(t, list),
                 contactAvatar = isHanjin
-                  ? `${import.meta.env.BASE_URL}people/IMG_9702.jpeg`
-                  : list.find((i) => !i.outgoing && i.avatar)?.avatar || list.find((i) => i.avatar)?.avatar || "";
+                  ? hanjinAvatar
+                  : list.find((i) => !i.outgoing && i.avatar)?.avatar || list.find((i) => i.avatar)?.avatar || "",
+                contactRemark = isHanjin
+                  ? hanjinRemark
+                  : list.find((i) => i.meta?.remark)?.meta.remark || t;
               return (
                 <button
                   className="contact-row"
@@ -1376,7 +1402,7 @@ function AppContent({
                     {contactAvatar ? <img src={safeMedia(contactAvatar)} alt="" /> : t.slice(0, 1)}
                   </span>
                   <span>
-                    <strong>{list.find((i) => i.meta?.remark)?.meta.remark || t}</strong>
+                    <strong>{contactRemark}</strong>
                     <p>{last.body}</p>
                   </span>
                   <small>{last.time.slice(-5)}</small>
