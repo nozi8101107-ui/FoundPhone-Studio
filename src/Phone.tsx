@@ -142,7 +142,11 @@ function PhoneRuntime({
   const [locked, setLocked] = useState(!creator);
   const storyKey = "foundphone.chapter1.v2.done:" + work.id + ":" + String(work.variables.storyNickname || "");
   const storyFlowKey = "foundphone.chapter1.v3:" + work.id + ":" + String(work.variables.storyNickname || "");
-  const chapterDispatch = (work.data.twitter || []).find((item) => item.id === "chapter-dispatch");
+  const dispatchDate = work.phone.date || "2026-09-01";
+  const rawChapterDispatch = (work.data.twitter || []).find((item) => item.id === "chapter-dispatch");
+  const chapterDispatch = rawChapterDispatch
+    ? { ...rawChapterDispatch, time: dispatchDate + " 23:00" }
+    : undefined;
   const chapterItemsKey = "foundphone.chapter1.messages:" + work.id;
   const [storyActive, setStoryActive] = useState(false);
   const [storyFinished, setStoryFinished] = useState(() => { try { return !!JSON.parse(localStorage.getItem(storyFlowKey) || "null")?.done; } catch { return false; } });
@@ -235,7 +239,8 @@ function PhoneRuntime({
   }, []);
   const completePayment = () => {
     if (!checkout) return;
-    const {item,quantity}=checkout;
+    const {item}=checkout;
+    const quantity=/避孕套|安全套|condom/i.test(item.title+" "+item.body) ? 1 : checkout.quantity;
     const total=Number(item.meta.price||0)*quantity;
     const time=new Date().toLocaleString("sv-SE",{hour12:false}).replace("T"," ");
     const number="TB"+Date.now().toString().slice(-12);
@@ -520,7 +525,11 @@ function PhoneRuntime({
                     work.apps.find((a) => a.id === app)?.name ?? plugin.name
                   }
                   items={[
-                    ...(work.data[app] ?? []),
+                    ...(work.data[app] ?? []).map((item) =>
+                      app === "twitter" && item.id === "chapter-dispatch"
+                        ? { ...item, time: dispatchDate + " 23:00" }
+                        : item
+                    ),
                     ...(s.messages[app] ?? []),
                     ...(chapterItems[app] ?? []),
                   ].filter((item) => {
@@ -1235,6 +1244,7 @@ function AppContent({
               appId={app.id}
               owner={work.phone.owner}
               virtualTime={state.time}
+              virtualDate={work.phone.date}
               ui={state.ui?.[app.id]}
               onUi={creator ? undefined : onUi}
               name={name}
