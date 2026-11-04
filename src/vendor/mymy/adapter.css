@@ -699,3 +699,10 @@
   flex: none;
   border-radius: 50%;
 }
+
+.mymy-ui .ig-carousel{position:relative;width:100%;height:270px;background:#f1f1f4;overflow:hidden}
+.mymy-ui .ig-carousel>img{display:block;width:100%;height:100%;object-fit:cover}
+.mymy-ui .ig-carousel>button{position:absolute;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:#ffffffd9;color:#222;font-size:22px;line-height:24px;display:grid;place-items:center}
+.mymy-ui .ig-carousel>button:first-of-type{left:8px}
+.mymy-ui .ig-carousel>button:nth-of-type(2){right:8px}
+.mymy-ui .ig-carousel>small{position:absolute;right:10px;bottom:10px;padding:3px 7px;border-radius:12px;background:#0008;color:#fff;font-size:10px}
