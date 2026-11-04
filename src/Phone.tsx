@@ -156,7 +156,7 @@ function PhoneRuntime({
   const [storyFinished, setStoryFinished] = useState(() => { try { return !!JSON.parse(localStorage.getItem(storyFlowKey) || "null")?.done; } catch { return false; } });
   const [storyThread, setStoryThread] = useState("");
   const [storyApp, setStoryApp] = useState("");
-  const [storyUnreadThread, setStoryUnreadThread] = useState("");
+  const [storyUnreadThreads, setStoryUnreadThreads] = useState<Record<string, boolean>>({});
   const [deliveredStoryIds, setDeliveredStoryIds] = useState<string[]>([]);
   const [storyNotification, setStoryNotification] = useState<{app:string;thread:string;item:Item}|null>(null);
   const [chapterItems, setChapterItems] = useState<Record<string,Item[]>>({});
@@ -357,6 +357,9 @@ function PhoneRuntime({
   const displayTime = deviceNow.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: false });
   const chapterDispatch = useMemo(() => makeChapterDispatch(work, String(work.variables.storyCrush || "shinyu")), [work.id, work.variables.storyCrush]);
   const chapterSocial = useMemo(() => makeChapterSocial(work, String(work.variables.storyCrush || "shinyu")), [work.id, work.variables.storyCrush]);
+  const storyUnreadKey = (appId:string, threadId:string) => appId + "::" + threadId;
+  const unreadThreadForApp = Object.keys(storyUnreadThreads).find((key) => key.startsWith(app + "::"))?.slice(app.length + 2) || "";
+  const appHasStoryUnread = (appId:string) => Object.keys(storyUnreadThreads).some((key) => key.startsWith(appId + "::"));
   const plugin = getApp(app);
   useEffect(() => {
     const count = s.notifications.length;
@@ -534,7 +537,7 @@ function PhoneRuntime({
                     return priority(a.id)-priority(b.id);
                   })}
                   initialThread={app === storyApp ? pendingThread : ""}
-                  unreadThread={storyUnreadThread}
+                  unreadThread={unreadThreadForApp}
                   storyReply={storyReply}
                   onStorySend={(text, thread) => {
                     window.dispatchEvent(new CustomEvent("foundphone-story-send", {detail:{app:app.id,thread,text}}));
@@ -542,7 +545,7 @@ function PhoneRuntime({
                   }}
                   creator={creator}
                   state={s}
-                  onRead={(id) => { event("read", id); if (id === storyThread) setStoryUnreadThread(""); }}
+                  onRead={(id) => { event("read", id); if (id === storyThread) setStoryUnreadThreads((v) => { const next={...v}; delete next[storyUnreadKey(app,storyThread)]; return next; }); }}
                   onEdit={(item) => onEdit?.(app, item)}
                   onAdd={() => onAdd?.(app)}
                   onBack={() => setApp("")}
@@ -587,7 +590,7 @@ function PhoneRuntime({
                   <AppIcon
                     key={a.id}
                     id={a.id}
-                    unread={a.id === storyApp && !!storyUnreadThread}
+                    unread={appHasStoryUnread(a.id)}
                     name={small ? undefined : a.name}
                     small={small}
                     custom={a.icon}
@@ -616,7 +619,7 @@ function PhoneRuntime({
                 setStoryApp(nativeApp);
                 setPendingThread(thread);
                 setStoryThread(thread);
-                setStoryUnreadThread("");
+                setStoryUnreadThreads({});
                 setStoryNotification(null);
                 setApp(nativeApp);
                 setRecent((v) => [nativeApp, ...v.filter((a) => a !== nativeApp)].slice(0, 8));
@@ -630,7 +633,7 @@ function PhoneRuntime({
                   setBanner("新消息 · "+item.sender+"："+item.body);
                   window.setTimeout(() => setBanner(""), 2600);
                 } else {
-                  setStoryUnreadThread(thread);
+                  setStoryUnreadThreads((v) => ({...v,[storyUnreadKey(nativeApp,thread)]:true}));
                   setStoryNotification({app:nativeApp,thread,item});
                 }
               }}
