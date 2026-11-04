@@ -216,8 +216,9 @@ user
 我们去狎鸥亭怎么样
 你：好
 嗯`,
- hanjin:`@2026-10-01 19:08
-哈咯 user 备注韩振`,
+ hanjin:`@2026-11-04 19:08
+哈咯 user 备注韩振
+你：好的好的`,
  jihoon:`@2026-10-01 14:02
 啊今天练习好累
 但是刚刚吃了好吃的
@@ -587,9 +588,11 @@ user 我刚刚路过一家店 看到这个
   ...friends,
   make("ig-user-profile",profile.nickname,"",{handle:profile.nickname,username:profile.nickname,account:"user",followers:String(mutualCount),following:String(mutualCount+1),mutuals:String(mutualCount),followingOnly:"tws_pledis"})
  ];
- const exContact=profile.ex!==profile.crush?exMessages:[];
+ const exContact=profile.ex!==profile.crush?(profile.ex==="hanjin"?buildMessages("hanjin","韩振",`@2026-11-04 19:08
+哈咯 user 备注韩振
+你：好的好的`,avatarFor("hanjin")):exMessages):[];
  const hanjinSelected=profile.crush==="hanjin"||profile.ex==="hanjin";
- const hanjinWechatMessages=hanjinSelected?(profile.crush==="hanjin"?hanjinWechat:buildMessages("hanjin",handles.hanjin,breakupText.hanjin,avatarFor("hanjin"))):[];
+ const hanjinWechatMessages=hanjinSelected?(profile.crush==="hanjin"?hanjinWechat:buildMessages("hanjin",handles.hanjin,breakupText.hanjin,avatarFor("hanjin"))).map(item=>({...item,avatar:item.outgoing?profile.avatar:item.avatar})):[];
  const isPlaceholder=(item:Work["data"][string][number])=>/测试(用户|联系人|会话|消息|内容|回复|动态)/.test([item.title,item.body,item.sender].join(" "))||item.body==="这是一条测试内容。"||item.body==="这是一条测试消息。";
  const cleanedData=Object.fromEntries(Object.entries(work.data).map(([app,items])=>[app,items.filter(item=>!isPlaceholder(item))])) as Work["data"];
  cleanedData.instagram=(cleanedData.instagram||[]).filter(item=>item.meta.account==="official" && item.kind!=="post");
