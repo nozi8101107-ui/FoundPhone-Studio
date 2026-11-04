@@ -561,7 +561,7 @@ user 我刚刚路过一家店 看到这个
   sender:"tws_pledis",
   avatar:`${import.meta.env.BASE_URL}ig/IMG_9849.jpeg`,
   kind:"post" as const,
-  media:`${import.meta.env.BASE_URL}ig/${images[0]}`,
+  media:`ig/${images[0]}`,
   likes:42000,
   folder:"官方帖子"
  }));
