@@ -57,7 +57,7 @@ function Actions({ p, item, commentsDisabled = false, commentCount }: { p: Props
 function PostHeader({ item, p }: { item: Item; p: Props }) {
   return (
     <button className="social-author" onClick={() => p.onItem(item)}>
-      <Avatar name={item.sender} />
+      <Avatar name={item.sender} src={item.avatar} />
       <span>
         <strong>{item.sender}</strong>
         <small>{meta(item, "handle", item.time)}</small>
@@ -167,7 +167,7 @@ export function XSkin(p: Props) {
           .filter((i) => tab === "为你推荐" || i.folder === "正在关注")
           .map((i) => (
             <article className="x-post" key={i.id}>
-              <Avatar name={i.sender} />
+              <Avatar name={i.sender} src={i.avatar} />
               <div>
                 <button className="x-byline" onClick={() => p.onItem(i)}>
                   <strong>{i.sender}</strong>
@@ -225,7 +225,7 @@ export function ThreadsSkin(p: Props) {
         ).map((i) => (
           <article className="threads-post" key={i.id}>
             <div className="thread-avatar">
-              <Avatar name={i.sender} />
+              <Avatar name={i.sender} src={i.avatar} />
               <i />
             </div>
             <div>
@@ -304,7 +304,7 @@ export function FacebookSkin(p: Props) {
                 key={s}
                 onClick={() => p.onItem(items.find((i) => i.sender === s)!)}
               >
-                <Avatar name={s} />
+                <Avatar name={s} src={items.find((item) => item.sender === s)?.avatar} />
                 <strong>{s}</strong>
               </button>
             ))}
@@ -364,7 +364,7 @@ export function RedbookSkin(p: Props) {
               <Media item={i} />
               <strong>{i.title}</strong>
               <div>
-                <Avatar name={i.sender} />
+                <Avatar name={i.sender} src={i.avatar} />
                 <small>{i.sender}</small>
                 <Heart size={12} />
                 <small>{i.likes}</small>
@@ -623,7 +623,7 @@ export function SnapchatSkin(p: Props) {
           <div className="snap-chats">
             {list.map((x) => (
               <button key={x.id} onClick={() => p.onItem(x)}>
-                <Avatar name={x.sender} />
+                <Avatar name={x.sender} src={x.avatar} />
                 <div>
                   <strong>{x.sender}</strong>
                   <small>{x.body}</small>
@@ -636,7 +636,7 @@ export function SnapchatSkin(p: Props) {
           <>
             <Media item={i} />
             <button className="snap-author" onClick={() => p.onItem(i)}>
-              <Avatar name={i.sender} />
+              <Avatar name={i.sender} src={i.avatar} />
               {i.sender}
             </button>
             <button
