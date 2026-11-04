@@ -68,7 +68,12 @@ export function ChapterOne({work,onFinish,onDispatchOpen,onNativeOpen,onNativeIt
  const [blocked,setBlocked]=useState(()=>{try{return !!JSON.parse(localStorage.getItem(key)||"null")?.blocked}catch{return false}});
  const [exFirstDelivered,setExFirstDelivered]=useState(()=>{try{return !!JSON.parse(localStorage.getItem(key)||"null")?.exFirstDelivered}catch{return false}});
  const current=stage==="crush"?crushChat(crush):stage==="friend"?friendChat():stage==="ex"?exChat(ex,crush,xp):stage==="closing"?closeChat(crush,nick):[];
- const stamp=crush==="dohoon"?"15:30":crush==="hanjin"?"15:25":crush==="youngjae"?"20:30":crush==="jihoon"?"18:50":crush==="kyungmin"?"19:49":"20:03";
+ const storyDate=work.phone.date||"2026-09-01";
+ const stamp=stage==="crush"
+   ? (crush==="dohoon"?"15:30":crush==="hanjin"?"15:25":crush==="youngjae"?"20:30":crush==="jihoon"?"18:50":crush==="kyungmin"?"19:49":"20:03")
+   : stage==="friend" ? storyDate+" 23:03"
+   : stage==="ex" ? storyDate+" 23:05"
+   : storyDate+" 23:07";
  const targetId=stage==="ex"?ex:crush;
  const nativeApp=stage==="friend"?"wechat":targetId==="hanjin"?"wechat":"kakao";
  const nativeContact=(work.data[nativeApp]||[]).find(item=>item.meta.handle===handles[targetId]);
