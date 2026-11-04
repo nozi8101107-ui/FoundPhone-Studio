@@ -64,6 +64,7 @@ import {
 } from "./schema";
 import { dispatch, choose, visible, advance } from "./engine";
 import { db } from "./persistence";
+import { OpeningStory } from "./runtime/OpeningStory";
 export function AppIcon({
   id,
   name,
@@ -135,6 +136,8 @@ function PhoneRuntime({
   const [app, setApp] = useState("");
   const [homeRequest, setHomeRequest] = useState(0);
   const [locked, setLocked] = useState(!creator);
+  const storyKey = "foundphone.chapter1.done:" + work.id + ":" + String(work.variables.storyNickname || "");
+  const [openingStory, setOpeningStory] = useState(false);
   const [pinOpen, setPinOpen] = useState(false);
   const [quickCamera, setQuickCamera] = useState(false);
   const [keyboard, setKeyboard] = useState(false);
@@ -304,6 +307,7 @@ function PhoneRuntime({
     if (!work.phone.passcode || pin === work.phone.passcode) {
       setLocked(false);
       setPinOpen(false);
+      if (!creator && work.variables.storyCrush && !localStorage.getItem(storyKey)) setOpeningStory(true);
       event("password", pin);
     } else {
       setPinError("密码不正确");
@@ -551,6 +555,7 @@ function PhoneRuntime({
               />
             )}
           </AnimatePresence>
+          {openingStory && !locked && <OpeningStory work={work} onFinish={() => { localStorage.setItem(storyKey, "1"); setOpeningStory(false); }} />}
           {folder && (
             <div className="folder-overlay" onClick={() => setFolder("")}>
               <h2>{folder}</h2>
