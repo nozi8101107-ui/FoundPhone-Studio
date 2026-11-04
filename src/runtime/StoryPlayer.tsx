@@ -685,11 +685,43 @@ const extraThreads=extraThreadTexts.map((body,index)=>{const author=randId();con
  });
  const weiboPosts=[...toiletPosts,...bathPosts,...exFanPosts,...bigbarPosts,...extraSupportPosts].sort(()=>Math.random()-.5);
 
+ const xRandomHandles=["softcloud_","yjarchive","luvshinyu","dohhoney","hanjinzip","twsplanet","bluehour_","myluv247","onlytws","seoulstarlight","yjfilm","shinyu_log","dohoonpic","hanjinluv","to_us_daily"];
+ const xRandomName=()=>xRandomHandles[Math.floor(Math.random()*xRandomHandles.length)]+String(Math.floor(10+Math.random()*990));
+ const xPost=(id:string,sender:string,handle:string,body:string,official=false)=>{
+  const item=make(id,body,body,{handle,reposts:String(official?3000+Math.floor(Math.random()*17000):Math.floor(Math.random()*2500)),views:String(official?300000+Math.floor(Math.random()*1700000):1000+Math.floor(Math.random()*180000)),commentCount:String(official?20+Math.floor(Math.random()*65):0)}, ""); 
+  item.sender=sender;item.folder="正在关注";item.likes=official?10000+Math.floor(Math.random()*90000):Math.floor(Math.random()*18000);
+  item.comments=[];
+  return item;
+ };
+ const xOfficialPosts=[
+  xPost("x_sbs_mc_shinyu","SBSKPOP X INKIGAYO","SBSKPOP","今日#MC신유가요\n\n#인기가요 #MC #신유 #TWS @TWS_PLEDIS",true),
+  xPost("x_tws_mv","TWS_PLEDIS","TWS_PLEDIS","TWS : '내 이름을 불러줘' Official MV\n\nyoutu.be/3MPUCncZBR0\n\n#TWS #투어스 #247WithUs #TO_US #내이름을불러줘 #CallMyName",true),
+  xPost("x_tws_fansign","TWS_PLEDIS","TWS_PLEDIS","TWS 2nd Single Album 'TO US' 발매 기념 팬사인회 안내\n\n#TWS #투어스 #247WithUs #TO_US",true)
+ ];
+ const xRandomBodies=[
+  "오닐 퇴근 #신유\n아ㅏㅏㅏ미쳤어",
+  "아얼굴도  #신유 얼굴",
+  "중국업자들이 가져갈거면 국내 선예매 왜해",
+  "남자아이돌 안무 존예수준미쳤나? 발목잡고 턴하는거봐",
+  "얼굴진짜.. 뽀용하게생김",
+  "imagine how hard yj must have worked for this comeback",
+  "믿기지가 않아ㅏㅏㅏ 🥹🍀✨",
+  "ถามทุกคนหน่อยฮะ ถ้าเที่ยวต่างประเทศครั้งแรก ประเทศไหนเดินทางง่าย ปลอดภัย และรอดสุดสำหรับมือใหม่",
+  "아니 도훈이 오늘얼굴 ㄹㅇ 천사같음...존잘",
+  "얘들아 도훈 흑발... 미쳤다.....",
+  "태어나서 현실에서 본 남자 중에 한진 쌩얼이 거의 원탑인 듯",
+  "🪼: i’ll tell you the behind after the post (the photos)\n🪼: i got off the car and went to a convenience store\n🪼: i was so happy\n🪼: that i wanted to buy some nurungji\n🪼: and was about to make the payment but suddenly the bank was under maintenance\n🪼: and my wallet was in another bag\n🪼: at the same time the staff there were like ‘Oh!.. aren’t you TWS?,..’\n🪼: so woahhh\n🪼: i told them to wait for me for just 30 seconds\n🪼: i ran like crazy to get my wallet and came back\n🪼: but still the tears didn’t go away\n🪼: i was so moved 🥹",
+  "멤버들에게 하고싶었던 말?\n경민: PASS!"
+ ];
+ const xRandomPosts=xRandomBodies.map((body,index)=>xPost("x_user_"+(index+1),xRandomName(),xRandomName(),body,false));
+ const xPosts=[...xOfficialPosts,...xRandomPosts].sort(()=>Math.random()-.5);
+
+
  const historicalBills=historicalOrders.map(order=>{const bill=make("bill-"+order.id,order.title,"淘宝订单付款",{merchant:"淘宝 · "+order.sender,amount:"-¥"+order.meta.price,status:"支付成功",orderNumber:order.meta.number});bill.sender="淘宝";bill.folder="交易";bill.time=order.time;return bill;});
  const hiddenAppIds=new Set(["appstore","contacts","reminders","spotify","find"]);
  const cleanedApps=work.apps.map(app=>hiddenAppIds.has(app.id)?{...app,installed:false,visible:false,dock:false,folder:""}:app.id==="taobao"?{...app,installed:true,visible:true}:app);
  if(!cleanedApps.some(app=>app.id==="taobao"))cleanedApps.push({id:"taobao",name:"淘宝",installed:true,visible:true,dock:false,folder:"",icon:""});
- const personalized:Work={...work,apps:cleanedApps,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...cleanedData,kakao:[...(cleanedData.kakao||[]),...crushMessages,...exContact],wechat:[...(cleanedData.wechat||[]),...hanjinWechatMessages],instagram:[...(cleanedData.instagram||[]).filter(item=>item.meta.account==="official"),...insta],threads:[...(cleanedData.threads||[]),...threadItems,...extraThreads],weibo:[...(cleanedData.weibo||[]).filter(item=>item.id!=="test-item-weibo"),...weiboPosts],taobao:[...(cleanedData.taobao||[]),...taobaoItems,...historicalOrders],alipay:[...(cleanedData.alipay||[]),...historicalBills]}};
+ const personalized:Work={...work,apps:cleanedApps,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...cleanedData,kakao:[...(cleanedData.kakao||[]),...crushMessages,...exContact],wechat:[...(cleanedData.wechat||[]),...hanjinWechatMessages],instagram:[...(cleanedData.instagram||[]).filter(item=>item.meta.account==="official"),...insta],threads:[...(cleanedData.threads||[]),...threadItems,...extraThreads],twitter:[...(cleanedData.twitter||[]).filter(item=>item.id!=="test-item-twitter"),...xPosts],weibo:[...(cleanedData.weibo||[]).filter(item=>item.id!=="test-item-weibo"),...weiboPosts],taobao:[...(cleanedData.taobao||[]),...taobaoItems,...historicalOrders],alipay:[...(cleanedData.alipay||[]),...historicalBills]}};
  return <main className="story-runtime"><Phone key={session} work={personalized}/></main>;
 }
 createRoot(document.getElementById("root")!).render(<StoryPlayer/>);
