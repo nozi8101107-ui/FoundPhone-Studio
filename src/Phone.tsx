@@ -538,6 +538,7 @@ function PhoneRuntime({
                   })}
                   initialThread={app === storyApp ? pendingThread : ""}
                   unreadThread={unreadThreadForApp}
+                  unreadThreads={Object.keys(storyUnreadThreads).filter((key) => key.startsWith(app + "::")).map((key) => key.slice(app.length + 2))}
                   storyReply={storyReply}
                   onStorySend={(text, thread) => {
                     window.dispatchEvent(new CustomEvent("foundphone-story-send", {detail:{app:app.id,thread,text}}));
@@ -545,7 +546,7 @@ function PhoneRuntime({
                   }}
                   creator={creator}
                   state={s}
-                  onRead={(id) => { event("read", id); if (id === storyThread) setStoryUnreadThreads((v) => { const next={...v}; delete next[storyUnreadKey(app,storyThread)]; return next; }); }}
+                  onRead={(id) => { event("read", id); setStoryUnreadThreads((v) => { const next={...v}; delete next[storyUnreadKey(app,id)]; return next; }); }}
                   onEdit={(item) => onEdit?.(app, item)}
                   onAdd={() => onAdd?.(app)}
                   onBack={() => setApp("")}
@@ -657,6 +658,7 @@ function PhoneRuntime({
               onClick={() => {
                 const notice = storyNotification;
                 setPendingThread(notice.thread);
+                setStoryThread(notice.thread);
                 setStoryUnreadThreads((v) => { const next={...v}; delete next[storyUnreadKey(notice.app,notice.thread)]; return next; });
                 setStoryNotification(null);
                 open(notice.app);
@@ -1050,6 +1052,7 @@ function AppContent({
   work,
   initialThread = "",
   unreadThread = "",
+  unreadThreads = [],
   storyReply = null,
   onStorySend,
 }: {
@@ -1067,6 +1070,7 @@ function AppContent({
   work: Work;
   initialThread?: string;
   unreadThread?: string;
+  unreadThreads?: string[];
   storyReply?: { app: string; thread: string; text: string; token: number } | null;
   onStorySend?: (text: string, thread: string) => void;
 }) {
@@ -1189,8 +1193,9 @@ function AppContent({
               onAdd={onAdd}
               onBack={onBack}
               thread={thread}
-              onThread={(value) => { setThread(value); if (value === unreadThread) onRead(value); }}
+              onThread={(value) => { setThread(value); if (value === unreadThread || unreadThreads.includes(value)) onRead(value); }}
               unreadThread={unreadThread}
+              unreadThreads={unreadThreads}
               storyReply={storyReply?.app === app.id && storyReply.thread === thread ? {text:storyReply.text,token:storyReply.token} : null}
               onStorySend={(text) => onStorySend?.(text, thread)}
             />
