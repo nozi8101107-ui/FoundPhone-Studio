@@ -64,6 +64,7 @@ import {
 } from "./schema";
 import { dispatch, choose, visible, advance } from "./engine";
 import { db } from "./persistence";
+import { ChapterOne } from "./runtime/ChapterOne";
 export function AppIcon({
   id,
   name,
@@ -139,6 +140,9 @@ function PhoneRuntime({
   const [homeRequest, setHomeRequest] = useState(0);
   const [locked, setLocked] = useState(!creator);
   const storyKey = "foundphone.chapter1.v2.done:" + work.id + ":" + String(work.variables.storyNickname || "");
+  const storyFlowKey = "foundphone.chapter1.v3:" + work.id + ":" + String(work.variables.storyNickname || "");
+  const [storyActive, setStoryActive] = useState(false);
+  const [storyFinished, setStoryFinished] = useState(() => { try { return !!JSON.parse(localStorage.getItem(storyFlowKey) || "null")?.done; } catch { return false; } });
   const [storyThread, setStoryThread] = useState("");
   const [storyApp, setStoryApp] = useState("");
   const [storyUnreadThread, setStoryUnreadThread] = useState("");
@@ -317,42 +321,11 @@ function PhoneRuntime({
       setPinOpen(false);
       const crush = String(work.variables.storyCrush || "");
       const targetApp = crush === "hanjin" ? "wechat" : "kakao";
-      const sourceItems = work.data[targetApp] || [];
-      const first = sourceItems.find((item) => item.meta.storyChapter1 === "1" && item.meta.handle && item.meta.handle === ({
-        shinyu:"tlswjdghks", dohoon:"doking", youngjae:"jae_e", hanjin:"henan_prince", jihoon:"ahoooon", kyungmin:"kyungman_lee"
-      } as Record<string,string>)[crush]);
-      if (!creator && crush && first && !localStorage.getItem(storyKey)) {
-        const thread = first.title;
-        const queue = sourceItems.filter((item) => item.meta.storyChapter1 === "1" && item.title === thread && item.meta.handle === first.meta.handle);
+      if (!creator && crush && !storyFinished) {
         setStoryApp(targetApp);
-        setStoryThread(thread);
-        let delivered: string[] = [];
-        try {
-          const saved = JSON.parse(localStorage.getItem(storyKey + ":messages") || "[]");
-          if (Array.isArray(saved)) delivered = saved.filter((id): id is string => typeof id === "string");
-        } catch {}
-        setDeliveredStoryIds(delivered);
-        const pending = queue.filter((item) => !delivered.includes(item.id));
-        let index = 0;
-        const sendNext = () => {
-          if (index >= pending.length) {
-            localStorage.setItem(storyKey, "1");
-            return;
-          }
-          const item = pending[index++];
-          setDeliveredStoryIds((current) => {
-            const next = [...current, item.id];
-            try { localStorage.setItem(storyKey + ":messages", JSON.stringify(next)); } catch {}
-            return next;
-          });
-          if (!item.outgoing) setStoryUnreadThread(thread);
-          if (!item.outgoing && work.phone.notifications) {
-            setStoryNotification({ app: targetApp, thread, item });
-            window.setTimeout(() => setStoryNotification((current) => current?.item.id === item.id ? null : current), 4200);
-          }
-          storyTimer.current = window.setTimeout(sendNext, item.outgoing ? 1700 : 2800);
-        };
-        storyTimer.current = window.setTimeout(sendNext, 900);
+        setStoryUnreadThread(String(work.variables.storyNickname || "user"));
+        setApp(targetApp);
+        setStoryActive(true);
       }
       event("password", pin);
     } else {
@@ -533,7 +506,11 @@ function PhoneRuntime({
                   items={[
                     ...(work.data[app] ?? []),
                     ...(s.messages[app] ?? []),
-                  ].filter((item) => !(app === storyApp && item.meta.storyChapter1 === "1" && item.title === storyThread && !deliveredStoryIds.includes(item.id)))}
+                  ].filter((item) => {
+                    if (creator) return true;
+                    const chapterPost = item.id.startsWith("chapter-thread-") || item.id.startsWith("chapter-toilet-") || item.id.startsWith("chapter-battle-") || item.id.startsWith("chapter-exfan-") || item.id === "chapter-giveaway" || item.id === "chapter-dispatch";
+                    return !chapterPost || storyFinished;
+                  })}
                   initialThread={app === storyApp ? pendingThread : ""}
                   unreadThread={storyUnreadThread}
                   creator={creator}
@@ -604,6 +581,19 @@ function PhoneRuntime({
               />
             )}
           </AnimatePresence>
+          {storyActive && !locked && (
+            <ChapterOne
+              key={storyFlowKey}
+              work={work}
+              onFinish={() => {
+                setStoryActive(false);
+                setStoryFinished(true);
+                setStoryUnreadThread("");
+                setStoryNotification(null);
+                setApp("");
+              }}
+            />
+          )}
           {storyNotification && !locked && (
             <button
               type="button"
