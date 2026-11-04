@@ -1302,7 +1302,9 @@ function AppContent({
                 onClick={() => (creator ? onEdit(i) : onRead(i.id))}
               >
                 <span className="avatar">
-                  {i.avatar ? <img src={safeMedia(i.avatar)} alt="" /> : i.sender.slice(0, 1)}
+                  {(!i.outgoing && i.meta?.handle === "henan_prince")
+                    ? <img src={`${import.meta.env.BASE_URL}people/IMG_9702.jpeg`} alt="" />
+                    : i.avatar ? <img src={safeMedia(i.avatar)} alt="" /> : i.sender.slice(0, 1)}
                 </span>
                 <span className="bubble">
                   {i.kind === "image" ||
@@ -1354,7 +1356,10 @@ function AppContent({
             chats.map((t) => {
               const list = shown.filter((i) => i.title === t),
                 last = list[list.length - 1],
-                contactAvatar = list.find((i) => !i.outgoing && i.avatar)?.avatar || list.find((i) => i.avatar)?.avatar || "";
+                isHanjin = list.some((i) => i.meta?.handle === "henan_prince"),
+                contactAvatar = isHanjin
+                  ? `${import.meta.env.BASE_URL}people/IMG_9702.jpeg`
+                  : list.find((i) => !i.outgoing && i.avatar)?.avatar || list.find((i) => i.avatar)?.avatar || "";
               return (
                 <button
                   className="contact-row"
