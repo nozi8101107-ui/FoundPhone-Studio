@@ -502,11 +502,11 @@ export function MymyInstagram(p: SkinProps) {
                     <small>帖子</small>
                   </div>
                   <button className="ig-profile-count" onClick={() => setAccountList("粉丝")}>
-                    <b>{posts.find((i) => i.meta.account === "user")?.meta.followers || "42"}</b>
+                    <b>{profileAccount?.meta.followers || posts.find((i) => i.meta.account === "user")?.meta.followers || "42"}</b>
                     <small>粉丝</small>
                   </button>
                   <button className="ig-profile-count" onClick={() => setAccountList("关注")}>
-                    <b>{posts.find((i) => i.meta.account === "user")?.meta.following || "43"}</b>
+                    <b>{profileAccount?.meta.following || posts.find((i) => i.meta.account === "user")?.meta.following || "23"}</b>
                     <small>关注</small>
                   </button>
                 </div>
@@ -569,7 +569,7 @@ export function MymyInstagram(p: SkinProps) {
           </header>
           <div className="ig-account-list">
             {(accountList === "粉丝" ? accounts.filter((a) => a.meta.account !== "official" && a.meta.account !== "user") : accounts.filter((a) => a.meta.account !== "user")).map((a) => (
-              <article className="ig-following-card" key={a.id}>
+              <article className="ig-following-card" key={a.id} onClick={() => { setProfileHandle(a.meta.handle || a.sender); setTab("个人主页"); setAccountList(""); }}>
                 <Avatar name={a.sender} src={a.avatar} />
                 <div className="ig-following-info">
                   <b>{a.meta.username || a.sender}</b>
