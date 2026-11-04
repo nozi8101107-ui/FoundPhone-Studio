@@ -203,6 +203,8 @@ export function WeChatSkin(p: SkinProps) {
     [searchOpen, setSearchOpen] = useState(false),
     [utility, setUtility] = useState("");
   const [selectedTransfer, setSelectedTransfer] = useState<Item | null>(null);
+  const threadItems = p.thread ? p.items.filter((i) => i.title === p.thread) : [];
+  const threadLabel = threadItems.find((i) => i.meta.remark)?.meta.remark || p.thread;
   const [readThreads, setReadThreads] = useSkinState<string[]>(
     p,
     "readThreads",
@@ -402,8 +404,10 @@ export function WeChatSkin(p: SkinProps) {
                 .map((t) => {
                   const list = p.items.filter((i) => i.title === t),
                     last = list.at(-1)!,
+                    label = list.find((i) => i.meta.remark)?.meta.remark || t,
+                    isHanjin = list.some((i) => i.meta.handle === "henan_prince"),
                     // The chat-list avatar belongs to the other participant, never whichever sender wrote last.
-                    contactAvatar = list.find((i) => !i.outgoing)?.avatar || "";
+                    contactAvatar = isHanjin ? import.meta.env.BASE_URL + "people/IMG_9702.jpeg" : list.find((i) => !i.outgoing)?.avatar || "";
                   return (
                     <button
                       className="wx-chat-row"
@@ -415,7 +419,7 @@ export function WeChatSkin(p: SkinProps) {
                       }}
                     >
                       <span className="wx-chat-avatar">
-                        <Avatar name={t} src={contactAvatar} />
+                        <Avatar name={label} src={contactAvatar} />
                         {(p.unreadThread === t || p.unreadThreads?.includes(t)) ? (
                           <b className="wx-unread" style={{width:8,height:8,minWidth:8,padding:0,borderRadius:"50%",fontSize:0}} />
                         ) : !readThreads.includes(t) && list.some((i) => !i.read) ? (
@@ -423,7 +427,7 @@ export function WeChatSkin(p: SkinProps) {
                         ) : null}
                       </span>
                       <div>
-                        <strong>{t}</strong>
+                        <strong>{label}</strong>
                         <p>{last.body}</p>
                       </div>
                       <time>{last.meta.pinned === "true" ? "置顶" : last.time.slice(-5)}</time>
