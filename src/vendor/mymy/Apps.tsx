@@ -337,6 +337,9 @@ export function MymyInstagram(p: SkinProps) {
     stories = p.items.filter((i) => i.meta.story === "true"),
     dms = p.items.filter((i) => i.folder === "私信"),
     active = stories[story - 1];
+  const officialAvatar = import.meta.env.BASE_URL + "ig/IMG_9849.jpeg";
+  const accountAvatar = (account: Item) =>
+    account.meta.handle === "tws_pledis" ? officialAvatar : account.avatar;
   const toggle = (id: string, values: string[], set: (v: string[]) => void) =>
     set(values.includes(id) ? values.filter((v) => v !== id) : [...values, id]);
   useEffect(() => {
@@ -495,7 +498,7 @@ export function MymyInstagram(p: SkinProps) {
           {!selected && tab === "个人主页" && (
             <>
               <div className="pf">
-                <Avatar name={profileHandle} src={profileAccount?.avatar} />
+                <Avatar name={profileHandle} src={profileAccount ? accountAvatar(profileAccount) : undefined} />
                 <div className="ps">
                   <div>
                     <b>{profilePosts.length}</b>
@@ -518,11 +521,23 @@ export function MymyInstagram(p: SkinProps) {
                 </div>
               </div>
               <div className="pg2">
-                {profilePosts.map((i) => (
-                  <button key={i.id} onClick={() => openPost(i)}>
-                    <Media item={i} />
-                  </button>
-                ))}
+                {profilePosts.map((i) => {
+                  let cover = "";
+                  try {
+                    cover = (JSON.parse(i.meta.images || "[]") as string[])[0] || "";
+                  } catch {
+                    cover = "";
+                  }
+                  return (
+                    <button key={i.id} onClick={() => openPost(i)}>
+                      {cover ? (
+                        <img src={import.meta.env.BASE_URL + "ig/" + cover} alt={i.title} />
+                      ) : (
+                        <Media item={i} />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </>
           )}
@@ -570,7 +585,7 @@ export function MymyInstagram(p: SkinProps) {
           <div className="ig-account-list">
             {(accountList === "粉丝" ? accounts.filter((a) => a.meta.account !== "official" && a.meta.account !== "user") : accounts.filter((a) => a.meta.account !== "user")).map((a) => (
               <article className="ig-following-card" key={a.id} onClick={() => { setProfileHandle(a.meta.handle || a.sender); setTab("个人主页"); setAccountList(""); }}>
-                <Avatar name={a.sender} src={a.avatar} />
+                <Avatar name={a.sender} src={accountAvatar(a)} />
                 <div className="ig-following-info">
                   <b>{a.meta.username || a.sender}</b>
                   <small>@{a.meta.handle || ""}</small>
