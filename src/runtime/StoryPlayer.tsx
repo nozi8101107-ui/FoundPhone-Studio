@@ -675,7 +675,15 @@ const extraThreads=extraThreadTexts.map((body,index)=>{const author=randId();con
    makeWeibo(base+"3",author,handle,"【应援】\n仁川机场大屏\n应援已经上线～欢迎大家积极打卡\n近期大事汇总：微博正文\n安利：微博正文",bigbarComments,"大吧")
   ];
  });
- const weiboPosts=[...toiletPosts,...bathPosts,...exFanPosts,...bigbarPosts].sort(()=>Math.random()-.5);
+ const extraSupportPosts=[
+  ["【应援】\n演出场馆街旗\n应援已经上线～欢迎大家积极打卡\n近期大事汇总：微博正文\n安利：微博正文","bar_support_street"],
+  ["【应援】\n演出场馆外海报\n应援已经上线～欢迎大家积极打卡\n近期大事汇总：微博正文\n安利：微博正文","bar_support_poster"],
+  ["【应援】\n演出场馆外应援物发放\n领取条件需要：关注本账号、超话等级5及以上\n应援已经上线～欢迎大家来领取～\n近期大事汇总：微博正文\n安利：微博正文","bar_support_gift"]
+ ].map(([body,id])=>{
+  const [author,handle]=bigbarAccounts[Math.floor(Math.random()*bigbarAccounts.length)];
+  return makeWeibo(id,author,handle,body,bigbarComments,"大吧");
+ });
+ const weiboPosts=[...toiletPosts,...bathPosts,...exFanPosts,...bigbarPosts,...extraSupportPosts].sort(()=>Math.random()-.5);
 
  const historicalBills=historicalOrders.map(order=>{const bill=make("bill-"+order.id,order.title,"淘宝订单付款",{merchant:"淘宝 · "+order.sender,amount:"-¥"+order.meta.price,status:"支付成功",orderNumber:order.meta.number});bill.sender="淘宝";bill.folder="交易";bill.time=order.time;return bill;});
  const hiddenAppIds=new Set(["appstore","contacts","reminders","spotify","find"]);
