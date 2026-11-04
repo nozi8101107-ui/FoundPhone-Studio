@@ -368,7 +368,9 @@ export function WeChatSkin(p: SkinProps) {
                 )
                 .map((t) => {
                   const list = p.items.filter((i) => i.title === t),
-                    last = list.at(-1)!;
+                    last = list.at(-1)!,
+                    // The chat-list avatar belongs to the other participant, never whichever sender wrote last.
+                    contactAvatar = list.find((i) => !i.outgoing)?.avatar || "";
                   return (
                     <button
                       className="wx-chat-row"
@@ -380,7 +382,7 @@ export function WeChatSkin(p: SkinProps) {
                       }}
                     >
                       <span className="wx-chat-avatar">
-                        <Avatar name={t} src={last.avatar} />
+                        <Avatar name={t} src={contactAvatar} />
                         {!readThreads.includes(t) &&
                           list.some((i) => !i.read) && (
                             <b className="wx-unread">
