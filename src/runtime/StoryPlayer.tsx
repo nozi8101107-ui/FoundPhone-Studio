@@ -615,13 +615,13 @@ user 我刚刚路过一家店 看到这个
  ];
 
  const buildWechatConversation=(id:string,title:string,raw:string)=>{
-  let current="2026-11-04 19:00",minuteOffset=0,index=0;
+  let current="2026-11-04 19:00",index=0;
   const rows:Work["data"][string]=[];
   const add=(sender:string,body:string,kind:"text"|"image"|"transfer"="text",amount="")=>{
    const outgoing=sender==="user";
    const displaySender=outgoing?profile.nickname:sender;
-   const item=make("wechat-"+id+"-"+(++index),title,body,{chat:"true"},outgoing?profile.avatar:"");
-   item.time=current;item.sender=displaySender;item.outgoing=outgoing;item.read=true;item.kind=kind;
+   const item={...make("wechat-"+id+"-"+(++index),title,body,{chat:"true"},outgoing?profile.avatar:""),kind};
+   item.time=current;item.sender=displaySender;item.outgoing=outgoing;item.read=true;
    if(kind==="transfer"){
     item.body=amount;
     item.meta={...item.meta,transferStatus:"claimed",transferAmount:amount,transferDirection:outgoing?"sent":"received",transferRecipient:outgoing?sender:"user"};
