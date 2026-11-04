@@ -325,11 +325,14 @@ export function MymyInstagram(p: SkinProps) {
     [draft, setDraft] = useState(""),
     [pop, setPop] = useState("");
   const [accountList, setAccountList] = useState<"粉丝" | "关注" | "">("");
+  const [profileHandle, setProfileHandle] = useState(p.owner || "机主");
   const posts = p.items.filter(
       (i) => i.folder !== "私信" && i.meta.story !== "true",
     ),
-    accounts = posts.filter((i) => !!i.meta.account),
-    feedPosts = posts.filter((i) => !i.meta.account),
+    accounts = posts.filter((i) => !!i.meta.account && !i.meta.postNumber),
+    feedPosts = posts.filter((i) => !i.meta.account || !!i.meta.postNumber),
+    profilePosts = feedPosts.filter((i) => i.sender === profileHandle),
+    profileAccount = accounts.find((i) => i.meta.handle === profileHandle),
     stories = p.items.filter((i) => i.meta.story === "true"),
     dms = p.items.filter((i) => i.folder === "私信"),
     active = stories[story - 1];
@@ -361,7 +364,7 @@ export function MymyInstagram(p: SkinProps) {
       <header className="igph">
         <Avatar name={i.sender} src={i.avatar} />
         <div className="igpn">
-          <button onClick={() => setTab("个人主页")}>
+          <button onClick={() => { setProfileHandle(i.sender); setTab("个人主页"); }}>
             <b>{i.sender}</b>
           </button>
           <small>{i.meta.location || i.time}</small>
@@ -479,10 +482,10 @@ export function MymyInstagram(p: SkinProps) {
           {!selected && tab === "个人主页" && (
             <>
               <div className="pf">
-                <Avatar name={p.owner || "机主"} />
+                <Avatar name={profileHandle} src={profileAccount?.avatar} />
                 <div className="ps">
                   <div>
-                    <b>{feedPosts.length}</b>
+                    <b>{profilePosts.length}</b>
                     <small>帖子</small>
                   </div>
                   <button className="ig-profile-count" onClick={() => setAccountList("粉丝")}>
@@ -495,14 +498,14 @@ export function MymyInstagram(p: SkinProps) {
                   </button>
                 </div>
               </div>
-              <p className="pn">{p.owner}</p>
+              <p className="pn">{profileHandle}</p>
               <div className="ptab">
                 <div className="on">
                   <Grid />
                 </div>
               </div>
               <div className="pg2">
-                {feedPosts.map((i) => (
+                {profilePosts.map((i) => (
                   <button key={i.id} onClick={() => openPost(i)}>
                     <Media item={i} />
                   </button>
