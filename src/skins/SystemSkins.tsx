@@ -409,9 +409,20 @@ export function NotesSkin(p: Props) {
   );
 }
 export function CalendarSkin(p: Props) {
-  const [month, setMonth] = useState(8),
-    [year, setYear] = useState(2026),
-    [day, setDay] = useState(1);
+  const phoneDate = /^\\d{4}-\\d{2}-\\d{2}$/.test(p.virtualDate || "")
+    ? new Date((p.virtualDate as string) + "T12:00:00")
+    : new Date();
+  const [month, setMonth] = useState(phoneDate.getMonth()),
+    [year, setYear] = useState(phoneDate.getFullYear()),
+    [day, setDay] = useState(phoneDate.getDate());
+  useEffect(() => {
+    const next = /^\\d{4}-\\d{2}-\\d{2}$/.test(p.virtualDate || "")
+      ? new Date((p.virtualDate as string) + "T12:00:00")
+      : new Date();
+    setMonth(next.getMonth());
+    setYear(next.getFullYear());
+    setDay(next.getDate());
+  }, [p.virtualDate]);
   const prefix = `${year}-${String(month + 1).padStart(2, "0")}`;
   const list = p.items.filter((i) =>
     i.time.startsWith(`${prefix}-${String(day).padStart(2, "0")}`),
