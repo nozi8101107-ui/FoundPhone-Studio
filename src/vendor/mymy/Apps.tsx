@@ -120,6 +120,9 @@ export function MymyKakao(p: SkinProps) {
           <div className="msgs kk" ref={scroll}>
             {messages.map((m, i) => {
               const run = messageRun(messages, i);
+              // Original imported chat history stores the account handle in sender;
+              // show the contact's saved remark in the conversation instead.
+              const displaySender = m.outgoing ? m.sender : String(m.meta?.remark || m.sender);
               return (
                 <div
                   key={m.id}
@@ -132,9 +135,9 @@ export function MymyKakao(p: SkinProps) {
                   {!m.outgoing && run.first && (
                     <>
                       <div className="kzmav">
-                        <Avatar name={m.sender} src={m.avatar} />
+                        <Avatar name={displaySender} src={m.avatar} />
                       </div>
-                      <div className="kzmn">{m.sender}</div>
+                      <div className="kzmn">{displaySender}</div>
                     </>
                   )}
                   {m.outgoing && run.last && (
