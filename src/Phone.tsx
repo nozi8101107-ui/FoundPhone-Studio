@@ -142,6 +142,7 @@ function PhoneRuntime({
   const [locked, setLocked] = useState(!creator);
   const storyKey = "foundphone.chapter1.v2.done:" + work.id + ":" + String(work.variables.storyNickname || "");
   const storyFlowKey = "foundphone.chapter1.v3:" + work.id + ":" + String(work.variables.storyNickname || "");
+  const chapterDispatch = (work.data.twitter || []).find((item) => item.id === "chapter-dispatch");
   const chapterItemsKey = "foundphone.chapter1.messages:" + work.id;
   const [storyActive, setStoryActive] = useState(false);
   const [storyFinished, setStoryFinished] = useState(() => { try { return !!JSON.parse(localStorage.getItem(storyFlowKey) || "null")?.done; } catch { return false; } });
@@ -640,7 +641,7 @@ function PhoneRuntime({
               }}
               onDispatchOpen={() => {
                 setStoryUnreadThreads((v) => ({...v,[storyUnreadKey("twitter","Dispatch")]:true}));
-                setStoryNotification({app:"twitter",thread:"Dispatch",item:chapterDispatch});
+                if (chapterDispatch) setStoryNotification({app:"twitter",thread:"Dispatch",item:chapterDispatch});
               }}
               onFinish={() => {
                 setStoryActive(false);
