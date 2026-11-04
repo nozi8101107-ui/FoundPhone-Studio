@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import type { Work } from "../schema";
 
 type Turn = { from: "them" | "you"; text: string };
@@ -111,8 +111,8 @@ export function OpeningStory({work,onFinish}:{work:Work;onFinish:()=>void}) {
  const fill=()=>{if(current?.from==="you")setDraft(current.text);};
  const startFriend=()=>{setStage("friend");setMessages([]);setCursor(0);setFriendDone(false);};
  const startEx=()=>{setStage("ex");setMessages([]);setCursor(0);setExDone(false);};
- const frame:React.CSSProperties={position:"absolute",inset:0,zIndex:60,background:"#f4f5f7",display:"flex",flexDirection:"column",fontFamily:"-apple-system,BlinkMacSystemFont,sans-serif",color:"#222"};
- const header:React.CSSProperties={height:52,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 16px",background:"#f8f8f8",borderBottom:"1px solid #e7e7e7"};
+ const frame:CSSProperties={position:"absolute",inset:0,zIndex:60,background:"#f4f5f7",display:"flex",flexDirection:"column",fontFamily:"-apple-system,BlinkMacSystemFont,sans-serif",color:"#222"};
+ const header:CSSProperties={height:52,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 16px",background:"#f8f8f8",borderBottom:"1px solid #e7e7e7"};
  if(stage==="done") return <div style={{...frame,background:"#0006",justifyContent:"center",alignItems:"center",padding:24}}>
   <div style={{background:"#fff",borderRadius:16,padding:"25px 22px",width:"100%",maxWidth:320,textAlign:"center",boxShadow:"0 12px 40px #0003"}}>
    <div style={{fontSize:30,marginBottom:12}}>✓</div><strong style={{fontSize:17}}>剧情1已结束</strong><p style={{fontSize:13,color:"#777",lineHeight:1.6}}>可以自由探索手机啦！</p>
