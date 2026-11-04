@@ -37,6 +37,7 @@ import {
   useEffect,
   useState,
   useRef,
+  useMemo,
   Suspense,
   type CSSProperties,
 } from "react";
@@ -65,6 +66,15 @@ import {
 import { dispatch, choose, visible, advance } from "./engine";
 import { db } from "./persistence";
 import { ChapterOne } from "./runtime/ChapterOne";
+function makeChapterDispatch(work: Work, member: string): Item {
+  const labels: Record<string,string> = {shinyu:"SHINYU",dohoon:"DOHOON",youngjae:"YOUNGJAE",hanjin:"HANJIN",jihoon:"JIHOON",kyungmin:"KYUNGMIN"};
+  const nick: Record<string,string> = {shinyu:"老雕",dohoon:"老牛",youngjae:"丑年",hanjin:"蛤蟆",jihoon:"强子",kyungmin:"娟子"};
+  const n=labels[member]||"SHINYU", k=nick[member]||"老雕";
+  const all=["让"+k+"粉丝成天飒飒飒 回旋镖了吧","啊啊啊大晚上睡不着了好坤动",k+"你对得起谁","等公司公告的 冷知识 那个谁当年也发公告了","上升期谈恋爱 "+k+"你要死吗","是路人你就给我路过","这么真的料不信的有了","今晚hybe将灯火通明",k+"你对得起谁","今年谈恋爱的好多啊","我的舍友是看我是TWS粉丝 刚刚听说了这件事 然后刚刚塞给我一堆零食。。我真的要爱上她了","这是ai的吧","TWS唯一恋爱咖","蹲公司回应","粉丝滤镜碎一地","别吵了等声明","这时间点也太巧了","到底是不是本人啊"];
+  const seed=Array.from(work.id+member).reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);
+  const comments=[...all].sort((a,b)=>{const h=(v:string)=>Array.from(v).reduce((x,c)=>(x*33+c.charCodeAt(0))>>>0,seed);return h(a)-h(b)}).slice(0,15+seed%11);
+  return {id:"chapter-dispatch",title:"【独家】TWS成员"+n+"深夜密会素人女性 汉南洞街头举止亲密疑似恋爱中",body:"Dispatch独家报道\nD社今日晚间独家捕捉到TWS成员"+n+"与一名素人女性在首尔深夜约会，两人举止亲密，疑似恋爱中。\n据本社记者追踪，当晚21时40分许，"+n+"身着黑色卫衣、佩戴棒球帽和口罩，与一名素人女性一同离开，两人自然并肩而行，"+n+"主动接过女方手中的纸袋，途中"+n+"多次低头靠近女方耳边交谈，笑容明显。"+n+"轻拍女方背部，随后两人分别乘车离开。\n据本社掌握的信息，该女性为圈外素人，尚未知两人通过何种渠道认识。身边人士向D社透露：“"+n+"对这段关系非常谨慎，私下对女方很体贴”\n截至发稿时，TWS所属公司PLEDIS Entertainment尚未就此事发表官方立场。",richText:"",meta:{source:"Dispatch",exclusive:"true"},time:"21:40",sender:"Dispatch",avatar:"",kind:"post",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:false,read:false,likes:32000,comments};
+}
 export function AppIcon({
   id,
   name,
@@ -342,6 +352,7 @@ function PhoneRuntime({
     return () => window.clearInterval(timer);
   }, []);
   const displayTime = deviceNow.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: false });
+  const chapterDispatch = useMemo(() => makeChapterDispatch(work, String(work.variables.storyCrush || "shinyu")), [work.id, work.variables.storyCrush]);
   const plugin = getApp(app);
   useEffect(() => {
     const count = s.notifications.length;
@@ -504,7 +515,8 @@ function PhoneRuntime({
                     work.apps.find((a) => a.id === app)?.name ?? plugin.name
                   }
                   items={[
-                    ...(work.data[app] ?? []),
+                    ...(work.data[app] ?? []).filter((item) => item.id !== "chapter-dispatch"),
+                    ...(app === "twitter" && storyActive ? [chapterDispatch] : []),
                     ...(s.messages[app] ?? []),
                   ].filter((item) => {
                     if (creator) return true;
