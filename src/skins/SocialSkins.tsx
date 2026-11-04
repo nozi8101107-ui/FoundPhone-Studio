@@ -31,7 +31,7 @@ import {
   useContent,
   type Props,
 } from "./shared";
-function Actions({ p, item }: { p: Props; item: Item }) {
+function Actions({ p, item, commentsDisabled = false, commentCount }: { p: Props; item: Item; commentsDisabled?: boolean; commentCount?: string }) {
   const [liked, setLiked] = useSkinState<boolean>(p, `liked-${item.id}`, false),
     [saved, setSaved] = useSkinState<boolean>(p, `saved-${item.id}`, false);
   return (
@@ -40,9 +40,9 @@ function Actions({ p, item }: { p: Props; item: Item }) {
         <Heart size={17} fill={liked ? "currentColor" : "none"} />
         {item.likes + (liked ? 1 : 0) || ""}
       </button>
-      <button aria-label={`评论${item.title}`} onClick={() => p.onItem(item)}>
+      <button aria-label={`评论${item.title}`} onClick={commentsDisabled ? undefined : () => p.onItem(item)}>
         <MessageCircle size={17} />
-        {item.comments.length || ""}
+        {commentCount ?? (item.comments.length || "")}
       </button>
       <button aria-label={`详情${item.title}`} onClick={() => p.onItem(item)}>
         <Repeat2 size={17} />
@@ -179,7 +179,7 @@ export function XSkin(p: Props) {
                   <p>{i.body}</p>
                   {i.media && <Media item={i} />}
                 </button>
-                <Actions p={p} item={i} />
+                <Actions p={p} item={i} commentsDisabled commentCount={meta(i, "commentCount")} />
               </div>
             </article>
           ))}
