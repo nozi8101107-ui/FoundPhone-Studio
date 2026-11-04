@@ -57,13 +57,13 @@ function Avatar({
   round?: boolean;
   src?: string;
 }) {
+  const avatarSrc = safeMedia(src) || (/^(\/|\.\/|ig\/|people\/)/.test(src) ? src : "");
+  const resolvedSrc = avatarSrc && !/^(data:|https?:\/\/)/.test(avatarSrc)
+    ? (avatarSrc.startsWith("/") ? avatarSrc : `${import.meta.env.BASE_URL}${avatarSrc}`)
+    : avatarSrc;
   return (
     <span className={`skin-avatar ${round ? "round" : ""}`}>
-      {safeMedia(src)?.startsWith("data:image/") ? (
-        <img src={safeMedia(src)} alt="" />
-      ) : (
-        name.slice(0, 1)
-      )}
+      {resolvedSrc ? <img src={resolvedSrc} alt="" /> : name.slice(0, 1)}
     </span>
   );
 }
@@ -74,10 +74,10 @@ function ItemMedia({ item }: { item: Item }) {
     const parsed = JSON.parse(item.meta.images || "[]");
     if (Array.isArray(parsed)) imageList = parsed.filter((x): x is string => typeof x === "string");
   } catch { imageList = []; }
-  const rawSrc = imageList.length ? imageList[imageIndex % imageList.length] : item.media;
+  const rawSrc = imageList.length ? `ig/${imageList[imageIndex % imageList.length]}` : item.media;
   const src = safeMedia(rawSrc) || (/^(\/|\.\/|ig\/|people\/)/.test(rawSrc) ? rawSrc : "");
   const resolvedSrc = src && !/^(data:|https?:\/\/)/.test(src)
-    ? `${import.meta.env.BASE_URL}${src.replace(/^\//, "")}`
+    ? (src.startsWith("/") ? src : `${import.meta.env.BASE_URL}${src}`)
     : src;
   return resolvedSrc ? (
     item.kind === "audio" ? <audio controls src={resolvedSrc} /> :
@@ -764,7 +764,7 @@ export function InstagramSkin(p: SkinProps) {
           </div>
           {posts.map((i) => <article className="ig-post" key={i.id}>
             <div className="ig-post-author">
-              <button type="button" className="ig-author-link" onClick={() => openProfile(i.sender)}><Avatar name={i.sender} round /><strong>{i.sender}</strong></button>
+              <button type="button" className="ig-author-link" onClick={() => openProfile(i.sender)}><Avatar name={i.sender} round src={i.avatar} /><strong>{i.sender}</strong></button>
               <button aria-label={`帖子详情${i.title}`} onClick={() => p.onItem(i)}><MoreHorizontal size={19} /></button>
             </div>
             <button className="ig-post-media" onClick={() => p.onItem(i)}><ItemMedia item={i} /></button>
@@ -789,7 +789,7 @@ export function InstagramSkin(p: SkinProps) {
           {!reels.length && <p className="skin-empty">暂无 Reels</p>}
         </> : <>
           <div className="ig-profile">
-            <Avatar name={profileHandle} round />
+            <Avatar name={profileHandle} round src={account?.avatar} />
             <div><strong>{profilePosts.length}</strong><small>帖子</small></div>
             <div><strong>{account?.meta.followers ?? "0"}</strong><small>关注者</small></div>
             <div><strong>{account?.meta.following ?? "0"}</strong><small>正在关注</small></div>
