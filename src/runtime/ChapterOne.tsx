@@ -67,6 +67,7 @@ export function ChapterOne({work,onFinish,onDispatchOpen,onNativeOpen,onNativeIt
  const [xOpened,setXOpened]=useState(()=>{try{return !!JSON.parse(localStorage.getItem(key)||"null")?.xOpened}catch{return false}});
  const [blocked,setBlocked]=useState(()=>{try{return !!JSON.parse(localStorage.getItem(key)||"null")?.blocked}catch{return false}});
  const current=stage==="crush"?crushChat(crush):stage==="friend"?friendChat():stage==="ex"?exChat(ex,crush,xp):stage==="closing"?closeChat(crush):[];
+ const stamp=crush==="dohoon"?"15:30":crush==="hanjin"?"15:25":crush==="youngjae"?"20:30":crush==="jihoon"?"18:50":crush==="kyungmin"?"19:49":"20:03";
  const targetId=stage==="ex"?ex:crush;
  const nativeApp=stage==="friend"?"wechat":targetId==="hanjin"?"wechat":"kakao";
  const nativeThread=stage==="friend"?"闺蜜":(work.data[nativeApp]||[]).find(item=>item.meta.handle===handles[targetId])?.title||names[targetId];
@@ -122,7 +123,7 @@ export function ChapterOne({work,onFinish,onDispatchOpen,onNativeOpen,onNativeIt
  const allDone=stage==="done";
  const heading=stage==="crush"||stage==="closing"?names[crush]:stage==="friend"?"闺蜜":stage==="ex"?names[ex]:"Dispatch";
  const displayStage:string=stage;
- const stamp=crush==="dohoon"?"15:30":crush==="hanjin"?"15:25":crush==="youngjae"?"20:30":crush==="jihoon"?"18:50":crush==="kyungmin"?"19:49":"20:03";
+
  if(displayStage!=="done")return null;
  return <div className="chapter-one-overlay" style={{position:"absolute",inset:0,zIndex:120,background:"#f5f5f7",color:"#19191d",display:"flex",flexDirection:"column",fontFamily:"-apple-system,BlinkMacSystemFont,sans-serif"}}>
  <style>{".chapter-one-overlay button{font:inherit}.chapter-one-head{height:58px;flex:none;background:#fff;border-bottom:1px solid #e7e7eb;display:flex;align-items:center;justify-content:space-between;padding:0 16px}.chapter-one-scroll{overflow:auto;flex:1;padding:14px 12px}.chapter-one-bubble{max-width:82%;padding:11px 13px;border-radius:17px;margin:8px 0;white-space:pre-wrap;line-height:1.45;font-size:14px;background:white;box-shadow:0 1px 2px #0001}.chapter-one-bubble.you{margin-left:auto;background:#a8e6a0}.chapter-one-composer{background:#fff;padding:10px;display:flex;gap:8px;border-top:1px solid #e5e5e9}.chapter-one-composer button{border:0;border-radius:18px;padding:10px 14px;background:#222;color:white}.chapter-one-composer button:disabled{opacity:.35}.chapter-one-feed{background:#fff;border-radius:16px;padding:18px;white-space:pre-wrap;line-height:1.65;font-size:14px}.chapter-one-modal{position:absolute;inset:0;background:#0007;display:grid;place-items:center;padding:24px}.chapter-one-modal section{background:white;border-radius:20px;padding:24px;text-align:center;width:100%;max-width:310px}.chapter-one-modal button,.chapter-one-primary{border:0;background:#171717;color:#fff;border-radius:12px;padding:12px 20px;margin-top:16px}.chapter-one-muted{color:#777;font-size:12px}"}</style>
