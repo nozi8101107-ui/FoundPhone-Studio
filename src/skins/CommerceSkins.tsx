@@ -103,6 +103,7 @@ export function TaobaoSkin(p: Props) {
         : i.folder === tab,
     )
     .filter((i) => status === "全部" || meta(i, "status") === status);
+  const selectedIsCondom = !!selected && /避孕套|安全套|condom/i.test(selected.title+" "+selected.body);
   return (
     <div className="catalog-skin taobao-ui">
       <Header p={p} />
@@ -113,7 +114,7 @@ export function TaobaoSkin(p: Props) {
         {tab === "商品" ? (
           <div className="taobao-products">
             {list.map((i) => (
-              <button key={i.id} onClick={() => {setSelected(i);setQuantity(1);setPaymentStep(false);}}>
+              <button key={i.id} onClick={() => {setSelected(i);setQuantity(/避孕套|安全套|condom/i.test(i.title+" "+i.body)?1:1);setPaymentStep(false);}}>
                 <Media item={i} />
                 <strong>{i.title}</strong>
                 <p>
@@ -179,7 +180,7 @@ export function TaobaoSkin(p: Props) {
               <div>
                 <button aria-label="减少数量" disabled={quantity<=1} onClick={()=>setQuantity(v=>Math.max(1,v-1))}>−</button>
                 <strong>{quantity}</strong>
-                <button aria-label="增加数量" onClick={()=>setQuantity(v=>Math.min(99,v+1))}>＋</button>
+                <button aria-label="增加数量" disabled={selectedIsCondom} onClick={()=>setQuantity(v=>Math.min(99,v+1))}>＋</button>
               </div>
             </div>}
             {!paymentStep && <div className="taobao-payment-row"><span>支付方式</span><strong>支付宝余额　›</strong></div>}
