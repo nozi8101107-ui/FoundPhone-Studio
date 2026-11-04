@@ -642,7 +642,6 @@ function PhoneRuntime({
               onDispatchOpen={() => {
                 setStoryUnreadThreads((v) => ({...v,[storyUnreadKey("twitter","Dispatch")]:true}));
                 setStoryNotification({app:"twitter",thread:"Dispatch",item:chapterDispatch});
-                setBanner("X · Dispatch 发布了一条独家报道");
               }}
               onFinish={() => {
                 setStoryActive(false);
