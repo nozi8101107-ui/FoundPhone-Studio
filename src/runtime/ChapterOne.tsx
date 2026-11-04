@@ -54,7 +54,7 @@ function dispatchBody(id:string):string {
  const n=english[id]||"SHINYU";
  return "【独家】TWS成员"+n+"深夜密会素人女性 汉南洞街头举止亲密疑似恋爱中\n\nDispatch独家报道\nD社今日晚间独家捕捉到TWS成员"+n+"与一名素人女性在首尔深夜约会，两人举止亲密，疑似恋爱中。\n据本社记者追踪，当晚21时40分许，"+n+"身着黑色卫衣、佩戴棒球帽和口罩，与一名素人女性一同离开，两人自然并肩而行，"+n+"主动接过女方手中的纸袋，途中"+n+"多次低头靠近女方耳边交谈，笑容明显。"+n+"轻拍女方背部，随后两人分别乘车离开。\n据本社掌握的信息，该女性为圈外素人，尚未知两人通过何种渠道认识。身边人士向D社透露：“"+n+"对这段关系非常谨慎，私下对女方很体贴”\n截至发稿时，TWS所属公司PLEDIS Entertainment尚未就此事发表官方立场。";
 }
-export function ChapterOne({work,onFinish}:{work:Work;onFinish:()=>void}) {
+export function ChapterOne({work,onFinish,onDispatchOpen}:{work:Work;onFinish:()=>void;onDispatchOpen:()=>void}) {
  const crush=String(work.variables.storyCrush||"shinyu"), ex=String(work.variables.storyEx||"dohoon"), xp=String(work.variables.storyXp||"BG"), nick=String(work.variables.storyNickname||"你");
  const key="foundphone.chapter1.v3:"+work.id+":"+nick;
  const [stage,setStage]=useState<"crush"|"dispatch"|"friend"|"ex"|"closing"|"done">(()=>{try{const v=JSON.parse(localStorage.getItem(key)||"null");return v?.done?"done":v?.stage||"crush"}catch{return "crush"}});
@@ -75,10 +75,11 @@ export function ChapterOne({work,onFinish}:{work:Work;onFinish:()=>void}) {
  const send=()=>{const e=events[cursor];if(!e||e.from!=="you"||!draft.trim())return;if(stage==="ex"&&xp==="BG"&&ex==="youngjae"&&cursor===events.length-1)setBlocked(true);setBusy(false);setCursor(v=>v+1);setDraft("");};
  const fill=()=>{const e=events[cursor];if(e?.from==="you")setDraft(e.text)};
  const goDispatch=()=>{setComments(false);setStage("friend");setRows([]);setCursor(0);setBanner("微信：闺蜜发来新消息 · "+names[ex]+"：发来新消息");};
- useEffect(()=>{if(stage!=="dispatch"||!xOpened)return;const t=window.setTimeout(goDispatch,2000);return()=>clearTimeout(t)},[stage,xOpened]);
+ useEffect(()=>{if(stage!=="dispatch")return;setXOpened(true);onDispatchOpen();const t=window.setTimeout(goDispatch,2000);return()=>clearTimeout(t)},[stage]);
  const allDone=stage==="done";
  const heading=stage==="crush"||stage==="closing"?names[crush]:stage==="friend"?"闺蜜":stage==="ex"?names[ex]:"Dispatch";
  const stamp=crush==="dohoon"?"15:30":crush==="hanjin"?"15:25":crush==="youngjae"?"20:30":crush==="jihoon"?"18:50":crush==="kyungmin"?"19:49":"20:03";
+ if(stage==="dispatch")return null;
  return <div className="chapter-one-overlay" style={{position:"absolute",inset:0,zIndex:120,background:"#f5f5f7",color:"#19191d",display:"flex",flexDirection:"column",fontFamily:"-apple-system,BlinkMacSystemFont,sans-serif"}}>
  <style>{".chapter-one-overlay button{font:inherit}.chapter-one-head{height:58px;flex:none;background:#fff;border-bottom:1px solid #e7e7eb;display:flex;align-items:center;justify-content:space-between;padding:0 16px}.chapter-one-scroll{overflow:auto;flex:1;padding:14px 12px}.chapter-one-bubble{max-width:82%;padding:11px 13px;border-radius:17px;margin:8px 0;white-space:pre-wrap;line-height:1.45;font-size:14px;background:white;box-shadow:0 1px 2px #0001}.chapter-one-bubble.you{margin-left:auto;background:#a8e6a0}.chapter-one-composer{background:#fff;padding:10px;display:flex;gap:8px;border-top:1px solid #e5e5e9}.chapter-one-composer button{border:0;border-radius:18px;padding:10px 14px;background:#222;color:white}.chapter-one-composer button:disabled{opacity:.35}.chapter-one-feed{background:#fff;border-radius:16px;padding:18px;white-space:pre-wrap;line-height:1.65;font-size:14px}.chapter-one-modal{position:absolute;inset:0;background:#0007;display:grid;place-items:center;padding:24px}.chapter-one-modal section{background:white;border-radius:20px;padding:24px;text-align:center;width:100%;max-width:310px}.chapter-one-modal button,.chapter-one-primary{border:0;background:#171717;color:#fff;border-radius:12px;padding:12px 20px;margin-top:16px}.chapter-one-muted{color:#777;font-size:12px}"}</style>
  <header className="chapter-one-head"><strong>{stage==="dispatch"?"X":(stage==="friend"?"微信":appFor(stage==="ex"?ex:crush))+" · "+heading}</strong><small>{stage==="crush"?"1-1":stage==="dispatch"?"1-2":stage==="friend"||stage==="ex"?"1-3":stage==="closing"?"1-4":"完成"}</small></header>
