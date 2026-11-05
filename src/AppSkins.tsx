@@ -351,7 +351,7 @@ export function WeChatSkin(p: SkinProps) {
           {!p.items.some((i) => i.title === p.thread && i.meta.stub !== "true") && (
             <p className="skin-empty">暂无聊天记录</p>
           )}
-          {p.storyReply ? <WeChatStoryComposer {...p} /> : <Compose creator={p.creator} onAdd={p.onAdd} />}
+          {p.storyReply || p.storyChoices?.length ? <WeChatStoryComposer {...p} /> : <Compose creator={p.creator} onAdd={p.onAdd} />}
         </>
       ) : moments ? (
         <div className="wx-moments">
