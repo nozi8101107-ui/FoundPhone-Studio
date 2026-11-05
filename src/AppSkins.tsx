@@ -52,6 +52,8 @@ export type SkinProps = {
   unreadThreads?: string[];
   storyReply?: { text: string; token: number } | null;
   onStorySend?: (text: string) => void;
+  storyChoices?: string[];
+  onStoryChoice?: (choice:string)=>void;
 };
 function Avatar({
   name,
@@ -184,7 +186,7 @@ function WeChatStoryComposer(p: SkinProps) {
     if (p.storyReply) setDraft(p.storyReply.text);
   }, [p.storyReply?.token]);
   return (
-    <form className="skin-compose" onSubmit={(e) => {
+    <>{p.storyChoices?.length ? <div style={{display:"flex",gap:8,flexWrap:"wrap",padding:"8px 10px"}}>{p.storyChoices.map(choice=><button key={choice} type="button" onClick={()=>p.onStoryChoice?.(choice)} style={{border:"1px solid #07c160",borderRadius:16,padding:"7px 12px",background:"#fff",color:"#16834a"}}>{choice}</button>)}</div>:null}<form className="skin-compose" onSubmit={(e) => {
       e.preventDefault();
       if (!draft.trim()) return;
       p.onStorySend?.(draft.trim());
@@ -193,7 +195,7 @@ function WeChatStoryComposer(p: SkinProps) {
       <Mic size={20} />
       <input aria-label="微信消息" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="输入消息" style={{flex:1,minWidth:0,border:0,outline:0,background:"transparent",font:"inherit"}} />
       <button type="submit" disabled={!draft.trim()} style={{border:0,borderRadius:8,padding:"6px 12px",background:draft.trim()?"#07c160":"#ddd",color:"#fff"}}>发送</button>
-    </form>
+    </form></>
   );
 }
 export function WeChatSkin(p: SkinProps) {
