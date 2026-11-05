@@ -1218,6 +1218,10 @@ function AppContent({
   onStoryThreadChange,
   storyChoices = [],
   onStoryChoice,
+  saveSlots = [],
+  onSaveSlot,
+  onRenameSlot,
+  onLoadSlot,
 }: {
   app: AppPlugin;
   name: string;
@@ -1239,6 +1243,10 @@ function AppContent({
   onStoryThreadChange?: (thread: string) => void;
   storyChoices?: string[];
   onStoryChoice?: (choice: string) => void;
+  saveSlots?: SaveSlot[];
+  onSaveSlot?: (slot: number) => Promise<void>;
+  onRenameSlot?: (slot: number, name: string) => Promise<void>;
+  onLoadSlot?: (slot: SaveSlot) => void;
 }) {
   const [detail, setDetail] = useState<Item | null>(null);
   const [thread, setThread] = useState(initialThread);
