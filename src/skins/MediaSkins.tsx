@@ -17,7 +17,7 @@ import {
   Users,
   Video,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { safeMedia, type Item } from "../schema";
 import {
   Avatar,
@@ -484,13 +484,41 @@ const douyinPosts: DouyinPostData[] = [
 function DouyinPost({ post }: { post: DouyinPostData }) {
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const avatar = import.meta.env.BASE_URL + "youtube/channels4_profile.jpeg";
   const src = encodeURI(import.meta.env.BASE_URL + "dy/" + post.video);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.65) {
+          // Muted playback is permitted by mobile browsers' autoplay policies.
+          video.muted = true;
+          void video.play().catch(() => {
+            // Playback can still be blocked by browser or device settings.
+          });
+        } else {
+          video.pause();
+        }
+      },
+      { threshold: [0, 0.65, 1] },
+    );
+    observer.observe(video);
+    return () => {
+      observer.disconnect();
+      video.pause();
+    };
+  }, []);
+
   return (
     <article className="vertical-video douyin-video-post">
       <video
+        ref={videoRef}
         src={src}
         controls
+        muted
         playsInline
         preload="metadata"
         aria-label={post.title}
