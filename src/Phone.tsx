@@ -66,6 +66,7 @@ import {
 import { dispatch, choose, visible, advance } from "./engine";
 import { db } from "./persistence";
 import { ChapterOne } from "./runtime/ChapterOne";
+import { ChapterTwo } from "./runtime/ChapterTwo";
 export function AppIcon({
   id,
   name,
@@ -155,6 +156,17 @@ function PhoneRuntime({
   const [storyUnreadThreads, setStoryUnreadThreads] = useState<Record<string, boolean>>({});
   const [deliveredStoryIds, setDeliveredStoryIds] = useState<string[]>([]);
   const [storyNotification, setStoryNotification] = useState<{app:string;thread:string;item:Item}|null>(null);
+  const chapterTwoKey = "foundphone.chapter2.v1:" + work.id + ":" + String(work.variables.storyNickname || "");
+  const [chapterTwoOpenedApps, setChapterTwoOpenedApps] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem(chapterTwoKey) || "null")?.openedApps || []; } catch { return []; } });
+  const [chapterTwoActive, setChapterTwoActive] = useState(() => { try { const v=JSON.parse(localStorage.getItem(chapterTwoKey) || "null"); return !!v?.active && !v?.done; } catch { return false; } });
+  const [chapterTwoDone, setChapterTwoDone] = useState(() => { try { return !!JSON.parse(localStorage.getItem(chapterTwoKey) || "null")?.done; } catch { return false; } });
+  const [chapterTwoXReady, setChapterTwoXReady] = useState(false);
+  useEffect(() => {
+    try { localStorage.setItem(chapterTwoKey, JSON.stringify({openedApps:chapterTwoOpenedApps,active:chapterTwoActive,done:chapterTwoDone})); } catch {}
+  }, [chapterTwoKey,chapterTwoOpenedApps,chapterTwoActive,chapterTwoDone]);
+  useEffect(() => {
+    if (!creator && storyFinished && chapterTwoOpenedApps.length >= 5 && !chapterTwoDone && !chapterTwoActive) setChapterTwoActive(true);
+  }, [creator,storyFinished,chapterTwoOpenedApps.length,chapterTwoDone,chapterTwoActive]);
   // Auto-dismiss the incoming-message banner after 2 seconds unless tapped.
   useEffect(() => {
     if (!storyNotification) return;
@@ -325,6 +337,10 @@ function PhoneRuntime({
     setKeyboard(false);
     if (id === "twitter") {
       window.dispatchEvent(new CustomEvent("foundphone-open-dispatch"));
+      if (chapterTwoXReady) { setChapterTwoDone(true); setChapterTwoActive(false); }
+    }
+    if (storyFinished && !chapterTwoDone) {
+      setChapterTwoOpenedApps((current) => current.includes(id) ? current : [...current, id]);
     }
     setRecent((v) => [id, ...v.filter((a) => a !== id)].slice(0, 8));
     setFolder("");
@@ -537,7 +553,7 @@ function PhoneRuntime({
                     const chapterPost = item.id.startsWith("chapter-thread-") || item.id.startsWith("chapter-toilet-") || item.id.startsWith("chapter-battle-") || item.id.startsWith("chapter-exfan-") || item.id === "chapter-giveaway" || item.id === "chapter-dispatch";
                     return !chapterPost || storyFinished || (storyActive && item.id === "chapter-dispatch");
                   }).sort((a,b) => {
-                    const priority = (id:string) => id === "chapter-dispatch" ? 0 : app === "threads" && id.startsWith("chapter-thread-") ? 0 : app === "weibo" && id === "chapter-giveaway" ? 0 : app === "weibo" && (id.startsWith("chapter-toilet-") || id.startsWith("chapter-battle-") || id.startsWith("chapter-exfan-")) ? 1 : 2;
+                    const priority = (id:string) => id === "chapter2-pledis-statement" ? -1 : id === "chapter-dispatch" ? 0 : app === "threads" && id.startsWith("chapter-thread-") ? 0 : app === "weibo" && id === "chapter-giveaway" ? 0 : app === "weibo" && (id.startsWith("chapter-toilet-") || id.startsWith("chapter-battle-") || id.startsWith("chapter-exfan-")) ? 1 : 2;
                     return priority(a.id)-priority(b.id);
                   })}
                   initialThread=""
@@ -659,6 +675,32 @@ function PhoneRuntime({
               }}
             />
           )}
+          {chapterTwoActive && !locked && !creator && (
+            <ChapterTwo
+              key={chapterTwoKey}
+              work={work}
+              onNativeItem={(nativeApp,item) => {
+                setChapterItems((v) => ({...v,[nativeApp]:[...(v[nativeApp]||[]),item]}));
+              }}
+              onNativeNotification={(nativeApp,thread,item) => {
+                if (app === nativeApp && storyThread === thread) {
+                  setBanner((nativeApp === "kakao" ? "KakaoTalk" : "微信")+": "+item.sender+"："+item.body);
+                  window.setTimeout(() => setBanner(""), 2600);
+                } else {
+                  setStoryUnreadThreads((v) => ({...v,[storyUnreadKey(nativeApp,thread)]:true}));
+                  setStoryNotification({app:nativeApp,thread,item});
+                }
+              }}
+              onXPost={(item) => {
+                setChapterItems((v) => ({...v,twitter:[item,...(v.twitter||[]).filter(existing=>existing.id!==item.id)]}));
+                setChapterTwoXReady(true);
+              }}
+              onXNotification={(item) => {
+                setStoryUnreadThreads((v) => ({...v,[storyUnreadKey("twitter","PLEDIS_Entertainment")]:true}));
+                setStoryNotification({app:"twitter",thread:"PLEDIS_Entertainment",item});
+              }}
+            />
+          )}
           {storyNotification && !locked && (
             <button
               type="button"
@@ -672,7 +714,12 @@ function PhoneRuntime({
                 if (notice.app === "twitter") {
                   setApp("twitter");
                   setRecent((v) => ["twitter", ...v.filter((a) => a !== "twitter")].slice(0, 8));
-                  window.dispatchEvent(new CustomEvent("foundphone-open-dispatch"));
+                  if (notice.item.id === "chapter2-pledis-statement") {
+                    setChapterTwoDone(true);
+                    setChapterTwoActive(false);
+                  } else {
+                    window.dispatchEvent(new CustomEvent("foundphone-open-dispatch"));
+                  }
                 } else open(notice.app);
               }}
               style={{position:"absolute",zIndex:90,top:12,left:12,right:12,width:"calc(100% - 24px)",maxWidth:390,margin:"0 auto",border:0,borderRadius:18,padding:"12px 14px",background:"rgba(250,250,252,.96)",backdropFilter:"blur(24px)",boxShadow:"0 8px 28px #0003",color:"#202124",textAlign:"left",display:"flex",gap:11,alignItems:"center"}}
