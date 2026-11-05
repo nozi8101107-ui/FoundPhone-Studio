@@ -196,8 +196,8 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
     p4Cursor.current=0;p4Waiting.current=null;setPart4Started(true);setPart4Index(0);runP4();
   };
   const delivered=useRef(false);
-  const callbacks=useRef({onNativeItem,onNativeNotification,onXPost,onXNotification,onPrompt,onChoices});
-  callbacks.current={onNativeItem,onNativeNotification,onXPost,onXNotification,onPrompt,onChoices};
+
+
   useEffect(()=>{
     if(delivered.current)return;
     delivered.current=true;
