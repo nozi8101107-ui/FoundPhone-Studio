@@ -65,6 +65,8 @@ import {
 } from "./schema";
 import { dispatch, choose, visible, advance } from "./engine";
 import { db } from "./persistence";
+import type { SaveSlot } from "./runtime/saveSlots";
+import { collectProgressStorage } from "./runtime/saveSlots";
 import { ChapterOne } from "./runtime/ChapterOne";
 import { ChapterTwo } from "./runtime/ChapterTwo";
 export function AppIcon({
@@ -127,6 +129,7 @@ function PhoneRuntime({
   onOpen,
   runtime: external,
   onRuntime,
+  onLoadSlot,
 }: {
   deviceLayout: ReturnType<typeof useDeviceLayout>;
   work: Work;
@@ -137,8 +140,38 @@ function PhoneRuntime({
   onOpen?: (app: string) => void;
   runtime?: Runtime;
   onRuntime?: (s: Runtime) => void;
+  onLoadSlot?: (slot: SaveSlot) => void;
 }) {
   const [app, setApp] = useState("");
+  const [saveSlots, setSaveSlots] = useState<SaveSlot[]>([]);
+  useEffect(() => {
+    let active = true;
+    void db.slots.where("workId").equals(work.id).toArray().then((slots) => {
+      if (active) setSaveSlots(slots.sort((a,b)=>a.slot-b.slot));
+    }).catch(() => {});
+    return () => { active = false; };
+  }, [work.id]);
+  const saveToSlot = async (slot: number) => {
+    const profile = JSON.parse(localStorage.getItem("foundphone.user-profile.v1") || "null");
+    if (!profile) return;
+    const id = work.id + ":" + slot;
+    const previous = await db.slots.get(id);
+    const entry: SaveSlot = {
+      id, workId: work.id, slot, name: previous?.name || "存档" + slot,
+      savedAt: Date.now(), profile, runtime: structuredClone(runtimeRef.current),
+      localStorage: collectProgressStorage(),
+    };
+    await db.slots.put(entry);
+    setSaveSlots((current) => [...current.filter((item)=>item.slot!==slot),entry].sort((a,b)=>a.slot-b.slot));
+  };
+  const renameSlot = async (slot: number, name: string) => {
+    const current = saveSlots.find((item)=>item.slot===slot);
+    if (!current) return;
+    const updated = {...current,name:name.slice(0,8)};
+    await db.slots.put(updated);
+    setSaveSlots((items)=>items.map((item)=>item.slot===slot?updated:item));
+  };
+
   const [homeRequest, setHomeRequest] = useState(0);
   const [locked, setLocked] = useState(!creator);
   const storyKey = "foundphone.chapter1.v2.done:" + work.id + ":" + String(work.variables.storyNickname || "");
@@ -1419,6 +1452,10 @@ function AppContent({
           creator={creator}
           onItem={read}
           onSettings={onSettings}
+          saveSlots={saveSlots}
+          onSaveSlot={saveToSlot}
+          onRenameSlot={renameSlot}
+          onLoadSlot={onLoadSlot}
         />
       ) : app.id === "calculator" && !detail ? (
         <NativeCalculator
