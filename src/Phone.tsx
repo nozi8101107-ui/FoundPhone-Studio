@@ -170,6 +170,17 @@ function PhoneRuntime({
   }, [creator,storyFinished,chapterTwoOpenedApps.length,chapterTwoDone,chapterTwoActive]);
   // Auto-dismiss the incoming-message banner after 2 seconds unless tapped.
   useEffect(() => {
+    const finishChapterTwo = (event: Event) => {
+      const detail = (event as CustomEvent<{ending:number}>).detail;
+      setChapterTwoDone(true);
+      setChapterTwoActive(false);
+      setChapterTwoChoices([]);
+      try { localStorage.setItem(chapterTwoKey, JSON.stringify({openedApps:chapterTwoOpenedApps,active:false,done:true,ending:detail?.ending || 0})); } catch {}
+    };
+    window.addEventListener("foundphone-chapter2-ending", finishChapterTwo);
+    return () => window.removeEventListener("foundphone-chapter2-ending", finishChapterTwo);
+  }, [chapterTwoKey,chapterTwoOpenedApps]);
+  useEffect(() => {
     if (!storyNotification) return;
     const timer = window.setTimeout(() => setStoryNotification(null), 2000);
     return () => window.clearTimeout(timer);
@@ -679,7 +690,7 @@ function PhoneRuntime({
               }}
             />
           )}
-          {chapterTwoActive && !locked && !creator && (
+          {chapterTwoActive && storyFinished && !locked && !creator && (
             <ChapterTwo
               key={chapterTwoKey}
               work={work}
