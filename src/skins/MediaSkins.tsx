@@ -494,8 +494,7 @@ function DouyinPost({ post }: { post: DouyinPostData }) {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && entry.intersectionRatio >= 0.65) {
-          // Muted playback is permitted by mobile browsers' autoplay policies.
-          video.muted = true;
+          // Try autoplay with sound; mobile browsers may require a prior user gesture.
           void video.play().catch(() => {
             // Playback can still be blocked by browser or device settings.
           });
@@ -518,7 +517,6 @@ function DouyinPost({ post }: { post: DouyinPostData }) {
         ref={videoRef}
         src={src}
         controls
-        muted
         playsInline
         preload="metadata"
         aria-label={post.title}
