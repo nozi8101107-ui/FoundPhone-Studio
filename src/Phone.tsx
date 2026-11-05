@@ -165,8 +165,20 @@ function PhoneRuntime({
   useEffect(() => {
     try { localStorage.setItem(chapterTwoKey, JSON.stringify({openedApps:chapterTwoOpenedApps,active:chapterTwoActive,done:chapterTwoDone})); } catch {}
   }, [chapterTwoKey,chapterTwoOpenedApps,chapterTwoActive,chapterTwoDone]);
+  // A fresh Chapter 1 run must not inherit a stale Chapter 2 completion flag.
   useEffect(() => {
-    if (!creator && storyFinished && chapterTwoOpenedApps.length >= 5 && !chapterTwoDone && !chapterTwoActive) setChapterTwoActive(true);
+    if (!storyFinished && chapterTwoDone) {
+      setChapterTwoDone(false);
+      setChapterTwoActive(false);
+      setChapterTwoOpenedApps([]);
+      try { localStorage.setItem(chapterTwoKey, JSON.stringify({openedApps:[],active:false,done:false})); } catch {}
+    }
+  }, [storyFinished,chapterTwoDone,chapterTwoKey]);
+  useEffect(() => {
+    if (!creator && storyFinished && chapterTwoOpenedApps.length >= 5 && !chapterTwoDone && !chapterTwoActive) {
+      setChapterTwoActive(true);
+      try { localStorage.setItem(chapterTwoKey, JSON.stringify({openedApps:chapterTwoOpenedApps,active:true,done:false})); } catch {}
+    }
   }, [creator,storyFinished,chapterTwoOpenedApps.length,chapterTwoDone,chapterTwoActive]);
   // Auto-dismiss the incoming-message banner after 2 seconds unless tapped.
   useEffect(() => {
