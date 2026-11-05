@@ -206,9 +206,13 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
   const callbacks=useRef({onNativeItem,onNativeNotification,onXPost,onXNotification,onPrompt,onChoices});
   callbacks.current={onNativeItem,onNativeNotification,onXPost,onXNotification,onPrompt,onChoices};
   const p4Running=useRef(false);
-  const deliverP4Incoming=(item:Item,done:()=>void)=>{
+  const deliverP4Incoming=(createItem:()=>Item,done:()=>void)=>{
     const delay=1000+Math.random()*1500;
-    window.setTimeout(()=>{callbacks.current.onNativeNotification(part4ActiveRef.current?exApp:app,part4ActiveRef.current?exThread:thread,item);done();},delay);
+    window.setTimeout(()=>{
+      const item=createItem();
+      callbacks.current.onNativeNotification(part4ActiveRef.current?exApp:app,part4ActiveRef.current?exThread:thread,item);
+      done();
+    },delay);
   };
   const runP4=()=>{
     if(p4Running.current)return;
@@ -218,9 +222,11 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
         const lines=action.type==="in"?action.lines:[""];
         const deliver=(index:number)=>{
           if(index>=lines.length){p4Running.current=false;runP4();return;}
-          const item=action.type==="image"?addChat("",false,{kind:"image",media:import.meta.env.BASE_URL+action.path}):addChat(lines[index],false);
           p4Running.current=true;
-          deliverP4Incoming(item,()=>deliver(index+1));
+          deliverP4Incoming(
+            ()=>action.type==="image"?addChat("",false,{kind:"image",media:import.meta.env.BASE_URL+action.path}):addChat(lines[index],false),
+            ()=>deliver(index+1)
+          );
         };
         deliver(0);return;
       }
