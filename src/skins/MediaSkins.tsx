@@ -413,9 +413,119 @@ function VerticalVideo({ p, item }: { p: Props; item: Item }) {
     </article>
   );
 }
+type DouyinPostData = {
+  title: string;
+  video: string;
+  likes: string;
+  comments: string;
+  saves: string;
+  shares: string;
+  date: string;
+};
+
+const douyinPosts: DouyinPostData[] = [
+  {
+    title: "Replay,replay,replay⏪️#姐姐真漂亮 #SHINYU #申惟 #TWS",
+    video: "ScreenRecording_11-05-2026 11-42-20_1.mov",
+    likes: "90.4万", comments: "7.0万", saves: "9.1万", shares: "18.2万",
+    date: "2024年2月28日",
+  },
+  {
+    title: "道勋丝带儿🤓🖤 #道勋 #DOHOON #TWS",
+    video: "ScreenRecording_11-05-2026 11-54-52_1.mov",
+    likes: "54.0万", comments: "2.4万", saves: "5.1万", shares: "12.0万",
+    date: "2024年9月15日",
+  },
+  {
+    title: "no doubt #TWS #英宰 #YOUNGJAE",
+    video: "ScreenRecording_11-05-2026 11-58-40_1.mov",
+    likes: "40.4万", comments: "1.1万", saves: "2.9万", shares: "4.9万",
+    date: "2025年12月14日",
+  },
+  {
+    title: "🪩🪩 #TWS #韩振 #HANJIN",
+    video: "ScreenRecording_11-05-2026 12-02-07_1.mov",
+    likes: "212.5万", comments: "21.9万", saves: "10.0万", shares: "20.7万",
+    date: "2026年2月10日",
+  },
+  {
+    title: "🪼🔄 #TWS #志薰 #JIHOON",
+    video: "ScreenRecording_11-05-2026 12-06-19_1.mp4",
+    likes: "25.0万", comments: "4779", saves: "1.0万", shares: "2.7万",
+    date: "2025年8月17日",
+  },
+  {
+    title: "NEON2 #TWS #炅潣 #KYUNGMIN #247WithUs",
+    video: "ScreenRecording_11-05-2026 12-09-12_1.mov",
+    likes: "41.3万", comments: "2862", saves: "1.4万", shares: "3.4万",
+    date: "2026年10月21日",
+  },
+  {
+    title: "NEON #TWS #志薰 #JIHOON #炅潣 #KYUNGMIN",
+    video: "ScreenRecording_11-05-2026 12-14-54_1.mov",
+    likes: "75.9万", comments: "9675", saves: "3.1万", shares: "11.9万",
+    date: "2026年10月15日",
+  },
+  {
+    title: "LOVE SCENARIO🩵 #TWS #韩振 #HANJIN #英宰 #YOUNGJAE",
+    video: "ScreenRecording_11-05-2026 12-18-34_1.mov",
+    likes: "25.4万", comments: "3606", saves: "8970", shares: "1.9万",
+    date: "2026年8月19日",
+  },
+  {
+    title: "哈吉嘛🙅‍♂️🙅‍♂️ #TWS #道勋 #DOHOON #申惟 #SHINYU",
+    video: "copy_0ECC91CC-68D5-49AC-825E-0FFBAEF0B09D.mov",
+    likes: "32.0万", comments: "5264", saves: "2.3万", shares: "3.4万",
+    date: "2025年8月20日",
+  },
+];
+
+function DouyinPost({ post }: { post: DouyinPostData }) {
+  const [liked, setLiked] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const avatar = import.meta.env.BASE_URL + "youtube/channels4_profile.jpeg";
+  const src = encodeURI(import.meta.env.BASE_URL + "dy/" + post.video);
+  return (
+    <article className="vertical-video douyin-video-post">
+      <video
+        src={src}
+        controls
+        playsInline
+        preload="metadata"
+        aria-label={post.title}
+      />
+      <div className="vertical-actions">
+        <span className="douyin-account-avatar">
+          <Avatar name="TWS_PLEDIS" src={avatar} />
+        </span>
+        <button aria-label="点赞" aria-pressed={liked} onClick={() => setLiked((v) => !v)}>
+          <Heart size={29} fill={liked ? "#f44368" : "white"} />
+          <small>{post.likes}</small>
+        </button>
+        <button aria-label="评论">
+          <MessageCircle size={27} />
+          <small>{post.comments}</small>
+        </button>
+        <button aria-label="收藏" aria-pressed={saved} onClick={() => setSaved((v) => !v)}>
+          <Bookmark size={27} fill={saved ? "#f8cc55" : "none"} />
+          <small>{post.saves}</small>
+        </button>
+        <button aria-label="转发">
+          <Share2 size={26} />
+          <small>{post.shares}</small>
+        </button>
+      </div>
+      <div className="vertical-caption douyin-caption">
+        <strong>@TWS_PLEDIS</strong>
+        <p>{post.title}</p>
+        <small>{post.date}</small>
+      </div>
+    </article>
+  );
+}
+
 export function DouyinSkin(p: Props) {
-  const { tab, setTab, items } = useContent(p, "推荐");
-  const list = tab === "推荐" ? items : items.filter((i) => i.folder === tab);
+  const { tab, setTab } = useContent(p, "推荐");
   return (
     <div className="catalog-skin douyin-ui">
       <Header p={p} />
@@ -430,11 +540,10 @@ export function DouyinSkin(p: Props) {
           </button>
         ))}
       </div>
-      <div className="vertical-feed">
-        {list.map((i) => (
-          <VerticalVideo key={i.id} p={p} item={i} />
-        ))}
-        <Empty items={list} />
+      <div className="vertical-feed douyin-feed">
+        {tab === "推荐" || tab === "关注"
+          ? douyinPosts.map((post) => <DouyinPost key={post.video} post={post} />)
+          : <div className="douyin-empty">暂时没有同城视频</div>}
       </div>
       <Tabs
         tabs={["推荐", "关注", "我"]}
