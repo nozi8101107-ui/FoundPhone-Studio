@@ -1,4 +1,4 @@
-import { useState, type ComponentType } from "react";
+import { useState, type ComponentType, type CSSProperties } from "react";
 import {
   Plane,
   Wifi,
@@ -24,7 +24,7 @@ import type { SaveSlot } from "../runtime/saveSlots";
 import { IOSToggle } from "../vendor/konsta/Toggle";
 import { NavigationPage, useNavigation } from "./Navigation";
 type Row = [ComponentType<{ size?: number }>, string, string];
-const slotButtonStyle: React.CSSProperties = {flex:1,minWidth:0,height:34,border:0,borderRadius:9,background:"#f2f2f7",color:"#222",fontSize:12,fontWeight:600};
+const slotButtonStyle: CSSProperties = {flex:1,minWidth:0,height:34,border:0,borderRadius:9,background:"#f2f2f7",color:"#222",fontSize:12,fontWeight:600};
 const groups: Row[][] = [
   [
     [Plane, "飞行模式", "#ff9500"],
