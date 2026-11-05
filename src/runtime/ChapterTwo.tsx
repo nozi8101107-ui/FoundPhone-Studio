@@ -75,9 +75,14 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
   const contact=(work.data[app]||[]).find(i=>i.meta.handle===handles[crush]&&!i.outgoing&&i.avatar)||(work.data[app]||[]).find(i=>i.meta.handle===handles[crush]);
   const remark=String(contact?.meta.remark||contact?.title||names[crush]||"对方");
   const avatar=crush==="hanjin"?import.meta.env.BASE_URL+"people/IMG_9702.jpeg":contact?.avatar||"";
-
   const xp=String(work.variables.storyXp||"BG").toUpperCase();
   const ex=String(work.variables.storyEx||"dohoon");
+  const exApp=ex==="hanjin"?"wechat":"kakao";
+  const exContact=(work.data[exApp]||[]).find(i=>i.meta.handle===handles[ex]&&!i.outgoing&&i.avatar)||(work.data[exApp]||[]).find(i=>i.meta.handle===handles[ex]);
+  const exThread=exContact?.title||names[ex]||"聊天";
+  const exRemark=String(exContact?.meta.remark||exContact?.title||names[ex]||"对方");
+  const exAvatar=ex==="hanjin"?import.meta.env.BASE_URL+"people/IMG_9702.jpeg":exContact?.avatar||"";
+  const part4ActiveRef=useRef(false);
   const nick=String(work.variables.storyNickname||"你");
   const [part3Started,setPart3Started]=useState(false);
   const [part3Index,setPart3Index]=useState(0);
@@ -88,10 +93,17 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
   const [part4Ended,setPart4Ended]=useState(false);
   const [replyToken,setReplyToken]=useState(3100);
   const flow=useRef<any[]>([]);
-  const sendPrompt=(text:string)=>{setReplyToken(v=>v+1);callbacks.current.onPrompt(app,thread,text,replyToken+1);};
+  const sendPrompt=(text:string)=>{setReplyToken(v=>v+1);callbacks.current.onPrompt(part4ActiveRef.current?exApp:app,part4ActiveRef.current?exThread:thread,text,replyToken+1);};
   const addChat=(body:string,outgoing:boolean,extra:Partial<Item>={})=>{
-    const item:Item={id:"chapter2-"+(part4Started?"p4":"p3")+"-"+Date.now()+"-"+Math.random().toString(36).slice(2),title:thread,body,richText:"",meta:{story:"chapter2",handle:handles[crush],remark},time:part4Started?"00:53":"00:31",sender:outgoing?"我":remark,avatar:outgoing?"":avatar,kind:"text",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing,read:false,likes:0,comments:[],...extra};
-    callbacks.current.onNativeItem(app,item);
+    const inPart4=part4ActiveRef.current;
+    const targetApp=inPart4?exApp:app;
+    const targetThread=inPart4?exThread:thread;
+    const targetRemark=inPart4?exRemark:remark;
+    const targetAvatar=inPart4?exAvatar:avatar;
+    const targetHandle=inPart4?handles[ex]:handles[crush];
+    const item:Item={id:"chapter2-"+(inPart4?"p4":"p3")+"-"+Date.now()+"-"+Math.random().toString(36).slice(2),title:targetThread,body,richText:"",meta:{story:"chapter2",handle:targetHandle,remark:targetRemark},time:inPart4?"00:53":"00:31",sender:outgoing?"我":targetRemark,avatar:outgoing?"":targetAvatar,kind:"text",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing,read:false,likes:0,comments:[],...extra};
+    callbacks.current.onNativeItem(targetApp,item);
+    return item;
   };
   const p3First:Record<string,string[]>={
     shinyu:["我没事","怎么还没睡","说了让你先好好休息的"],
@@ -190,6 +202,7 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
   const startP4=()=>{
     if(part4Ended)return;
     const branch=(xp==="GB"?"GB":"BG");
+    part4ActiveRef.current=true;
     p4Actions.current=p4Flows[branch][ex]||p4Flows[branch].shinyu;
     p4Cursor.current=0;p4Waiting.current=null;setPart4Started(true);setPart4Index(0);runP4();
   };
@@ -225,7 +238,7 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
 
   useEffect(()=>{
     const onThread=(e:Event)=>{const d=(e as CustomEvent).detail||{};if(d.app===app&&d.thread===thread&&localStorage.getItem("foundphone.chapter2.xOpened:"+work.id)==="1")beginPart3();};
-    const onSend=(e:Event)=>{const d=(e as CustomEvent).detail||{};if(d.app!==app||d.thread!==thread)return;if(part4Started){handlePart4Send(String(d.text||""));return;}if(part3Started)handlePart3Send(String(d.text||""));};
+    const onSend=(e:Event)=>{const d=(e as CustomEvent).detail||{};const expectedApp=part4ActiveRef.current?exApp:app;const expectedThread=part4ActiveRef.current?exThread:thread;if(d.app!==expectedApp||d.thread!==expectedThread)return;if(part4ActiveRef.current){handlePart4Send(String(d.text||""));return;}if(part3Started)handlePart3Send(String(d.text||""));};
     const onPart4=()=>startP4();
     window.addEventListener("foundphone-chapter2-thread-open",onThread);
     window.addEventListener("foundphone-story-send",onSend);
