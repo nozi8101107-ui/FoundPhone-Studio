@@ -53,7 +53,7 @@ function makeStatement(crush:string):Item {
     "谢谢大家。\n\nPLEDIS Entertainment";
   return {
     id:"chapter2-pledis-statement", title:"PLEDIS Entertainment", body, richText:"",
-    meta:{handle:"PLEDIS_Entertainment",commentCount:"4000+",reposts:"3w+",story:"chapter2"},
+    meta:{handle:"PLEDIS_Entertainment",likesDisplay:"10w+",commentCount:"4000+",reposts:"3w+",story:"chapter2"},
     time:"00:30",sender:"PLEDIS_Entertainment",avatar:"",kind:"post",media:"",
     hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:false,read:false,
     likes:100000,comments:makeComments(crush)
