@@ -163,7 +163,8 @@ export function XSkin(p: Props) {
       </div>
       <div className="catalog-scroll">
         <SearchBox value={q} set={setQ} />
-        {items
+        {[...items]
+          .sort((a,b) => (a.id === "chapter2-pledis-statement" ? -1 : b.id === "chapter2-pledis-statement" ? 1 : 0))
           .filter((i) => tab === "为你推荐" || i.folder === "正在关注")
           .map((i) => (
             <article className="x-post" key={i.id}>
