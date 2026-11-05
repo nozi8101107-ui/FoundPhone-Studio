@@ -892,15 +892,15 @@ function PhoneRuntime({
               <h2>故事在这里停泊。</h2>
               <p>{s.endings[s.endings.length - 1]}</p>
               <button
-                onClick={() => {
-                  // A restart must clear both the normal phone save and every Chapter 1
-                  // sidecar save; otherwise old chats and the previous story cursor leak
-                  // into the newly configured playthrough.
+                onClick={async () => {
+                  // Reset the IndexedDB runtime as well as all per-playthrough sidecars.
+                  // Await deletion so an old saved chat state cannot be restored on re-entry.
                   if (storyTimer.current) {
                     clearTimeout(storyTimer.current);
                     storyTimer.current = null;
                   }
                   try {
+                    await db.saves.delete(work.id);
                     for (let i = localStorage.length - 1; i >= 0; i--) {
                       const key = localStorage.key(i);
                       if (key && key.startsWith("foundphone.") && key !== "foundphone.user-profile.v1" && !key.startsWith("foundphone.save-slots.")) localStorage.removeItem(key);
