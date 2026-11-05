@@ -827,8 +827,13 @@ function PhoneRuntime({
                     localStorage.removeItem(storyFlowKey);
                     localStorage.removeItem(storyKey);
                     localStorage.removeItem(chapterItemsKey);
+                    localStorage.removeItem(chapterTwoKey);
                   } catch {}
                   setChapterItems({});
+                  setChapterTwoOpenedApps([]);
+                  setChapterTwoActive(false);
+                  setChapterTwoDone(false);
+                  setChapterTwoXReady(false);
                   setStoryActive(false);
                   setStoryFinished(false);
                   setStoryThread("");
