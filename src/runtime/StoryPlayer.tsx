@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Phone } from "../Phone";
 import { db } from "../persistence";
+import type { SaveSlot } from "./saveSlots";
+import { restoreProgressStorage } from "./saveSlots";
 import { validateWork, type Work } from "../schema";
 import { UserOnboarding, type UserProfile } from "./UserOnboarding";
 import "../styles.css";
@@ -10,13 +12,15 @@ const KEY="foundphone.user-profile.v1";
 const friendNames=["민서","서연","지우","유진","수빈","예린","채원","하린","도연","나연","소희","은서","지민","다은","현아","예지","승아","가은","혜원","시은"];
 const randId=()=>Array.from({length:9},()=>{const chars="abcdefghijklmnopqrstuvwxyz0123456789";return chars[Math.floor(Math.random()*chars.length)];}).join("");
 function readProfile():UserProfile|null{try{const x=JSON.parse(localStorage.getItem(KEY)||"null") as UserProfile|null;return x&&x.nickname&&/^\d{8}$/.test(x.birthday)&&x.avatar&&x.crush&&x.ex&&["BG","GB"].includes(x.xp)?x:null}catch{return null}}
-function StartChoice({onContinue,onRestart}:{onContinue:()=>void;onRestart:()=>void}){
- return <main className="start-choice"><section className="start-choice-card"><div className="start-choice-kicker">FOUND PHONE</div><h1>欢迎回来</h1><p>要接着上次的故事，还是重新开始？</p><button className="start-choice-primary" onClick={onContinue}>继续剧情<span>从上次离开的位置继续</span></button><button className="start-choice-secondary" onClick={onRestart}>重新开始<span>重新设置个人资料，从第一幕开始</span></button><small>选择继续会保留当前进度；重新开始会清空进度并重新设置资料</small></section></main>;
+function StartChoice({onContinue,onRestart,slots,onLoadSlot}:{onContinue:()=>void;onRestart:()=>void;slots:SaveSlot[];onLoadSlot:(slot:SaveSlot)=>void}){
+ const [showSlots,setShowSlots]=useState(false);
+ return <main className="start-choice"><section className="start-choice-card"><div className="start-choice-kicker">FOUND PHONE</div><h1>欢迎回来</h1><p>要接着上次的故事，还是重新开始？</p><button className="start-choice-primary" onClick={onContinue}>继续剧情<span>从上次离开的位置继续</span></button><button className="start-choice-secondary" onClick={onRestart}>重新开始<span>重新设置个人资料，从第一幕开始</span></button><button className="start-choice-secondary" onClick={()=>setShowSlots(true)}>读取存档<span>从已保存的进度继续</span></button><small>继续剧情保留当前进度；重新开始会重新设置资料，独立存档不会被删除。</small></section>{showSlots&&<div className="save-slot-overlay"><section className="save-slot-dialog"><h2>读取存档</h2>{slots.length?slots.slice().sort((a,b)=>a.slot-b.slot).map(slot=><button className="save-slot-choice" key={slot.id} onClick={()=>onLoadSlot(slot)}><strong>{slot.name}</strong><small>{new Date(slot.savedAt).toLocaleString()}</small></button>):<p>还没有存档，先进入手机，在「设置」中保存进度。</p>}<button className="save-slot-cancel" onClick={()=>setShowSlots(false)}>取消</button></section></div>}</main>;
 }
 function StoryPlayer(){
  const [work,setWork]=useState<Work|null>(null),[error,setError]=useState(""),[profile,setProfile]=useState<UserProfile|null>(()=>readProfile());
  const [choice,setChoice]=useState<"setup"|"choose"|"play">(()=>readProfile()?"choose":"setup");
  const [session,setSession]=useState(0);
+ const [saveSlots,setSaveSlots]=useState<SaveSlot[]>([]);
  const friends=useMemo(()=>{
   if(!profile)return [];
   const storageKey="foundphone.instagram-friends.v1:"+profile.nickname;
@@ -32,12 +36,14 @@ function StoryPlayer(){
   }
   return friendNames.map((name,index)=>{const handle=handlesForFriends[index];return {id:"ig-friend-"+index,title:handle,body:"",richText:"",meta:{handle,username:name,account:"friend",relationship:"互相关注",mutual:"true"},time:"2026-11-03 09:41",sender:handle,avatar:"",kind:"text" as const,media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:false,read:false,likes:0,comments:[] as string[]};});
  },[profile?.nickname]);
+ useEffect(()=>{if(!work)return;let active=true;void db.slots.where("workId").equals(work.id).toArray().then(items=>{if(active)setSaveSlots(items.sort((a,b)=>a.slot-b.slot))}).catch(()=>{});return()=>{active=false}},[work?.id,choice,session]);
+ const loadSlot=async(slot:SaveSlot)=>{if(!work)return;try{await db.saves.put({id:work.id,state:slot.runtime});restoreProgressStorage(slot.localStorage||{});localStorage.setItem(KEY,JSON.stringify(slot.profile));setProfile(slot.profile);setChoice("play");setSession(v=>v+1)}catch{setError("读取存档失败，请检查本机存储空间。")}};
  useEffect(()=>{const abort=new AbortController();fetch(new URLSearchParams(location.search).get("preview")==="test"?"./test-work.json":new URLSearchParams(location.search).get("template")==="blank"?"./blank-work.json":"./work.json",{signal:abort.signal}).then(r=>{if(!r.ok)throw Error("缺少作品文件，请运行 npm run story:build");return r.json()}).then(x=>{const w=validateWork(x);document.title=w.title==="捡手机"?"捡手机":w.title+" · 捡手机";setWork(w)}).catch(e=>{if(e.name!=="AbortError")setError(String(e))});return()=>abort.abort()},[]);
  const complete=(p:UserProfile)=>{try{localStorage.setItem(KEY,JSON.stringify(p));setProfile(p);setChoice("play");setSession(v=>v+1)}catch{setError("头像保存失败，请换一张较小的图片后重试。")}};
  const restart=async()=>{if(!work)return;try{await db.saves.delete(work.id);localStorage.removeItem(KEY);const prefixes=["foundphone.chapter1.v2.done:"+work.id+":","foundphone.chapter1.v3:"+work.id+":","foundphone.chapter1.messages:"+work.id];for(let i=localStorage.length-1;i>=0;i--){const key=localStorage.key(i);if(key&&prefixes.some(prefix=>key.startsWith(prefix)))localStorage.removeItem(key);}setProfile(null);setChoice("setup");setSession(v=>v+1)}catch{setError("无法清除旧进度，请检查浏览器存储权限。")}};
  if(!work)return <main className="story-runtime"><p role="status">{error||"正在打开手机…"}</p></main>;
  if(!profile)return <UserOnboarding key={session} onComplete={complete}/>;
- if(choice==="choose")return <StartChoice onContinue={()=>setChoice("play")} onRestart={()=>void restart()}/>;
+ if(choice==="choose")return <StartChoice onContinue={()=>setChoice("play")} onRestart={()=>void restart()} slots={saveSlots} onLoadSlot={(slot)=>void loadSlot(slot)}/>;
  const labels:Record<string,string>={shinyu:"tlswjdghks",dohoon:"doking",youngjae:"jae_e",hanjin:"henan_prince",jihoon:"ahoooon",kyungmin:"kyungman_lee"};
  const crushNames:Record<string,string>={shinyu:"晶㬊尼",dohoon:"小屎狗",youngjae:"居家服务型男",hanjin:"珍珍",jihoon:"击击击昏",kyungmin:"炅man"};
  const exNames:Record<string,string>={shinyu:"事多爹系天蝎男",dohoon:"不要理他！",youngjae:"远离双子男",hanjin:"不中",jihoon:"tws韩志薰",kyungmin:"李炅jiong潣min"};
@@ -1086,6 +1092,6 @@ const extraThreads=extraThreadTexts.map((body,index)=>{const author=randId();con
  const cleanedApps=work.apps.map(app=>hiddenAppIds.has(app.id)?{...app,installed:false,visible:false,dock:false,folder:""}:app.id==="taobao"?{...app,installed:true,visible:true}:app);
  if(!cleanedApps.some(app=>app.id==="taobao"))cleanedApps.push({id:"taobao",name:"淘宝",installed:true,visible:true,dock:false,folder:"",icon:""});
  const personalized:Work={...work,variables:{...work.variables,storyCrush:profile.crush,storyEx:profile.ex,storyXp:profile.xp,storyNickname:profile.nickname,storyUserAvatar:profile.avatar},apps:cleanedApps,phone:{...work.phone,owner:profile.nickname,passcode:profile.birthday.slice(-4),wallpaperImage:profile.homeWallpaper||profile.lockWallpaper},data:{...cleanedData,wechat:[...(cleanedData.wechat||[]),...hanjinWechatMessages,...wechatGroups,...wechatContacts,...wechatChatItems],youtube:[...(cleanedData.youtube||[]),...youtubeVideos],kakao:[...(cleanedData.kakao||[]),...kakaoMessages],instagram:[...(cleanedData.instagram||[]).filter(item=>item.meta.account==="official"),...insta],threads:[...(cleanedData.threads||[]),...threadItems.filter(()=>Math.random()<0.3),...extraThreads.filter(()=>Math.random()<0.3),...chapterThreads],twitter:[...(cleanedData.twitter||[]).filter(item=>item.id!=="test-item-twitter"),chapterDispatch,...xPosts],weibo:[...(cleanedData.weibo||[]).filter(item=>item.id!=="test-item-weibo"),...weiboPosts.filter(()=>Math.random()<0.45),...chapterWeibo],taobao:[...(cleanedData.taobao||[]),...taobaoItems,...historicalOrders],alipay:[...(cleanedData.alipay||[]),...historicalBills]}};
- return <main className="story-runtime"><Phone key={session} work={personalized}/></main>;
+ return <main className="story-runtime"><Phone key={session} work={personalized} onLoadSlot={(slot)=>void loadSlot(slot)}/></main>;
 }
 createRoot(document.getElementById("root")!).render(<StoryPlayer/>);
