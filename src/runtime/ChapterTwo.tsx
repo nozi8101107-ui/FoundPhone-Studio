@@ -151,39 +151,49 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
   const p4Send=(text:string)=>{addChat(text,true);};
   const startPart4=()=>{if(part4Started||part4Ended)return;setPart4Started(true);setPart4Index(0);};
   const sendPart4Prompt=(text:string)=>sendPrompt(text);
-  const p4Flow=()=>{
-    const flowByEx:Record<string,any>={};
-    // Full BG/GB ex-partner branches are advanced below from the selected ex and XP.
-    const bg:Record<string,any>={
-      shinyu:{start:["刚刚回来了","你们最近","见不了面了吧？"],after:["明天","我去你家楼下接你"],prompt:["关你什么事","？？？你干嘛","我跟你已经没有关系了","你也想被拍？"],end:["……","我会准备好的","鲜花","红酒","套我也买了"],choices:["我不喝酒","……"],branches:[["行"],["你来不来"]],tail:["房间号"],room:["1107"]},
-      dohoon:{start:["还真想得出来","“普通朋友”？？","喂","你喜欢那样的胆小鬼吗"],after:["关我什么事？","房间号3001","明天晚上"],prompt:["关你什么事"],choices:["你放过我吧 我这两天很累了","……"],branches:[["那我呢","……算了"],["你来不来"]],tail:["滚"],room:["哈","不愿意来","那我明天去你家找你"]},
-      youngjae:{start:["明天有空吗"],prompt:["？"],after:["明天我去你接你"],choices:["我不会去的","你这是通知吗"],branches:[["……行"],["我只是问你"]],tail:["。"],end:["^ ^","我明晚八点到"]},
-      hanjin:{start:["[image:wx/IMG_9985.jpeg]"],prompt:["？"],after:["想见你","明天"],prompt2:["这位男士请你爱疯手机"],end:["……","不好吗","我去接你"],choices:["不好","什么时候"],branches:[["。"],["明晚八点","我会到你家楼下"]]},
-      jihoon:{start:["你明天有事吗"],prompt:["有事"],after:["…","呀","骗人"],prompt2:["你有什么事"],end:["我明天去找你好不好"],choices:["你老实跳你的舞吧","你来干嘛"],branches:[[],["还能干嘛","我想你了"]],tail:["你想我了就直接来我家？"],last:["嗯"],tail2:["真好奇你的粉丝如果知道你这样之后会怎么想"],last2:["我买好套了","明晚八点到你家"]},
-      kyungmin:{start:["你在家吗"],prompt:["？","我现在不在家还能在哪","你来我家干嘛","这么晚了 你有病啊"],end:["那我明天去找你","去你家","我的东西你还没扔吧"],choices:["早扔了^ ^","你有病"],branches:[["哈"],["对","等着我吧"]]}
-    };
-    const gb:Record<string,any>={
-      shinyu:{start:["刚刚回来了","你们最近","见不了面了吧？"],prompt:["关你什么事","我跟你已经没有关系了"],after:["没什么事","想见你","[image:kkt/IMG_9986.jpeg]","我会准备好的"],choices:["我不在意","色诱？"],branches:[["行"],["你来不来"]],tail:["房间号"],last:["1107","会让你满意的"]},
-      dohoon:{start:["还真想得出来","“普通朋友”？？","喂","你喜欢那样的胆小鬼吗"],prompt:["关你什么事"],after:["关我什么事？","房间号3001","明天晚上","我从现在开始断食"],choices:["现在才断食 明天会喷我一身吧","你自己灌？"],branches:[["你他爸"],["？","那你给我灌"]],tail:["滚"],last:["说好了","明晚八点"]},
-      youngjae:{start:["明晚八点在家等我"],prompt:["？"],after:["明天我去找你","^ ^"],choices:["你觉得你对我还有吸引力？","你这是通知吗"],branches:[["是我自负了"],["我只是问你"]],tail:["。"],last:["^ ^","我明晚八点到","喜欢男仆装还是裸体围裙","露背毛衣？怎么样"],last2:["都不喜欢"],end:["那我都带过去"]},
-      hanjin:{start:[nick],prompt:["？"],after:["想见你","明天"],prompt2:["别发骚"],end:["……","不好吗","我去找你"],choices:["不好","什么时候"],branches:[["。"],["明晚八点","我会到你家楼下",nick]]},
-      jihoon:{start:["你明天在家吗",nick],prompt:["有事"],after:["…","呀","骗人的吧"],prompt2:["你有什么事"],end:["我明天去找你","[image:kkt/IMG_9993.jpeg]"],choices:["这招对我没用","脸都红透了^ ^"],branches:[["。","好不容易才发出来"],["。"]],tail:["可爱"],last:["嗯"],tail2:["这么想我？"],last2:["我明晚八点到你家"]},
-      kyungmin:{start:["你在家吗"],prompt:["？","我现在不在家还能在哪","这么晚了来我家？","你有病？"],end:["那我明天再去找你","去你家","我的东西你还没扔吧"],choices:["早扔了^ ^","这么急不可耐？"],branches:[["哈"],["对","等着我吧","明晚八点","我会准时到的"]]}
-    };
-    const cfg=(xp==="GB"?gb:bg)[ex]||(xp==="GB"?gb:bg).shinyu;
-    return cfg;
+  type P4Action = {type:"in";lines:string[]} | {type:"image";path:string} | {type:"prompt";text:string} | {type:"choice";options:string[];branches:P4Action[][]} | {type:"end";ending:number};
+  const I=(...lines:string[]):P4Action=>({type:"in",lines});
+  const P=(text:string):P4Action=>({type:"prompt",text});
+  const C=(options:string[],branches:P4Action[][]):P4Action=>({type:"choice",options,branches});
+  const E=(ending:number):P4Action=>({type:"end",ending});
+  const p4Flows:Record<string,Record<string,P4Action[]>>={
+    BG:{
+      shinyu:[I(String(work.variables.storyCrushName||names[crush])+"刚刚回来了","你们最近","见不了面了吧？"),P("关你什么事"),I("明天","我去你家楼下接你"),P("？？？你干嘛"),P("我跟你已经没有关系了"),P("你也想被拍？"),I("……","我会准备好的","鲜花","红酒","套我也买了"),C(["我不喝酒","……"],[[I("行"),E(1)],[P("房间号"),I("1107"),E(2)]])],
+      dohoon:[I(String(work.variables.storyCrushName||names[crush])+"还真想得出来","“普通朋友”？？","喂","你喜欢那样的胆小鬼吗"),P("关你什么事"),I("关我什么事？","房间号3001","明天晚上"),C(["你放过我吧 我这两天很累了","……"],[[I("那我呢","……算了"),E(1)],[P("滚"),I("哈","不愿意来","那我明天去你家找你"),E(2)]])],
+      youngjae:[I("明天有空吗"),P("？"),I("明天我去你接你"),P("不是你有病啊我发不出去消息"),I("…"),C(["我不会去的","你这是通知吗"],[[I("……行"),E(1)],[I("我只是问你"),P("。"),I("^ ^","我明晚八点到"),E(2)]])],
+      hanjin:[{type:"image",path:"wx/IMG_9985.jpeg"},P("？"),I("想见你","明天"),P("这位男士请你爱疯手机"),I("……","不好吗","我去接你"),C(["不好","什么时候"],[[I("。"),E(1)],[I("明晚八点","我会到你家楼下"),E(2)]])],
+      jihoon:[I("你明天有事吗"),P("有事"),I("…","呀","骗人"),P("你有什么事"),I("我明天去找你好不好"),C(["你老实跳你的舞吧","你来干嘛"],[[E(1)],[I("还能干嘛","我想你了"),P("你想我了就直接来我家？"),I("嗯"),P("真好奇你的粉丝如果知道你这样之后会怎么想"),I("我买好套了","明晚八点到你家"),E(2)]])],
+      kyungmin:[I("你在家吗"),P("？"),P("我现在不在家还能在哪"),P("你来我家干嘛"),P("这么晚了 你有病啊"),I("那我明天去找你","去你家","我的东西你还没扔吧"),C(["早扔了^ ^","你有病"],[[I("哈"),E(1)],[I("对","等着我吧"),E(2)]])]
+    },
+    GB:{
+      shinyu:[I(String(work.variables.storyCrushName||names[crush])+"刚刚回来了","你们最近","见不了面了吧？"),P("关你什么事"),I("没什么事","想见你"),P("我跟你已经没有关系了"),{type:"image",path:"kkt/IMG_9986.jpeg"},I("我会准备好的"),C(["我不在意","色诱？"],[[I("行"),E(1)],[P("房间号"),I("1107","会让你满意的"),E(2)]])],
+      dohoon:[I(String(work.variables.storyCrushName||names[crush])+"还真想得出来","“普通朋友”？？","喂","你喜欢那样的胆小鬼吗"),P("关你什么事"),I("关我什么事？","房间号3001","明天晚上","我从现在开始断食"),C(["现在才断食 明天会喷我一身吧","你自己灌？"],[[I("你他爸"),E(1)],[I("？","那你给我灌"),P("滚"),I("说好了","明晚八点"),E(2)]])],
+      youngjae:[I("明晚八点在家等我"),P("？"),I("明天我去找你","^ ^"),C(["你觉得你对我还有吸引力？","你这是通知吗"],[[I("是我自负了"),E(1)],[I("我只是问你"),P("。"),I("^ ^","我明晚八点到","喜欢男仆装还是裸体围裙","露背毛衣？怎么样"),P("都不喜欢"),I("那我都带过去"),E(2)]])],
+      hanjin:[I(nick),P("？"),I("想见你","明天"),P("别发骚"),I("……","不好吗","我去找你"),C(["不好","什么时候"],[[I("。"),E(1)],[I("明晚八点","我会到你家楼下",nick),E(2)]])],
+      jihoon:[I("你明天在家吗",nick),P("有事"),I("…","呀","骗人的吧"),P("你有什么事"),I("我明天去找你"),{type:"image",path:"kkt/IMG_9993.jpeg"},C(["这招对我没用","脸都红透了^ ^"],[[I("。","好不容易才发出来"),E(1)],[I("。"),P("可爱"),I("嗯"),P("这么想我？"),I("我明晚八点到你家"),E(2)]])],
+      kyungmin:[I("你在家吗"),P("？"),P("我现在不在家还能在哪"),P("这么晚了来我家？"),P("你有病？"),I("那我明天再去找你","去你家","我的东西你还没扔吧"),C(["早扔了^ ^","这么急不可耐？"],[[I("哈"),E(1)],[I("对","等着我吧","明晚八点","我会准时到的"),E(2)]])]
+    }
   };
-  const activeFlow=useRef<any>(null);
+  const p4Actions=useRef<P4Action[]>([]);
+  const p4Cursor=useRef(0);
+  const p4Waiting=useRef<"prompt"|"choice"|null>(null);
+  const callbacks=useRef({onNativeItem,onNativeNotification,onXPost,onXNotification,onPrompt,onChoices});
+  callbacks.current={onNativeItem,onNativeNotification,onXPost,onXNotification,onPrompt,onChoices};
+  const runP4=()=>{
+    while(p4Cursor.current<p4Actions.current.length){
+      const action=p4Actions.current[p4Cursor.current++];
+      if(action.type==="in"){action.lines.forEach(line=>addChat(line,false));continue;}
+      if(action.type==="image"){addChat("",false,{kind:"image",media:import.meta.env.BASE_URL+action.path});continue;}
+      if(action.type==="prompt"){p4Waiting.current="prompt";sendPrompt(action.text);return;}
+      if(action.type==="choice"){p4Waiting.current="choice";callbacks.current.onChoices(action.options);return;}
+      if(action.type==="end"){p4Waiting.current=null;callbacks.current.onChoices([]);p4End(action.ending);return;}
+    }
+  };
   const startP4=()=>{
-    const cfg=p4Flow();
-    activeFlow.current=cfg;
-    const initial=(cfg.start||[]).filter((x:string)=>!x.startsWith("[image:"));
-    initial.forEach((m:string)=>addChat(m,false));
-    const img=(cfg.start||[]).find((x:string)=>x.startsWith("[image:"));
-    if(img){const path=img.slice(7,-1);addChat("",false,{kind:"image",media:import.meta.env.BASE_URL+path});}
-    setPart4Index(1);
-    if(cfg.prompt?.length)sendPart4Prompt(cfg.prompt[0]);
-    else if(cfg.start?.length)sendPart4Prompt("？");
+    if(part4Started||part4Ended)return;
+    const branch=(xp==="GB"?"GB":"BG");
+    p4Actions.current=p4Flows[branch][ex]||p4Flows[branch].shinyu;
+    p4Cursor.current=0;p4Waiting.current=null;setPart4Started(true);setPart4Index(0);runP4();
   };
   const delivered=useRef(false);
   const callbacks=useRef({onNativeItem,onNativeNotification,onXPost,onXNotification,onPrompt,onChoices});
@@ -225,13 +235,19 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
     return()=>{window.removeEventListener("foundphone-chapter2-thread-open",onThread);window.removeEventListener("foundphone-story-send",onSend);window.removeEventListener("foundphone-chapter2-part4-ready",onPart4);};
   });
   const handlePart4Send=(text:string)=>{
-    const cfg=activeFlow.current;if(!cfg)return;p4Send(text);
-    const step=part4Index;
-    if(step===1&&cfg.after){cfg.after.forEach((m:string)=>addChat(m,false));setPart4Index(2);if(cfg.prompt?.[1])sendPart4Prompt(cfg.prompt[1]);else if(cfg.prompt2?.[0])sendPart4Prompt(cfg.prompt2[0]);else if(cfg.choices)callbacks.current.onChoices(cfg.choices);return;}
-    if(step===2&&cfg.prompt2?.length){cfg.prompt2.forEach((m:string)=>{});setPart4Index(3);if(cfg.end){cfg.end.forEach((m:string)=>addChat(m,false));}if(cfg.choices)callbacks.current.onChoices(cfg.choices);return;}
-    if(cfg.choices&&step<=3){const choice=cfg.choices.indexOf(text);const branch=(cfg.branches||[])[Math.max(0,choice)]||[];branch.forEach((m:string)=>addChat(m,false));callbacks.current.onChoices([]);setPart4Branch(String(Math.max(0,choice)));setPart4Index(4);if(cfg.tail?.length)sendPart4Prompt(cfg.tail[0]);else if(cfg.last?.length){cfg.last.forEach((m:string)=>addChat(m,false));p4End(choice===0?1:2);}else p4End(choice===0?1:2);return;}
-    if(step===4){if(cfg.room){cfg.room.forEach((m:string)=>addChat(m,false));p4End(2);}else if(cfg.last){cfg.last.forEach((m:string)=>addChat(m,false));p4End(2);}else p4End(2);return;}
-    p4End(2);
+    if(!p4Waiting.current)return;
+    addChat(text,true);
+    if(p4Waiting.current==="choice"){
+      const action=p4Actions.current[p4Cursor.current-1];
+      if(action?.type!=="choice")return;
+      const selected=action.options.indexOf(text);
+      const branch=action.branches[Math.max(0,selected)]||[];
+      p4Actions.current.splice(p4Cursor.current,0,...branch);
+      callbacks.current.onChoices([]);
+    }
+    p4Waiting.current=null;
+    setPart4Index(v=>v+1);
+    runP4();
   };
   return null;
 }
