@@ -567,7 +567,10 @@ function PhoneRuntime({
                   }}
                   onStoryThreadChange={(thread) => {
                     if (app === storyApp) setStoryThread(thread);
+                    window.dispatchEvent(new CustomEvent("foundphone-chapter2-thread-open",{detail:{app,thread}}));
                   }}
+                  storyChoices={chapterTwoChoices}
+                  onStoryChoice={(choice) => setStoryReply({app,thread:storyThread,text:choice,token:Date.now()})}
                   creator={creator}
                   state={s}
                   onRead={(id) => { event("read", id); setStoryUnreadThreads((v) => { const next={...v}; delete next[storyUnreadKey(app,id)]; return next; }); }}
@@ -696,6 +699,8 @@ function PhoneRuntime({
                 setChapterItems((v) => ({...v,twitter:[item,...(v.twitter||[]).filter(existing=>existing.id!==item.id)]}));
                 setChapterTwoXReady(true);
               }}
+              onPrompt={(nativeApp,nativeThread,text,token)=>setStoryReply({app:nativeApp,thread:nativeThread,text,token})}
+              onChoices={(choices)=>setChapterTwoChoices(choices)}
               onXNotification={(item) => {
                 setStoryUnreadThreads((v) => ({...v,[storyUnreadKey("twitter","PLEDIS_Entertainment")]:true}));
                 setStoryNotification({app:"twitter",thread:"PLEDIS_Entertainment",item});
@@ -716,8 +721,8 @@ function PhoneRuntime({
                   setApp("twitter");
                   setRecent((v) => ["twitter", ...v.filter((a) => a !== "twitter")].slice(0, 8));
                   if (notice.item.id === "chapter2-pledis-statement") {
-                    setChapterTwoDone(true);
-                    setChapterTwoActive(false);
+                    localStorage.setItem("foundphone.chapter2.xOpened:"+work.id,"1");
+                    window.dispatchEvent(new CustomEvent("foundphone-chapter2-x-opened"));
                   } else {
                     window.dispatchEvent(new CustomEvent("foundphone-open-dispatch"));
                   }
