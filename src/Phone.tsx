@@ -352,7 +352,12 @@ function PhoneRuntime({
       if (chapterTwoXReady) { localStorage.setItem("foundphone.chapter2.xOpened:"+work.id,"1"); window.dispatchEvent(new CustomEvent("foundphone-chapter2-x-opened")); }
     }
     if (storyFinished && !chapterTwoDone) {
-      setChapterTwoOpenedApps((current) => current.includes(id) ? current : [...current, id]);
+      const nextOpenedApps = chapterTwoOpenedApps.includes(id) ? chapterTwoOpenedApps : [...chapterTwoOpenedApps, id];
+      setChapterTwoOpenedApps(nextOpenedApps);
+      if (!creator && nextOpenedApps.length >= 5) {
+        setChapterTwoActive(true);
+        try { localStorage.setItem(chapterTwoKey, JSON.stringify({openedApps:nextOpenedApps,active:true,done:false})); } catch {}
+      }
     }
     setRecent((v) => [id, ...v.filter((a) => a !== id)].slice(0, 8));
     setFolder("");
