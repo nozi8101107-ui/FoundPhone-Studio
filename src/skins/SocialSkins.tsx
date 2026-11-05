@@ -38,7 +38,7 @@ function Actions({ p, item, commentsDisabled = false, commentCount }: { p: Props
     <div className="social-actions">
       <button aria-label={`喜欢${item.title}`} onClick={() => setLiked(!liked)}>
         <Heart size={17} fill={liked ? "currentColor" : "none"} />
-        {item.likes + (liked ? 1 : 0) || ""}
+        {meta(item, "likesDisplay", String(item.likes + (liked ? 1 : 0) || ""))}
       </button>
       <button aria-label={`评论${item.title}`} onClick={commentsDisabled ? undefined : () => p.onItem(item)}>
         <MessageCircle size={17} />
