@@ -148,8 +148,6 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
     window.setTimeout(()=>{setPart4Started(true);window.dispatchEvent(new CustomEvent("foundphone-chapter2-part4-ready"));},2000);
   };
   const p4End=(n:number)=>{setPart4Ended(true);try{localStorage.setItem("foundphone.chapter2.ending:"+work.id,JSON.stringify({ending:n,xp,ex,crush}));}catch{}window.setTimeout(()=>{window.dispatchEvent(new CustomEvent("foundphone-chapter2-ending",{detail:{ending:n}}));},1000);};
-  const p4Send=(text:string)=>{addChat(text,true);};
-  const startPart4=()=>{if(part4Started||part4Ended)return;setPart4Started(true);setPart4Index(0);};
   const sendPart4Prompt=(text:string)=>sendPrompt(text);
   type P4Action = {type:"in";lines:string[]} | {type:"image";path:string} | {type:"prompt";text:string} | {type:"choice";options:string[];branches:P4Action[][]} | {type:"end";ending:number};
   const I=(...lines:string[]):P4Action=>({type:"in",lines});
@@ -159,7 +157,7 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
   const p4Flows:Record<string,Record<string,P4Action[]>>={
     BG:{
       shinyu:[I(String(names[crush]||crush)+"刚刚回来了","你们最近","见不了面了吧？"),P("关你什么事"),I("明天","我去你家楼下接你"),P("？？？你干嘛"),P("我跟你已经没有关系了"),P("你也想被拍？"),I("……","我会准备好的","鲜花","红酒","套我也买了"),C(["我不喝酒","……"],[[I("行"),E(1)],[P("房间号"),I("1107"),E(2)]])],
-      dohoon:[I(String(work.variables.storyCrushName||names[crush])+"还真想得出来","“普通朋友”？？","喂","你喜欢那样的胆小鬼吗"),P("关你什么事"),I("关我什么事？","房间号3001","明天晚上"),C(["你放过我吧 我这两天很累了","……"],[[I("那我呢","……算了"),E(1)],[P("滚"),I("哈","不愿意来","那我明天去你家找你"),E(2)]])],
+      dohoon:[I(String(names[crush]||crush)+"还真想得出来","“普通朋友”？？","喂","你喜欢那样的胆小鬼吗"),P("关你什么事"),I("关我什么事？","房间号3001","明天晚上"),C(["你放过我吧 我这两天很累了","……"],[[I("那我呢","……算了"),E(1)],[P("滚"),I("哈","不愿意来","那我明天去你家找你"),E(2)]])],
       youngjae:[I("明天有空吗"),P("？"),I("明天我去你接你"),P("不是你有病啊我发不出去消息"),I("…"),C(["我不会去的","你这是通知吗"],[[I("……行"),E(1)],[I("我只是问你"),P("。"),I("^ ^","我明晚八点到"),E(2)]])],
       hanjin:[{type:"image",path:"wx/IMG_9985.jpeg"},P("？"),I("想见你","明天"),P("这位男士请你爱疯手机"),I("……","不好吗","我去接你"),C(["不好","什么时候"],[[I("。"),E(1)],[I("明晚八点","我会到你家楼下"),E(2)]])],
       jihoon:[I("你明天有事吗"),P("有事"),I("…","呀","骗人"),P("你有什么事"),I("我明天去找你好不好"),C(["你老实跳你的舞吧","你来干嘛"],[[E(1)],[I("还能干嘛","我想你了"),P("你想我了就直接来我家？"),I("嗯"),P("真好奇你的粉丝如果知道你这样之后会怎么想"),I("我买好套了","明晚八点到你家"),E(2)]])],
@@ -190,7 +188,7 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
     }
   };
   const startP4=()=>{
-    if(part4Started||part4Ended)return;
+    if(part4Ended)return;
     const branch=(xp==="GB"?"GB":"BG");
     p4Actions.current=p4Flows[branch][ex]||p4Flows[branch].shinyu;
     p4Cursor.current=0;p4Waiting.current=null;setPart4Started(true);setPart4Index(0);runP4();
