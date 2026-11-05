@@ -161,6 +161,7 @@ function PhoneRuntime({
   const [chapterTwoActive, setChapterTwoActive] = useState(() => { try { const v=JSON.parse(localStorage.getItem(chapterTwoKey) || "null"); return !!v?.active && !v?.done; } catch { return false; } });
   const [chapterTwoDone, setChapterTwoDone] = useState(() => { try { return !!JSON.parse(localStorage.getItem(chapterTwoKey) || "null")?.done; } catch { return false; } });
   const [chapterTwoXReady, setChapterTwoXReady] = useState(false);
+  const [chapterTwoChoices,setChapterTwoChoices]=useState<string[]>([]);
   useEffect(() => {
     try { localStorage.setItem(chapterTwoKey, JSON.stringify({openedApps:chapterTwoOpenedApps,active:chapterTwoActive,done:chapterTwoDone})); } catch {}
   }, [chapterTwoKey,chapterTwoOpenedApps,chapterTwoActive,chapterTwoDone]);
@@ -337,7 +338,7 @@ function PhoneRuntime({
     setKeyboard(false);
     if (id === "twitter") {
       window.dispatchEvent(new CustomEvent("foundphone-open-dispatch"));
-      if (chapterTwoXReady) { setChapterTwoDone(true); setChapterTwoActive(false); }
+      if (chapterTwoXReady) { localStorage.setItem("foundphone.chapter2.xOpened:"+work.id,"1"); window.dispatchEvent(new CustomEvent("foundphone-chapter2-x-opened")); }
     }
     if (storyFinished && !chapterTwoDone) {
       setChapterTwoOpenedApps((current) => current.includes(id) ? current : [...current, id]);
