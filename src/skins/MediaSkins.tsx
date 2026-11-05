@@ -11,6 +11,7 @@ import {
   Play,
   Plus,
   Search,
+  Share2,
   SkipForward,
   User,
   Users,
