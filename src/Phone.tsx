@@ -1150,6 +1150,8 @@ function AppContent({
   storyReply = null,
   onStorySend,
   onStoryThreadChange,
+  storyChoices = [],
+  onStoryChoice,
 }: {
   app: AppPlugin;
   name: string;
@@ -1169,6 +1171,8 @@ function AppContent({
   storyReply?: { app: string; thread: string; text: string; token: number } | null;
   onStorySend?: (text: string, thread: string) => void;
   onStoryThreadChange?: (thread: string) => void;
+  storyChoices?: string[];
+  onStoryChoice?: (choice: string) => void;
 }) {
   const [detail, setDetail] = useState<Item | null>(null);
   const [thread, setThread] = useState(initialThread);
