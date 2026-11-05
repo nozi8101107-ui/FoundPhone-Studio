@@ -1322,6 +1322,8 @@ function AppContent({
               unreadThreads={unreadThreads}
               storyReply={storyReply?.app === app.id && storyReply.thread === thread ? {text:storyReply.text,token:storyReply.token} : null}
               onStorySend={(text) => onStorySend?.(text, thread)}
+              storyChoices={storyChoices}
+              onStoryChoice={onStoryChoice}
             />
           </Suspense>
         </div>
