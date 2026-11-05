@@ -96,6 +96,7 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
   const [part4Index,setPart4Index]=useState(0);
   const [part4Branch,setPart4Branch]=useState("");
   const [part4Ended,setPart4Ended]=useState(false);
+  const [endingNumber,setEndingNumber]=useState(0);
   const [replyToken,setReplyToken]=useState(3100);
   const flow=useRef<any[]>([]);
   const sendPrompt=(text:string)=>{setReplyToken(v=>v+1);callbacks.current.onPrompt(part4ActiveRef.current?exApp:app,part4ActiveRef.current?exThread:thread,text,replyToken+1);};
@@ -106,7 +107,7 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
     const targetRemark=inPart4?exRemark:remark;
     const targetAvatar=inPart4?exAvatar:avatar;
     const targetHandle=inPart4?handles[ex]:handles[crush];
-    const item:Item={id:"chapter2-"+(inPart4?"p4":"p3")+"-"+Date.now()+"-"+Math.random().toString(36).slice(2),title:targetThread,body,richText:"",meta:{story:"chapter2",handle:targetHandle,remark:targetRemark},time:inPart4?"00:53":"00:31",sender:outgoing?"我":targetRemark,avatar:outgoing?"":targetAvatar,kind:"text",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing,read:false,likes:0,comments:[],...extra};
+    const item:Item={id:"chapter2-"+(inPart4?"p4":"p3")+"-"+Date.now()+"-"+Math.random().toString(36).slice(2),title:targetThread,body,richText:"",meta:{story:"chapter2",handle:targetHandle,remark:targetRemark},time:inPart4?"00:53":"00:31",sender:outgoing?"我":targetRemark,avatar:outgoing?String(work.variables.storyUserAvatar||""):targetAvatar,kind:"text",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing,read:false,likes:0,comments:[],...extra};
     callbacks.current.onNativeItem(targetApp,item);
     return item;
   };
@@ -164,7 +165,7 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
     setPart3Index(6);
     window.setTimeout(()=>{setPart4Started(true);window.dispatchEvent(new CustomEvent("foundphone-chapter2-part4-ready"));},2000);
   };
-  const p4End=(n:number)=>{setPart4Ended(true);try{localStorage.setItem("foundphone.chapter2.ending:"+work.id,JSON.stringify({ending:n,xp,ex,crush}));}catch{}window.setTimeout(()=>{window.dispatchEvent(new CustomEvent("foundphone-chapter2-ending",{detail:{ending:n}}));},1000);};
+  const p4End=(n:number)=>{setPart4Ended(true);setEndingNumber(n);try{localStorage.setItem("foundphone.chapter2.ending:"+work.id,JSON.stringify({ending:n,xp,ex,crush}));}catch{}};
   const sendPart4Prompt=(text:string)=>sendPrompt(text);
   type P4Action = {type:"in";lines:string[]} | {type:"image";path:string} | {type:"prompt";text:string} | {type:"wait";ms:number} | {type:"choice";options:string[];branches:P4Action[][]} | {type:"end";ending:number};
   const I=(...lines:string[]):P4Action=>({type:"in",lines});
@@ -194,11 +195,25 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
   const p4Waiting=useRef<"prompt"|"choice"|null>(null);
   const callbacks=useRef({onNativeItem,onNativeNotification,onXPost,onXNotification,onPrompt,onChoices});
   callbacks.current={onNativeItem,onNativeNotification,onXPost,onXNotification,onPrompt,onChoices};
+  const p4Running=useRef(false);
+  const deliverP4Incoming=(item:Item,done:()=>void)=>{
+    const delay=1000+Math.random()*1500;
+    window.setTimeout(()=>{callbacks.current.onNativeNotification(part4ActiveRef.current?exApp:app,part4ActiveRef.current?exThread:thread,item);done();},delay);
+  };
   const runP4=()=>{
+    if(p4Running.current)return;
     while(p4Cursor.current<p4Actions.current.length){
       const action=p4Actions.current[p4Cursor.current++];
-      if(action.type==="in"){action.lines.forEach(line=>addChat(line,false));continue;}
-      if(action.type==="image"){addChat("",false,{kind:"image",media:import.meta.env.BASE_URL+action.path});continue;}
+      if(action.type==="in"||action.type==="image"){
+        const lines=action.type==="in"?action.lines:[""];
+        const deliver=(index:number)=>{
+          if(index>=lines.length){p4Running.current=false;runP4();return;}
+          const item=action.type==="image"?addChat("",false,{kind:"image",media:import.meta.env.BASE_URL+action.path}):addChat(lines[index],false);
+          p4Running.current=true;
+          deliverP4Incoming(item,()=>deliver(index+1));
+        };
+        deliver(0);return;
+      }
       if(action.type==="prompt"){p4Waiting.current="prompt";sendPrompt(action.text);return;}
       if(action.type==="wait"){window.setTimeout(runP4,action.ms);return;}
       if(action.type==="choice"){p4Waiting.current="choice";callbacks.current.onChoices(action.options);return;}
@@ -267,5 +282,14 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
     setPart4Index(v=>v+1);
     runP4();
   };
+  if(part4Ended)return (
+    <div style={{position:"absolute",inset:0,zIndex:130,background:"rgba(0,0,0,.42)",display:"grid",placeItems:"center",padding:24}}>
+      <section style={{background:"#fff",borderRadius:20,padding:24,textAlign:"center",width:"100%",maxWidth:310,color:"#19191d"}}>
+        <h2>剧情2已结束</h2>
+        <p>可以自由探索手机啦！</p>
+        <button onClick={()=>window.dispatchEvent(new CustomEvent("foundphone-chapter2-ending",{detail:{ending:endingNumber}}))} style={{border:0,background:"#171717",color:"#fff",borderRadius:12,padding:"12px 24px",marginTop:16}}>确定</button>
+      </section>
+    </div>
+  );
   return null;
 }
