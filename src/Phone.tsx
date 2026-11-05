@@ -361,7 +361,6 @@ function PhoneRuntime({
     setKeyboard(false);
     if (id === "twitter") {
       window.dispatchEvent(new CustomEvent("foundphone-open-dispatch"));
-      if (chapterTwoXReady) { localStorage.setItem("foundphone.chapter2.xOpened:"+work.id,"1"); window.dispatchEvent(new CustomEvent("foundphone-chapter2-x-opened")); }
     }
     if (storyFinished && !chapterTwoDone) {
       const nextOpenedApps = chapterTwoOpenedApps.includes(id) ? chapterTwoOpenedApps : [...chapterTwoOpenedApps, id];
@@ -601,7 +600,14 @@ function PhoneRuntime({
                   onStoryChoice={(choice) => setStoryReply({app,thread:storyThread,text:choice,token:Date.now()})}
                   creator={creator}
                   state={s}
-                  onRead={(id) => { event("read", id); setStoryUnreadThreads((v) => { const next={...v}; delete next[storyUnreadKey(app,id)]; return next; }); }}
+                  onRead={(id) => {
+                    event("read", id);
+                    setStoryUnreadThreads((v) => { const next={...v}; delete next[storyUnreadKey(app,id)]; return next; });
+                    if (app === "twitter" && id === "chapter2-pledis-statement" && chapterTwoXReady) {
+                      localStorage.setItem("foundphone.chapter2.xOpened:"+work.id,"1");
+                      window.dispatchEvent(new CustomEvent("foundphone-chapter2-x-opened"));
+                    }
+                  }}
                   onEdit={(item) => onEdit?.(app, item)}
                   onAdd={() => onAdd?.(app)}
                   onBack={() => setApp("")}
@@ -749,8 +755,7 @@ function PhoneRuntime({
                   setApp("twitter");
                   setRecent((v) => ["twitter", ...v.filter((a) => a !== "twitter")].slice(0, 8));
                   if (notice.item.id === "chapter2-pledis-statement") {
-                    localStorage.setItem("foundphone.chapter2.xOpened:"+work.id,"1");
-                    window.dispatchEvent(new CustomEvent("foundphone-chapter2-x-opened"));
+                    // The statement is marked read only after opening the X post.
                   } else {
                     window.dispatchEvent(new CustomEvent("foundphone-open-dispatch"));
                   }
