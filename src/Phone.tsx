@@ -700,7 +700,7 @@ function PhoneRuntime({
               onNativeNotification={(nativeApp,thread,item) => {
                 if (app === nativeApp && storyThread === thread) {
                   setBanner((nativeApp === "kakao" ? "KakaoTalk" : "微信")+": "+item.sender+"："+item.body);
-                  window.setTimeout(() => setBanner(""), 2600);
+                  window.setTimeout(() => setBanner(""), 2000);
                 } else {
                   setStoryUnreadThreads((v) => ({...v,[storyUnreadKey(nativeApp,thread)]:true}));
                   setStoryNotification({app:nativeApp,thread,item});
