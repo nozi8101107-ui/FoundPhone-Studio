@@ -186,8 +186,8 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
     else if(cfg.start?.length)sendPart4Prompt("？");
   };
   const delivered=useRef(false);
-  const callbacks=useRef({onNativeItem,onNativeNotification,onXPost,onXNotification});
-  callbacks.current={onNativeItem,onNativeNotification,onXPost,onXNotification};
+  const callbacks=useRef({onNativeItem,onNativeNotification,onXPost,onXNotification,onPrompt,onChoices});
+  callbacks.current={onNativeItem,onNativeNotification,onXPost,onXNotification,onPrompt,onChoices};
   useEffect(()=>{
     if(delivered.current)return;
     delivered.current=true;
