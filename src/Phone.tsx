@@ -710,7 +710,7 @@ function PhoneRuntime({
                 setChapterItems((v) => ({...v,twitter:[item,...(v.twitter||[]).filter(existing=>existing.id!==item.id)]}));
                 setChapterTwoXReady(true);
               }}
-              onPrompt={(nativeApp,nativeThread,text,token)=>setStoryReply({app:nativeApp,thread:nativeThread,text,token})}
+              onPrompt={(nativeApp,nativeThread,text,token)=>{setStoryApp(nativeApp);setStoryThread(nativeThread);setPendingThread(nativeThread);setStoryReply({app:nativeApp,thread:nativeThread,text,token});}}
               onChoices={(choices)=>setChapterTwoChoices(choices)}
               onXNotification={(item) => {
                 setStoryUnreadThreads((v) => ({...v,[storyUnreadKey("twitter","PLEDIS_Entertainment")]:true}));
