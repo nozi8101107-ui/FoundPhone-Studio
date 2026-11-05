@@ -1465,8 +1465,8 @@ function AppContent({
           onItem={read}
           onSettings={onSettings}
           saveSlots={saveSlots}
-          onSaveSlot={saveToSlot}
-          onRenameSlot={renameSlot}
+          onSaveSlot={onSaveSlot}
+          onRenameSlot={onRenameSlot}
           onLoadSlot={onLoadSlot}
         />
       ) : app.id === "calculator" && !detail ? (
