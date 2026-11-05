@@ -240,7 +240,7 @@ export function NativeSettings({
                     <small style={{fontSize:11,color:"#8e8e93"}}>{saved ? new Date(saved.savedAt).toLocaleString() : "尚未存档"}</small>
                   </div>
                   <div style={{display:"flex",gap:7,marginTop:10}}>
-                    <button onClick={()=>{setNameSlot(slot);setNameDraft(saved?.name || "存档"+slot)}} style={slotButtonStyle}>命名</button>
+                    <button disabled={!saved} onClick={()=>{setNameSlot(slot);setNameDraft(saved?.name || "存档"+slot)}} style={{...slotButtonStyle,opacity:saved?1:.4}}>命名</button>
                     <button onClick={()=>requestSave(slot)} style={slotButtonStyle}>存档</button>
                     <button disabled={!saved} onClick={()=>saved&&onLoadSlot?.(saved)} style={{...slotButtonStyle,opacity:saved?1:.4}}>读档</button>
                   </div>
