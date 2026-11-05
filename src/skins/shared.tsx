@@ -153,7 +153,9 @@ export function Media({
   item: Item;
   className?: string;
 }) {
-  const src = safeMedia(item.media);
+  const raw = item.media;
+  const local = /^(\/|\.\/|people\/|wx\/|kkt\/)/.test(raw) && !raw.includes('..');
+  const src = safeMedia(raw) || (local ? (raw.startsWith('/') ? raw : `${import.meta.env.BASE_URL}${raw}`) : '');
   return src ? (
     item.kind === "audio" ? (
       <audio className={className} controls src={src} />
