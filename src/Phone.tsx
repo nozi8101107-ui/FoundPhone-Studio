@@ -144,33 +144,6 @@ function PhoneRuntime({
 }) {
   const [app, setApp] = useState("");
   const [saveSlots, setSaveSlots] = useState<SaveSlot[]>([]);
-  useEffect(() => {
-    let active = true;
-    void db.slots.where("workId").equals(work.id).toArray().then((slots) => {
-      if (active) setSaveSlots(slots.sort((a,b)=>a.slot-b.slot));
-    }).catch(() => {});
-    return () => { active = false; };
-  }, [work.id]);
-  const saveToSlot = async (slot: number) => {
-    const profile = JSON.parse(localStorage.getItem("foundphone.user-profile.v1") || "null");
-    if (!profile) return;
-    const id = work.id + ":" + slot;
-    const previous = await db.slots.get(id);
-    const entry: SaveSlot = {
-      id, workId: work.id, slot, name: previous?.name || "存档" + slot,
-      savedAt: Date.now(), profile, runtime: structuredClone(runtimeRef.current),
-      localStorage: collectProgressStorage(),
-    };
-    await db.slots.put(entry);
-    setSaveSlots((current) => [...current.filter((item)=>item.slot!==slot),entry].sort((a,b)=>a.slot-b.slot));
-  };
-  const renameSlot = async (slot: number, name: string) => {
-    const current = saveSlots.find((item)=>item.slot===slot);
-    if (!current) return;
-    const updated = {...current,name:name.slice(0,8)};
-    await db.slots.put(updated);
-    setSaveSlots((items)=>items.map((item)=>item.slot===slot?updated:item));
-  };
 
   const [homeRequest, setHomeRequest] = useState(0);
   const [locked, setLocked] = useState(!creator);
@@ -291,6 +264,33 @@ function PhoneRuntime({
   const s = external ?? own;
   const runtimeRef = useRef(s);
   runtimeRef.current = s;
+  useEffect(() => {
+    let active = true;
+    void db.slots.where("workId").equals(work.id).toArray().then((slots) => {
+      if (active) setSaveSlots(slots.sort((a,b)=>a.slot-b.slot));
+    }).catch(() => {});
+    return () => { active = false; };
+  }, [work.id]);
+  const saveToSlot = async (slot: number) => {
+    const profile = JSON.parse(localStorage.getItem("foundphone.user-profile.v1") || "null");
+    if (!profile) return;
+    const id = work.id + ":" + slot;
+    const previous = await db.slots.get(id);
+    const entry: SaveSlot = {
+      id, workId: work.id, slot, name: previous?.name || "存档" + slot,
+      savedAt: Date.now(), profile, runtime: structuredClone(runtimeRef.current),
+      localStorage: collectProgressStorage(),
+    };
+    await db.slots.put(entry);
+    setSaveSlots((current) => [...current.filter((item)=>item.slot!==slot),entry].sort((a,b)=>a.slot-b.slot));
+  };
+  const renameSlot = async (slot: number, name: string) => {
+    const current = saveSlots.find((item)=>item.slot===slot);
+    if (!current) return;
+    const updated = {...current,name:name.slice(0,8)};
+    await db.slots.put(updated);
+    setSaveSlots((items)=>items.map((item)=>item.slot===slot?updated:item));
+  };
   const update = (next: Runtime) => {
     runtimeRef.current = next;
     setOwn(next);
