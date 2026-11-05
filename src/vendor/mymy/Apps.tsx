@@ -163,6 +163,7 @@ export function MymyKakao(p: SkinProps) {
             })}
             {!messages.length && <Blank />}
           </div>
+          {p.storyChoices?.length ? <div style={{display:"flex",gap:8,flexWrap:"wrap",padding:"8px 10px"}}>{p.storyChoices.map(choice=><button key={choice} type="button" onClick={()=>p.onStoryChoice?.(choice)} style={{border:"1px solid #fee500",borderRadius:16,padding:"7px 12px",background:"#fff"}}>{choice}</button>)}</div> : null}
           <form
             className="kzinp"
             onSubmit={(e) => {
