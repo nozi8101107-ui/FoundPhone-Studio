@@ -485,6 +485,7 @@ function DouyinPost({ post }: { post: DouyinPostData }) {
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const endedRef = useRef(false);
   const avatar = import.meta.env.BASE_URL + "youtube/channels4_profile.jpeg";
   const src = encodeURI(import.meta.env.BASE_URL + "dy/" + post.video);
 
@@ -493,7 +494,7 @@ function DouyinPost({ post }: { post: DouyinPostData }) {
     if (!video) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.65) {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.65 && !endedRef.current) {
           // Try autoplay with sound; mobile browsers may require a prior user gesture.
           void video.play().catch(() => {
             // Playback can still be blocked by browser or device settings.
@@ -518,7 +519,10 @@ function DouyinPost({ post }: { post: DouyinPostData }) {
         src={src}
         controls
         playsInline
+        loop={false}
         preload="metadata"
+        onEnded={() => { endedRef.current = true; }}
+        onPlay={() => { endedRef.current = false; }}
         aria-label={post.title}
       />
       <div className="vertical-actions">
