@@ -111,6 +111,17 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
     callbacks.current.onNativeItem(targetApp,item);
     return item;
   };
+  const deliverIncoming=(lines:string[],done:()=>void)=>{
+    const deliver=(index:number)=>{
+      if(index>=lines.length){done();return;}
+      const timer=window.setTimeout(()=>{
+        const item=addChat(lines[index],false);
+        callbacks.current.onNativeNotification(part4ActiveRef.current?exApp:app,part4ActiveRef.current?exThread:thread,item);
+        deliver(index+1);
+      },1000+Math.random()*1500);
+    };
+    deliver(0);
+  };
   const p3First:Record<string,string[]>={
     shinyu:["我没事","怎么还没睡","说了让你先好好休息的"],
     dohoon:["你有什么好对不起的","啧","早知道就不叫你出来了"],
@@ -146,18 +157,17 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
     addChat(text,true);
     if(part3Index<2){const next=["你没事吧","对不起"][part3Index];setPart3Index(v=>v+1);sendPrompt(next);return;}
     if(part3Index===2){
-      (p3First[crush]||p3First.shinyu).forEach(m=>addChat(m,false));
-      callbacks.current.onChoices(p3Choices[crush]||p3Choices.shinyu);
-      setPart3Index(3);return;
+      setPart3Index(3);
+      deliverIncoming(p3First[crush]||p3First.shinyu,()=>callbacks.current.onChoices(p3Choices[crush]||p3Choices.shinyu));
+      return;
     }
     if(part3Index===3){
       const choice=(p3Choices[crush]||p3Choices.shinyu).indexOf(text);
       setPart3Branch(String(Math.max(0,choice)));
-      (p3Branches[crush]||p3Branches.shinyu)[Math.max(0,choice)].forEach(m=>addChat(m,false));
       callbacks.current.onChoices([]);
       const tail=p3Tail[crush]||p3Tail.shinyu;
       setPart3Index(4);
-      sendPrompt(tail[0]);
+      deliverIncoming((p3Branches[crush]||p3Branches.shinyu)[Math.max(0,choice)],()=>sendPrompt(tail[0]));
       return;
     }
     const tail=p3Tail[crush]||p3Tail.shinyu;
@@ -234,9 +244,22 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
     if(delivered.current)return;
     delivered.current=true;
     const messages=["开完会了","公司打算发声明","说只是朋友 普通聚餐"];
-    const timers:number[]=[];
-    messages.forEach((body,index)=>{
-      timers.push(window.setTimeout(()=>{
+    let timer:number|undefined;
+    let cancelled=false;
+    const deliver=(index:number)=>{
+      if(cancelled)return;
+      if(index>=messages.length){
+        timer=window.setTimeout(()=>{
+          if(cancelled)return;
+          const post=makeStatement(crush);
+          callbacks.current.onXPost(post);
+          callbacks.current.onXNotification(post);
+        },1000);
+        return;
+      }
+      timer=window.setTimeout(()=>{
+        if(cancelled)return;
+        const body=messages[index];
         const item:Item={
           id:"chapter2-chat-"+index,title:thread,body,richText:"",
           meta:{story:"chapter2",handle:handles[crush],remark},time:"00:29",
@@ -245,16 +268,11 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
         };
         callbacks.current.onNativeItem(app,item);
         callbacks.current.onNativeNotification(app,thread,item);
-        if(index===messages.length-1){
-          window.setTimeout(()=>{
-            const post=makeStatement(crush);
-            callbacks.current.onXPost(post);
-            callbacks.current.onXNotification(post);
-          },1000);
-        }
-      },900+index*1050));
-    });
-    return ()=>timers.forEach(window.clearTimeout);
+        deliver(index+1);
+      },1000+Math.random()*1500);
+    };
+    deliver(0);
+    return ()=>{cancelled=true;if(timer)window.clearTimeout(timer);};
   },[app,thread,remark,avatar,crush,work]);
 
   useEffect(()=>{
