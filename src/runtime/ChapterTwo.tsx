@@ -73,6 +73,8 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
   const remark=String(contact?.meta.remark||contact?.title||names[crush]||"对方");
   const avatar=crush==="hanjin"?import.meta.env.BASE_URL+"people/IMG_9702.jpeg":contact?.avatar||"";
   const delivered=useRef(false);
+  const callbacks=useRef({onNativeItem,onNativeNotification,onXPost,onXNotification});
+  callbacks.current={onNativeItem,onNativeNotification,onXPost,onXNotification};
   useEffect(()=>{
     if(delivered.current)return;
     delivered.current=true;
@@ -86,18 +88,18 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
           sender:remark,avatar,kind:"text",media:"",hidden:false,unlock:"",
           password:"",folder:"",favorite:false,outgoing:false,read:false,likes:0,comments:[]
         };
-        onNativeItem(app,item);
-        onNativeNotification(app,thread,item);
+        callbacks.current.onNativeItem(app,item);
+        callbacks.current.onNativeNotification(app,thread,item);
         if(index===messages.length-1){
           window.setTimeout(()=>{
             const post=makeStatement(work,crush);
-            onXPost(post);
-            onXNotification(post);
+            callbacks.current.onXPost(post);
+            callbacks.current.onXNotification(post);
           },1000);
         }
       },900+index*1050));
     });
     return ()=>timers.forEach(window.clearTimeout);
-  },[app,thread,remark,avatar,crush,work,onNativeItem,onNativeNotification,onXPost,onXNotification]);
+  },[app,thread,remark,avatar,crush,work]);
   return null;
 }
