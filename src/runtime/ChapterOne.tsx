@@ -88,7 +88,8 @@ export function ChapterOne({work,onFinish,onDispatchOpen,onNativeOpen,onNativeIt
  const nativeContact=findContactProfile(nativeApp,targetId);
  const nativeThread=stage==="friend"?"闺蜜":nativeContact?.title||names[targetId];
  const nativeRemark=stage==="friend"?"闺蜜":String(nativeContact?.meta.remark||nativeContact?.title||names[targetId]);
- const nativeAvatar=targetId==="hanjin"?import.meta.env.BASE_URL+"people/IMG_9702.jpeg":nativeContact?.avatar||"";
+ const friendContact=(work.data.wechat||[]).find(item=>item.title==="闺蜜"&&!item.outgoing&&!!item.avatar)||(work.data.wechat||[]).find(item=>item.title==="闺蜜"&&!item.outgoing);
+ const nativeAvatar=stage==="friend"?(friendContact?.avatar||""):targetId==="hanjin"?import.meta.env.BASE_URL+"people/IMG_9702.jpeg":nativeContact?.avatar||"";
  const exApp=ex==="hanjin"?"wechat":"kakao";
  const exContact=findContactProfile(exApp,ex);
  const exThread=exContact?.title||names[ex];
