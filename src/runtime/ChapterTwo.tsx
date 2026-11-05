@@ -86,9 +86,9 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
   const part4ActiveRef=useRef(false);
   const nick=String(work.variables.storyNickname||"你");
   const userBirthday=String(work.variables.storyBirthday||"2006-08-10");
-  const userOlderThanKyungmin=userBirthday<="2007-10-02";
-  const userYoungerThanHanjin=userBirthday>"2006-02-05";
-  const hanjinNick=nick+(userYoungerThanHanjin?"欧巴":"");
+  const userOlderThanKyungmin=userBirthday<"2007-10-02";
+  const userOlderThanHanjin=userBirthday<"2006-01-05";
+  const hanjinNick=nick+(userOlderThanHanjin?"姐姐":"");
   const [part3Started,setPart3Started]=useState(false);
   const [part3Index,setPart3Index]=useState(0);
   const [part3Branch,setPart3Branch]=useState("");
@@ -133,7 +133,7 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
   const p3Choices:Record<string,string[]>={
     shinyu:["睡不着…","想等你"],dohoon:["ㅋㅋㅋ…","可是你不说我也会去找你"],
     youngjae:["noooo","啊…可是我不见你会难受的"],hanjin:["因为想等你么！","不放心你…"],
-    jihoon:["等你来找我呀><","被消息吵醒了ㅋㅋ"],kyungmin:["嗯嗯 那我等下就睡了",userOlderThanKyungmin?"好可靠呢炅潣":"好可靠呢炅潣欧巴"]
+    jihoon:["等你来找我呀><","被消息吵醒了ㅋㅋ"],kyungmin:["嗯嗯 那我等下就睡了",userOlderThanKyungmin?"好可靠呢，怒那":"好可靠呢，"+nick]
   };
   const p3Branches:Record<string,string[][]>={
     shinyu:[["抱歉","让你不安了","以后我会更谨慎的"],["你不要这样","…","谢谢你","谢谢你等我","要是我开始变得依赖你了该怎么办"]],
@@ -141,7 +141,7 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
     youngjae:[["ㅋㅋ","可爱呢","这段日子 我会常给你发kkt的^ ^"],["ㅋㅋ","我也是","那这段时间","常联系吧"]],
     hanjin:[["嘿嘿","你真好","谢谢你 看到你还在等我我很高兴","但是我也希望你可以早休息呀"],["hhhhhh","没事","就是那个什么d社太爱管闲事了！","我没事呀 你不用等我"]],
     jihoon:[["嘿嘿","我来找你了","我没什么事了耶"],["啊啊啊啊啊","我给你吵醒了吗！","米阿内……"]],
-    kyungmin:[["嗯嗯！",nick+(userOlderThanKyungmin?"姐姐":"")+"快点睡噢","晚安"],["啊啊","怎么突然","不说了快睡吧快睡吧"]]
+    kyungmin:[["嗯嗯！",nick+(userOlderThanKyungmin?"怒那":"")+"快点睡噢","晚安"],["啊啊","怎么突然","不说了快睡吧快睡吧"]]
   };
   const p3Tail:Record<string,string[]>={
     shinyu:["明明你才让我更安心"],dohoon:["唉 最近不方便见面的话","多打打视频通话吧^-^"],
