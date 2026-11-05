@@ -203,7 +203,22 @@ function PhoneRuntime({
     const timer = window.setTimeout(() => setStoryNotification(null), 2000);
     return () => window.clearTimeout(timer);
   }, [storyNotification]);
-  const [chapterItems, setChapterItems] = useState<Record<string,Item[]>>(() => { try { return JSON.parse(localStorage.getItem(chapterItemsKey) || "{}"); } catch { return {}; } });
+  const [chapterItems, setChapterItems] = useState<Record<string,Item[]>>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem(chapterItemsKey) || "{}") as Record<string,Item[]>;
+      return Object.fromEntries(Object.entries(stored).map(([app,items]) => [
+        app,
+        Array.from(new Map((Array.isArray(items)?items:[]).map(item => [item.id,item])).values()),
+      ]));
+    } catch { return {}; }
+  });
+  const addChapterItem = (nativeApp:string,item:Item) => {
+    setChapterItems((current) => {
+      const items=current[nativeApp]||[];
+      if(items.some(existing=>existing.id===item.id)) return current;
+      return {...current,[nativeApp]:[...items,item]};
+    });
+  };
   const [storyReply, setStoryReply] = useState<{app:string;thread:string;text:string;token:number}|null>(null);
   const [pendingThread, setPendingThread] = useState("");
   const storyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -720,9 +735,7 @@ function PhoneRuntime({
                 setStoryApp(nativeApp);
                 setPendingThread(thread);
               }}
-              onNativeItem={(nativeApp, item) => {
-                setChapterItems((v) => ({...v,[nativeApp]:[...(v[nativeApp]||[]),item]}));
-              }}
+              onNativeItem={(nativeApp, item) => addChapterItem(nativeApp,item)}
               onNativePrompt={(nativeApp, thread, text, token) => {
                 // Keep the reply ready for the native composer, without opening the app or conversation.
                 setStoryApp(nativeApp);
@@ -755,9 +768,7 @@ function PhoneRuntime({
             <ChapterTwo
               key={chapterTwoKey}
               work={work}
-              onNativeItem={(nativeApp,item) => {
-                setChapterItems((v) => ({...v,[nativeApp]:[...(v[nativeApp]||[]),item]}));
-              }}
+              onNativeItem={(nativeApp,item) => addChapterItem(nativeApp,item)}
               onNativeNotification={(nativeApp,thread,item) => {
                 if (app === nativeApp && storyThread === thread) {
                   setBanner((nativeApp === "kakao" ? "KakaoTalk" : "微信")+": "+item.sender+"："+item.body);
