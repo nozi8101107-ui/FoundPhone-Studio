@@ -84,6 +84,10 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
   const exAvatar=ex==="hanjin"?import.meta.env.BASE_URL+"people/IMG_9702.jpeg":exContact?.avatar||"";
   const part4ActiveRef=useRef(false);
   const nick=String(work.variables.storyNickname||"你");
+  const userBirthday=String(work.variables.storyBirthday||"2006-08-10");
+  const userOlderThanKyungmin=userBirthday<="2007-10-02";
+  const userYoungerThanHanjin=userBirthday>"2006-02-05";
+  const hanjinNick=nick+(userYoungerThanHanjin?"欧巴":"");
   const [part3Started,setPart3Started]=useState(false);
   const [part3Index,setPart3Index]=useState(0);
   const [part3Branch,setPart3Branch]=useState("");
@@ -116,7 +120,7 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
   const p3Choices:Record<string,string[]>={
     shinyu:["睡不着…","想等你"],dohoon:["ㅋㅋㅋ…","可是你不说我也会去找你"],
     youngjae:["noooo","啊…可是我不见你会难受的"],hanjin:["因为想等你么！","不放心你…"],
-    jihoon:["等你来找我呀><","被消息吵醒了ㅋㅋ"],kyungmin:["嗯嗯 那我等下就睡了","好可靠呢炅潣"]
+    jihoon:["等你来找我呀><","被消息吵醒了ㅋㅋ"],kyungmin:["嗯嗯 那我等下就睡了",userOlderThanKyungmin?"好可靠呢炅潣":"好可靠呢炅潣欧巴"]
   };
   const p3Branches:Record<string,string[][]>={
     shinyu:[["抱歉","让你不安了","以后我会更谨慎的"],["你不要这样","…","谢谢你","谢谢你等我","要是我开始变得依赖你了该怎么办"]],
@@ -124,7 +128,7 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
     youngjae:[["ㅋㅋ","可爱呢","这段日子 我会常给你发kkt的^ ^"],["ㅋㅋ","我也是","那这段时间","常联系吧"]],
     hanjin:[["嘿嘿","你真好","谢谢你 看到你还在等我我很高兴","但是我也希望你可以早休息呀"],["hhhhhh","没事","就是那个什么d社太爱管闲事了！","我没事呀 你不用等我"]],
     jihoon:[["嘿嘿","我来找你了","我没什么事了耶"],["啊啊啊啊啊","我给你吵醒了吗！","米阿内……"]],
-    kyungmin:[["嗯嗯！",nick+"快点睡噢","晚安"],["啊啊","怎么突然","不说了快睡吧快睡吧"]]
+    kyungmin:[["嗯嗯！",nick+(userOlderThanKyungmin?"姐姐":"")+"快点睡噢","晚安"],["啊啊","怎么突然","不说了快睡吧快睡吧"]]
   };
   const p3Tail:Record<string,string[]>={
     shinyu:["明明你才让我更安心"],dohoon:["唉 最近不方便见面的话","多打打视频通话吧^-^"],
@@ -161,7 +165,7 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
   };
   const p4End=(n:number)=>{setPart4Ended(true);try{localStorage.setItem("foundphone.chapter2.ending:"+work.id,JSON.stringify({ending:n,xp,ex,crush}));}catch{}window.setTimeout(()=>{window.dispatchEvent(new CustomEvent("foundphone-chapter2-ending",{detail:{ending:n}}));},1000);};
   const sendPart4Prompt=(text:string)=>sendPrompt(text);
-  type P4Action = {type:"in";lines:string[]} | {type:"image";path:string} | {type:"prompt";text:string} | {type:"choice";options:string[];branches:P4Action[][]} | {type:"end";ending:number};
+  type P4Action = {type:"in";lines:string[]} | {type:"image";path:string} | {type:"prompt";text:string} | {type:"wait";ms:number} | {type:"choice";options:string[];branches:P4Action[][]} | {type:"end";ending:number};
   const I=(...lines:string[]):P4Action=>({type:"in",lines});
   const P=(text:string):P4Action=>({type:"prompt",text});
   const C=(options:string[],branches:P4Action[][]):P4Action=>({type:"choice",options,branches});
@@ -170,7 +174,7 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
     BG:{
       shinyu:[I(String(names[crush]||crush)+"刚刚回来了","你们最近","见不了面了吧？"),P("关你什么事"),I("明天","我去你家楼下接你"),P("？？？你干嘛"),P("我跟你已经没有关系了"),P("你也想被拍？"),I("……","我会准备好的","鲜花","红酒","套我也买了"),C(["我不喝酒","……"],[[I("行"),E(1)],[P("房间号"),I("1107"),E(2)]])],
       dohoon:[I(String(names[crush]||crush)+"还真想得出来","“普通朋友”？？","喂","你喜欢那样的胆小鬼吗"),P("关你什么事"),I("关我什么事？","房间号3001","明天晚上"),C(["你放过我吧 我这两天很累了","……"],[[I("那我呢","……算了"),E(1)],[P("滚"),I("哈","不愿意来","那我明天去你家找你"),E(2)]])],
-      youngjae:[I("明天有空吗"),P("？"),I("明天我去你接你"),P("不是你有病啊我发不出去消息"),I("…"),C(["我不会去的","你这是通知吗"],[[I("……行"),E(1)],[I("我只是问你"),P("。"),I("^ ^","我明晚八点到"),E(2)]])],
+      youngjae:[I("明天有空吗"),P("？"),{type:"wait",ms:1000},I("明天我去你接你"),P("不是你有病啊我发不出去消息"),I("…"),C(["我不会去的","你这是通知吗"],[[I("……行"),E(1)],[I("我只是问你"),P("。"),I("^ ^","我明晚八点到"),E(2)]])],
       hanjin:[{type:"image",path:"wx/IMG_9985.jpeg"},P("？"),I("想见你","明天"),P("这位男士请你爱疯手机"),I("……","不好吗","我去接你"),C(["不好","什么时候"],[[I("。"),E(1)],[I("明晚八点","我会到你家楼下"),E(2)]])],
       jihoon:[I("你明天有事吗"),P("有事"),I("…","呀","骗人"),P("你有什么事"),I("我明天去找你好不好"),C(["你老实跳你的舞吧","你来干嘛"],[[E(1)],[I("还能干嘛","我想你了"),P("你想我了就直接来我家？"),I("嗯"),P("真好奇你的粉丝如果知道你这样之后会怎么想"),I("我买好套了","明晚八点到你家"),E(2)]])],
       kyungmin:[I("你在家吗"),P("？"),I("你现在在家吗 我去找你"),P("我现在不在家还能在哪"),P("你来我家干嘛"),P("这么晚了 你有病啊"),I("那我明天去找你","去你家","我的东西你还没扔吧"),C(["早扔了^ ^","你有病"],[[I("哈"),E(1)],[I("对","等着我吧"),E(2)]])]
@@ -179,7 +183,7 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
       shinyu:[I(String(names[crush]||crush)+"刚刚回来了","你们最近","见不了面了吧？"),P("关你什么事"),I("没什么事","想见你"),P("我跟你已经没有关系了"),{type:"image",path:"kkt/IMG_9986.jpeg"},I("我会准备好的"),C(["我不在意","色诱？"],[[I("行"),E(1)],[P("房间号"),I("1107","会让你满意的"),E(2)]])],
       dohoon:[I(String(names[crush]||crush)+"还真想得出来","“普通朋友”？？","喂","你喜欢那样的胆小鬼吗"),P("关你什么事"),I("关我什么事？","房间号3001","明天晚上","我从现在开始断食"),C(["现在才断食 明天会喷我一身吧","你自己灌？"],[[I("你他爸"),E(1)],[I("？","那你给我灌"),P("滚"),I("说好了","明晚八点"),E(2)]])],
       youngjae:[I("明晚八点在家等我"),P("？"),I("明天我去找你","^ ^"),C(["你觉得你对我还有吸引力？","你这是通知吗"],[[I("是我自负了"),E(1)],[I("我只是问你"),P("。"),I("^ ^","我明晚八点到","喜欢男仆装还是裸体围裙","露背毛衣？怎么样"),P("都不喜欢"),I("那我都带过去"),E(2)]])],
-      hanjin:[I(nick),P("？"),I("想见你","明天"),P("别发骚"),I("……","不好吗","我去找你"),C(["不好","什么时候"],[[I("。"),E(1)],[I("明晚八点","我会到你家楼下",nick),E(2)]])],
+      hanjin:[I(hanjinNick),P("？"),I("想见你","明天"),P("别发骚"),I("……","不好吗","我去找你"),C(["不好","什么时候"],[[I("。"),E(1)],[I("明晚八点","我会到你家楼下",hanjinNick),E(2)]])],
       jihoon:[I("你明天在家吗",nick),P("有事"),I("…","呀","骗人的吧"),P("你有什么事"),I("我明天去找你"),{type:"image",path:"kkt/IMG_9993.jpeg"},C(["这招对我没用","脸都红透了^ ^"],[[I("。","好不容易才发出来"),E(1)],[I("。"),P("可爱"),I("嗯"),P("这么想我？"),I("我明晚八点到你家"),E(2)]])],
       kyungmin:[I("你在家吗"),P("？"),I("你现在在家吗","我想去找你"),P("我现在不在家还能在哪"),P("这么晚了来我家？"),P("你有病？"),I("那我明天再去找你","去你家","我的东西你还没扔吧"),C(["早扔了^ ^","这么急不可耐？"],[[I("哈"),E(1)],[I("对","等着我吧","明晚八点","我会准时到的"),E(2)]])]
     }
@@ -195,12 +199,13 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
       if(action.type==="in"){action.lines.forEach(line=>addChat(line,false));continue;}
       if(action.type==="image"){addChat("",false,{kind:"image",media:import.meta.env.BASE_URL+action.path});continue;}
       if(action.type==="prompt"){p4Waiting.current="prompt";sendPrompt(action.text);return;}
+      if(action.type==="wait"){window.setTimeout(runP4,action.ms);return;}
       if(action.type==="choice"){p4Waiting.current="choice";callbacks.current.onChoices(action.options);return;}
       if(action.type==="end"){p4Waiting.current=null;callbacks.current.onChoices([]);p4End(action.ending);return;}
     }
   };
   const startP4=()=>{
-    if(part4Ended)return;
+    if(part4Ended||part4ActiveRef.current)return;
     const branch=(xp==="GB"?"GB":"BG");
     part4ActiveRef.current=true;
     p4Actions.current=p4Flows[branch][ex]||p4Flows[branch].shinyu;
