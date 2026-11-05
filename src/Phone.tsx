@@ -645,6 +645,10 @@ function PhoneRuntime({
                   onAdd={() => onAdd?.(app)}
                   onBack={() => setApp("")}
                   onSettings={onSettings}
+                  saveSlots={saveSlots}
+                  onSaveSlot={saveToSlot}
+                  onRenameSlot={renameSlot}
+                  onLoadSlot={onLoadSlot}
                   onUi={(key, value) => {
                     const current = runtimeRef.current;
                     update(
