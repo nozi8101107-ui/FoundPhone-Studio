@@ -65,3 +65,93 @@ export function AudioPlayer({ p, item }: { p: SkinProps; item: Item }) {
     />
   );
 }
+
+
+export type AppleMusicTrack = {
+  id: string;
+  title: string;
+  artist: string;
+  cover: string;
+  file: string;
+};
+let appleAudio: HTMLAudioElement | null = null;
+let applePlaylist: AppleMusicTrack[] = [];
+let appleIndex = -1;
+const appleListeners = new Set<() => void>();
+function notifyAppleMusic() {
+  appleListeners.forEach((listener) => listener());
+}
+function appleElement() {
+  if (typeof document === "undefined") return null;
+  if (!appleAudio) {
+    appleAudio = document.createElement("audio");
+    appleAudio.preload = "auto";
+    appleAudio.addEventListener("timeupdate", notifyAppleMusic);
+    appleAudio.addEventListener("durationchange", notifyAppleMusic);
+    appleAudio.addEventListener("play", notifyAppleMusic);
+    appleAudio.addEventListener("pause", notifyAppleMusic);
+    appleAudio.addEventListener("ended", () => {
+      if (!applePlaylist.length) return;
+      appleIndex = (appleIndex + 1) % applePlaylist.length;
+      loadAppleTrack(true);
+    });
+    appleAudio.addEventListener("error", notifyAppleMusic);
+    appleAudio.style.display = "none";
+    document.body.appendChild(appleAudio);
+  }
+  return appleAudio;
+}
+function appleTrackUrl(track: AppleMusicTrack) {
+  const filename = track.file.normalize("NFD");
+  return new URL(import.meta.env.BASE_URL + "am/" + encodeURIComponent(filename), window.location.href).href;
+}
+function loadAppleTrack(autoplay: boolean) {
+  const audio = appleElement();
+  const track = applePlaylist[appleIndex];
+  if (!audio || !track) return;
+  audio.src = appleTrackUrl(track);
+  audio.load();
+  notifyAppleMusic();
+  if (autoplay) void audio.play().catch(() => notifyAppleMusic());
+}
+export function subscribeAppleMusic(listener: () => void) {
+  appleListeners.add(listener);
+  return () => appleListeners.delete(listener);
+}
+export function getAppleMusicState() {
+  const audio = appleAudio;
+  return {
+    track: applePlaylist[appleIndex] ?? null,
+    index: appleIndex,
+    count: applePlaylist.length,
+    playing: !!audio && !audio.paused && !audio.ended,
+    currentTime: audio?.currentTime ?? 0,
+    duration: Number.isFinite(audio?.duration) ? audio!.duration : 0,
+  };
+}
+export function playAppleMusic(tracks: AppleMusicTrack[], index: number) {
+  if (!tracks.length) return;
+  applePlaylist = tracks;
+  appleIndex = Math.max(0, Math.min(index, tracks.length - 1));
+  loadAppleTrack(true);
+}
+export function toggleAppleMusic() {
+  const audio = appleElement();
+  if (!audio) return;
+  if (audio.paused) {
+    if (!audio.src && applePlaylist.length) loadAppleTrack(true);
+    else void audio.play().catch(() => notifyAppleMusic());
+  } else audio.pause();
+  notifyAppleMusic();
+}
+export function seekAppleMusic(time: number) {
+  const audio = appleElement();
+  if (audio && Number.isFinite(audio.duration))
+    audio.currentTime = Math.max(0, Math.min(time, audio.duration));
+  notifyAppleMusic();
+}
+export function skipAppleMusic(delta: number) {
+  if (!applePlaylist.length) return;
+  appleIndex = (appleIndex + delta + applePlaylist.length) % applePlaylist.length;
+  loadAppleTrack(true);
+}
