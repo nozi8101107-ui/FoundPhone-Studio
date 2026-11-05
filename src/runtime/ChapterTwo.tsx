@@ -36,11 +36,12 @@ function makeComments(crush:string):string[] {
   ];
   const shuffled=[...pool].sort(()=>Math.random()-.5);
   const users=["bluehour_03","only4tws","summer_0525","luvmybias","hanriver00","starrynight_7","twsarchive","moodmaker__","pocket_angel","daily_idol","cloudnine_kr","dear_my_youth","winterpeach","afterglow_17","staywithus","orbitingyou","plum_soda","midnighttalk","zero_o_clock","twinkle_404","mellowday","tws_lover","peachy_0525","myblue_7","wintertws"];
+  const shuffledUsers=[...users].sort(()=>Math.random()-.5);
   const count=15+Math.floor(Math.random()*11);
-  return Array.from({length:count},(_,i)=>`@${users[i]}：${shuffled[i%shuffled.length]}`);
+  return Array.from({length:count},(_,i)=>`@${shuffledUsers[i%shuffledUsers.length]}：${shuffled[i%shuffled.length]}`);
 }
 
-function makeStatement(work:Work,crush:string):Item {
+function makeStatement(crush:string):Item {
   const stage=english[crush]||crush.toUpperCase();
   const body=
     "这里是PLEDIS Entertainment。\n\n"+
@@ -92,7 +93,7 @@ export function ChapterTwo({work,onNativeItem,onNativeNotification,onXPost,onXNo
         callbacks.current.onNativeNotification(app,thread,item);
         if(index===messages.length-1){
           window.setTimeout(()=>{
-            const post=makeStatement(work,crush);
+            const post=makeStatement(crush);
             callbacks.current.onXPost(post);
             callbacks.current.onXNotification(post);
           },1000);
