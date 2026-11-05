@@ -1,5 +1,13 @@
 export { WeatherSkin, HealthSkin } from "./CalibratedSystemApps";
-import { AudioPlayer, useTrack } from "../audio";
+import {
+  getAppleMusicState,
+  playAppleMusic,
+  seekAppleMusic,
+  skipAppleMusic,
+  subscribeAppleMusic,
+  toggleAppleMusic,
+  type AppleMusicTrack,
+} from "../audio";
 import { useSkinState } from "../skinState";
 import {
   Calendar,
@@ -735,82 +743,79 @@ export function FilesSkin(p: Props) {
     </div>
   );
 }
+const APPLE_MUSIC_TRACKS: AppleMusicTrack[] = [
+  { id: "tws-01", title: "내 이름을 불러줘", artist: "TWS (투어스)", cover: "IMG_9924.jpeg", file: "내 이름을 불러줘1.m4a" },
+  { id: "tws-02", title: "WEUP", artist: "TWS (투어스)", cover: "IMG_9924.jpeg", file: "WEUP1.m4a" },
+  { id: "tws-03", title: "첫 만남은 계획대로 되지 않아", artist: "TWS (투어스)", cover: "IMG_9926.jpeg", file: "첫 만남은 계획대로 되지 않아1.m4a" },
+  { id: "tws-04", title: "OVERDRIVE", artist: "TWS (투어스)", cover: "IMG_9933.jpeg", file: "OVERDRIVE1.m4a" },
+  { id: "tws-05", title: "마음 따라 뛰는 건 멋지지 않아?", artist: "TWS (투어스)", cover: "IMG_9936.jpeg", file: "마음 따라 뛰는 건 멋지지 않아1.m4a" },
+  { id: "tws-06", title: "hey!hey!", artist: "TWS (투어스)", cover: "IMG_9937.jpeg", file: "hey!hey!1.m4a" },
+  { id: "tws-07", title: "너의 모든 가능성이 되어 줄게", artist: "TWS (투어스)", cover: "IMG_9939.jpeg", file: "너의 모든 가능성이 되어 줄게1.m4a" },
+  { id: "tws-08", title: "마지막 축제", artist: "TWS (투어스)", cover: "IMG_9940.jpeg", file: "마지막 축제1.m4a" },
+  { id: "tws-09", title: "SODA SODA", artist: "TWS (투어스)", cover: "IMG_9941.jpeg", file: "SODA SODA1.m4a" },
+  { id: "tws-10", title: "lucky to be loved", artist: "TWS (투어스)", cover: "IMG_9936.jpeg", file: "lucky to be love1.m4a" },
+  { id: "tws-11", title: "내가 S면 넌 나의 N이 되어줘", artist: "TWS (투어스)", cover: "IMG_9937.jpeg", file: "내가 S면 넌 나의 N이 되어줘1.m4a" },
+  { id: "tws-12", title: "Fire Confetti", artist: "TWS (투어스)", cover: "IMG_9937.jpeg", file: "Fire Confetti1.m4a" },
+];
+function formatMusicTime(value: number) {
+  if (!Number.isFinite(value) || value < 0) return "0:00";
+  return Math.floor(value / 60) + ":" + String(Math.floor(value % 60)).padStart(2, "0");
+}
 export function MusicSkin(p: Props) {
-  const { tab, setTab, items } = useContent(p, "资料库");
-  const [song, setSong] = useTrack(p, items);
+  const [tab, setTab] = useState("歌曲");
+  const [player, setPlayer] = useState(getAppleMusicState);
+  useEffect(() => subscribeAppleMusic(() => setPlayer(getAppleMusicState())), []);
+  const active = player.track;
+  const coverUrl = (track: AppleMusicTrack) =>
+    new URL(import.meta.env.BASE_URL + "am/" + encodeURIComponent(track.cover), window.location.href).href;
   return (
-    <div className="catalog-skin native-music">
+    <div className="catalog-skin native-music" style={{ background: "linear-gradient(180deg,#f4dce3 0%,#fff 38%)" }}>
       <Header p={p} />
-      <div className="catalog-scroll">
-        <h1>{tab}</h1>
-        {tab === "歌单" ? (
-          <div className="music-albums">
-            {groupItems(items, "我的音乐").map((g) => (
-              <button
-                key={g}
-                onClick={() => {
-                  const i = items.find((i) => (i.folder || "我的音乐") === g);
-                  if (i) setSong(i);
-                }}
-              >
-                <Music size={51} />
-                <strong>{g}</strong>
-              </button>
-            ))}
+      <div className="catalog-scroll" style={{ padding: "18px 16px 120px" }}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <h1 style={{fontSize:28,margin:"8px 0 16px"}}>资料库</h1>
+          <span style={{fontSize:12,color:"#888"}}>TWS · 12 首歌曲</span>
+        </div>
+        <div style={{display:"flex",gap:18,borderBottom:"1px solid #ddd",marginBottom:12}}>
+          {["歌曲","专辑"].map(t=><button key={t} onClick={()=>setTab(t)} style={{padding:"8px 2px",fontWeight:tab===t?700:500,borderBottom:tab===t?"2px solid #d94d78":"2px solid transparent"}}>{t}</button>)}
+        </div>
+        {tab === "专辑" && (
+          <div style={{display:"flex",alignItems:"center",gap:14,padding:"12px 0 18px"}}>
+            <img src={coverUrl(APPLE_MUSIC_TRACKS[0])} alt="" style={{width:88,height:88,borderRadius:10,objectFit:"cover"}} />
+            <div><strong>TWS</strong><div style={{fontSize:13,color:"#777",marginTop:5}}>TWS (투어스) · 12 首歌曲</div></div>
           </div>
-        ) : (
-          items.map((i, n) => (
-            <button
-              className="music-track"
-              key={i.id}
-              onClick={() => {
-                setSong(i);
-              }}
-            >
-              <small>{n + 1}</small>
-              <span>
-                <strong>{i.title}</strong>
-                <small>
-                  {i.sender} · {meta(i, "album")}
-                </small>
-              </span>
-              <span>{meta(i, "duration")}</span>
-            </button>
-          ))
         )}
-        <Empty items={items} />
+        {APPLE_MUSIC_TRACKS.map((track,index)=>(
+          <button key={track.id} onClick={()=>playAppleMusic(APPLE_MUSIC_TRACKS,index)} style={{width:"100%",display:"flex",alignItems:"center",gap:12,padding:"9px 0",textAlign:"left",borderBottom:"1px solid #eee"}}>
+            <img src={coverUrl(track)} alt="" loading="lazy" style={{width:48,height:48,borderRadius:7,objectFit:"cover",flexShrink:0}} />
+            <span style={{flex:1,minWidth:0}}>
+              <strong style={{display:"block",fontSize:14,fontWeight:active?.id===track.id?700:500,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{track.title}</strong>
+              <small style={{display:"block",fontSize:12,color:"#888",marginTop:4}}>{track.artist}</small>
+            </span>
+            <span style={{fontSize:12,color:active?.id===track.id?"#d94d78":"#999"}}>{active?.id===track.id&&player.playing?"正在播放":"•••"}</span>
+          </button>
+        ))}
       </div>
-      {song && (
-        <div className="native-now-playing">
-          <button onClick={() => p.onItem(song)}>
-            <Music size={20} />
-            {song.title}
-          </button>
-          {song.kind === "audio" && safeMedia(song.media) ? (
-            <AudioPlayer p={p} item={song} />
-          ) : (
-            <button onClick={() => p.onItem(song)}>查看歌曲内容</button>
-          )}
-          <button
-            aria-label="下一首"
-            onClick={() =>
-              setSong(
-                items[
-                  (items.findIndex((i) => i.id === song.id) + 1) % items.length
-                ],
-              )
-            }
-          >
-            <SkipForward size={18} />
-          </button>
+      {active && (
+        <div style={{position:"absolute",left:10,right:10,bottom:62,background:"#fff",borderRadius:16,padding:12,boxShadow:"0 3px 18px #0002",zIndex:5}}>
+          <div style={{display:"flex",alignItems:"center",gap:11}}>
+            <img src={coverUrl(active)} alt="" style={{width:48,height:48,borderRadius:7,objectFit:"cover"}} />
+            <div style={{flex:1,minWidth:0}}>
+              <strong style={{display:"block",fontSize:13,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{active.title}</strong>
+              <small style={{color:"#888"}}>{active.artist}</small>
+            </div>
+            <button aria-label="上一首" onClick={()=>skipAppleMusic(-1)}><ChevronLeft size={21}/></button>
+            <button aria-label={player.playing?"暂停":"播放"} onClick={toggleAppleMusic}><span style={{fontSize:22}}>{player.playing?"Ⅱ":"▶"}</span></button>
+            <button aria-label="下一首" onClick={()=>skipAppleMusic(1)}><SkipForward size={20}/></button>
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:8,marginTop:8,fontSize:10,color:"#888"}}>
+            <span>{formatMusicTime(player.currentTime)}</span>
+            <input aria-label="播放进度" type="range" min={0} max={Math.max(1,player.duration)} value={Math.min(player.currentTime,player.duration||0)} onChange={e=>seekAppleMusic(Number(e.target.value))} style={{flex:1,accentColor:"#d94d78"}} />
+            <span>{formatMusicTime(player.duration)}</span>
+          </div>
         </div>
       )}
-      <Tabs
-        tabs={["资料库", "歌单"]}
-        value={tab}
-        set={setTab}
-        icons={[<Music />, <Folder />]}
-      />
+      <Tabs tabs={["歌曲","专辑"]} value={tab} set={setTab} icons={[<Music />,<Folder />]} />
     </div>
   );
 }
