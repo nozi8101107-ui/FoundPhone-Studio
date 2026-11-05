@@ -116,7 +116,7 @@ function loadAppleTrack(autoplay: boolean) {
 }
 export function subscribeAppleMusic(listener: () => void) {
   appleListeners.add(listener);
-  return () => appleListeners.delete(listener);
+  return () => { appleListeners.delete(listener); };
 }
 export function getAppleMusicState() {
   const audio = appleAudio;
