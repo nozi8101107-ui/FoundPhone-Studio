@@ -300,7 +300,8 @@ function PhoneRuntime({
     const handleCheckout = (event: Event) => {
       const detail = (event as CustomEvent<{item:Item;quantity:number}>).detail;
       if (!detail?.item || !detail.quantity) return;
-      setCheckout({...detail,success:false});
+      const isCondom=/避孕套|安全套|condom/i.test(detail.item.title+" "+detail.item.body);
+      setCheckout({...detail,quantity:isCondom?1:detail.quantity,success:false});
       setApp("alipay");
     };
     window.addEventListener("foundphone:checkout",handleCheckout);
