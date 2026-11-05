@@ -896,10 +896,10 @@ function PhoneRuntime({
                     storyTimer.current = null;
                   }
                   try {
-                    localStorage.removeItem(storyFlowKey);
-                    localStorage.removeItem(storyKey);
-                    localStorage.removeItem(chapterItemsKey);
-                    localStorage.removeItem(chapterTwoKey);
+                    for (let i = localStorage.length - 1; i >= 0; i--) {
+                      const key = localStorage.key(i);
+                      if (key && key.startsWith("foundphone.") && key !== "foundphone.user-profile.v1" && !key.startsWith("foundphone.save-slots.")) localStorage.removeItem(key);
+                    }
                   } catch {}
                   setChapterItems({});
                   setChapterTwoOpenedApps([]);
