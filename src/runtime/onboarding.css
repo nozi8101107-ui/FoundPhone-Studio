@@ -9,3 +9,9 @@
 .onboarding{align-items:start}
 .onboarding-card{margin:auto}
 @media(max-height:760px){.onboarding{place-items:start center}.onboarding-card{margin:12px auto}}
+
+.onboarding-modal-backdrop{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:24px;background:#17161366;backdrop-filter:blur(3px)}
+.onboarding-modal{width:min(100%,320px);padding:25px 22px 20px;border-radius:20px;background:#fff;box-shadow:0 16px 50px #0003;text-align:center}
+.onboarding-modal h2{margin:0 0 10px;font-size:18px;color:#24231f}
+.onboarding-modal p{margin:0;color:#77746d;font-size:13px;line-height:1.7}
+.onboarding-modal button{width:100%;height:43px;margin-top:20px;border:0;border-radius:12px;background:#24231f;color:#fff;font-weight:600}
