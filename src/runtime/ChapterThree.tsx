@@ -36,7 +36,6 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
  const branch=chapterTwoEnding===2?"3(2)":"3(1)";
  const [,setStep]=useState(0);
  const stepRef=useRef(0);
- const [token,setToken]=useState(7300);
  const tokenRef=useRef(7300);
  const timers=useRef<number[]>([]);
  const index=useRef(0);
@@ -51,7 +50,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
  let runEx:()=>void;
  const exRunning=useRef(false);
  const go=(n:number)=>{stepRef.current=n;setStep(n);};
- const prompt=(app:string,thread:string,text:string)=>{tokenRef.current+=1;setToken(tokenRef.current);onPrompt(app,thread,text,tokenRef.current);};
+ const prompt=(app:string,thread:string,text:string)=>{tokenRef.current+=1;onPrompt(app,thread,text,tokenRef.current);};
  const item=(app:string,thread:string,sender:string,body:string,outgoing=false,extra:Partial<Item>={})=>{
   const it:Item={id:"chapter3-"+stepRef.current+"-"+Date.now()+"-"+Math.random().toString(36).slice(2),title:thread,body,richText:"",meta:{story:"chapter3",handle:app==="kakao"?memberHandles[crush]:"",remark:sender},time:stepRef.current>=12?"19:29":stepRef.current===5?"10:29":"10:01",sender:outgoing?"我":sender,avatar:outgoing?String(work.variables.storyUserAvatar||""):app===crushApp?crushAvatar:app===exApp?exAvatar:"",kind:"text",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing,read:false,likes:0,comments:[],...extra};
   onNativeItem(app,it);return it;
