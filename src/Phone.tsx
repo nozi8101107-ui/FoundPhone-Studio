@@ -156,7 +156,16 @@ function PhoneRuntime({
   const chapterDispatch = rawChapterDispatch
     ? { ...rawChapterDispatch, time: dispatchDate + " 23:00" }
     : undefined;
-  const chapterItemsKey = "foundphone.chapter1.messages:" + work.id;
+  // Runtime-generated chats/posts belong to one configured playthrough, not the shared work.
+  // Including the selected crush/ex prevents messages from another profile leaking into this phone.
+  const playthroughKey = encodeURIComponent([
+    String(work.variables.storyNickname || ""),
+    String(work.variables.storyCrush || ""),
+    String(work.variables.storyEx || ""),
+    String(work.variables.storyXp || ""),
+  ].join(":"));
+  const chapterItemsKey = "foundphone.chapter1.messages:" + work.id + ":" + playthroughKey;
+  const chapterThreeDoneKey = "foundphone.chapter3.done:" + work.id + ":" + playthroughKey;
   const [storyActive, setStoryActive] = useState(false);
   const [storyFinished, setStoryFinished] = useState(() => { try { return !!JSON.parse(localStorage.getItem(storyFlowKey) || "null")?.done; } catch { return false; } });
   const [storyThread, setStoryThread] = useState("");
@@ -171,7 +180,7 @@ function PhoneRuntime({
   const [chapterTwoXReady, setChapterTwoXReady] = useState(false);
   const [chapterTwoChoices,setChapterTwoChoices]=useState<string[]>([]);
   const [chapterThreeActive,setChapterThreeActive]=useState(false);
-  const [chapterThreeDone,setChapterThreeDone]=useState(()=>{try{return !!localStorage.getItem("foundphone.chapter3.done:"+work.id);}catch{return false;}});
+  const [chapterThreeDone,setChapterThreeDone]=useState(()=>{try{return !!localStorage.getItem(chapterThreeDoneKey);}catch{return false;}});
   useEffect(() => {
     try { localStorage.setItem(chapterTwoKey, JSON.stringify({openedApps:chapterTwoOpenedApps,active:chapterTwoActive,done:chapterTwoDone})); } catch {}
   }, [chapterTwoKey,chapterTwoOpenedApps,chapterTwoActive,chapterTwoDone]);
@@ -834,7 +843,7 @@ function PhoneRuntime({
               onChoices={setChapterTwoChoices}
               onFinish={()=>{
                 setChapterThreeActive(false);setChapterThreeDone(true);
-                try{localStorage.setItem("foundphone.chapter3.done:"+work.id,"1");}catch{}
+                try{localStorage.setItem(chapterThreeDoneKey,"1");}catch{}
               }}
             />
           )}
