@@ -218,7 +218,7 @@ function PhoneRuntime({
   }, [storyNotification]);
   const [chapterItems, setChapterItems] = useState<Record<string,Item[]>>(() => {
     try {
-      const stored = JSON.parse(localStorage.getItem(chapterItemsKey) || "{}") as Record<string,Item[]>;
+      const stored = JSON.parse(localStorage.getItem(chapterItemsKey) || localStorage.getItem("foundphone.chapter1.messages:"+work.id) || "{}") as Record<string,Item[]>;
       return Object.fromEntries(Object.entries(stored).map(([app,items]) => [
         app,
         Array.from(new Map((Array.isArray(items)?items:[]).map(item => [item.id,item])).values()),
@@ -232,6 +232,17 @@ function PhoneRuntime({
       return {...current,[nativeApp]:[...items,item]};
     });
   };
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(chapterItemsKey) || "null");
+      if (saved && typeof saved === "object") {
+        setChapterItems(Object.fromEntries(Object.entries(saved).map(([app,items]) => [app,Array.from(new Map((Array.isArray(items)?items as Item[]:[]).map(item=>[item.id,item])).values())])));
+      } else {
+        const legacy = JSON.parse(localStorage.getItem("foundphone.chapter1.messages:"+work.id) || "null");
+        if (legacy && typeof legacy === "object") setChapterItems(legacy as Record<string,Item[]>);
+      }
+    } catch {}
+  }, [chapterItemsKey]);
   useEffect(() => {
     try { localStorage.setItem(chapterItemsKey, JSON.stringify(chapterItems)); } catch {}
   }, [chapterItemsKey, chapterItems]);
