@@ -394,6 +394,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
   }
   return false;
  };
+ startPart5Ref.current=startPart5;
  const onPhoneUnlocked=()=>{
    if(stepRef.current===161&&part4Active.current){
     const t=window.setTimeout(()=>{go(17);incoming("wechat",buddyThread,"搭子",["你回家路上注意安全！"],()=>{part4Cursor.current=0;part4Waiting.current=true;const a=part4Actions.current[0];if(a?.type==="prompt"&&a.thread===buddyThread)prompt("wechat",buddyThread,a.text||"");},{time:"09:47"});},1000);
