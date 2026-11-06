@@ -232,6 +232,9 @@ function PhoneRuntime({
       return {...current,[nativeApp]:[...items,item]};
     });
   };
+  useEffect(() => {
+    try { localStorage.setItem(chapterItemsKey, JSON.stringify(chapterItems)); } catch {}
+  }, [chapterItemsKey, chapterItems]);
   const [storyReply, setStoryReply] = useState<{app:string;thread:string;text:string;token:number}|null>(null);
   const [pendingThread, setPendingThread] = useState("");
   const storyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
