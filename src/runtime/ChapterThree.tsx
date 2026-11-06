@@ -58,7 +58,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
  const prompt=(app:string,thread:string,text:string)=>{tokenRef.current+=1;onPrompt(app,thread,text,tokenRef.current);};
  const threadSeed=(app:string,thread:string,sender:string)=>{
   const pool=work.data[app]||[];
-  return pool.find(i=>i.title===thread&&!i.outgoing) || pool.find(i=>i.meta?.remark===sender&&!i.outgoing) || pool.find(i=>i.sender===sender&&!i.outgoing);
+  return pool.find(i=>i.title===thread&&i.meta?.remark===sender&&!i.outgoing) || pool.find(i=>i.meta?.remark===sender&&!i.outgoing) || pool.find(i=>i.sender===sender&&!i.outgoing);
  };
  const threadAvatar=(app:string,thread:string,sender:string)=>{
   const seed=threadSeed(app,thread,sender);
