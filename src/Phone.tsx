@@ -182,8 +182,18 @@ function PhoneRuntime({
   const [chapterThreeActive,setChapterThreeActive]=useState(false);
   const [chapterThreeDone,setChapterThreeDone]=useState(()=>{try{return !!localStorage.getItem(chapterThreeDoneKey);}catch{return false;}});
   useEffect(() => {
-    try { localStorage.setItem(chapterTwoKey, JSON.stringify({openedApps:chapterTwoOpenedApps,active:chapterTwoActive,done:chapterTwoDone})); } catch {}
-  }, [chapterTwoKey,chapterTwoOpenedApps,chapterTwoActive,chapterTwoDone]);
+    try {
+      const current = JSON.parse(localStorage.getItem(chapterTwoKey) || "{}");
+      const fallback = JSON.parse(localStorage.getItem("foundphone.chapter2.ending:" + work.id) || "{}");
+      const ending = current.ending ?? fallback.ending;
+      localStorage.setItem(chapterTwoKey, JSON.stringify({
+        openedApps: chapterTwoOpenedApps,
+        active: chapterTwoActive,
+        done: chapterTwoDone,
+        ...(ending !== undefined ? { ending } : {}),
+      }));
+    } catch {}
+  }, [chapterTwoKey,chapterTwoOpenedApps,chapterTwoActive,chapterTwoDone,work.id]);
   // A fresh Chapter 1 run must not inherit a stale Chapter 2 completion flag.
   useEffect(() => {
     if (!storyFinished && chapterTwoDone) {
