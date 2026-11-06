@@ -88,7 +88,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
   exFlow.current=(xp==="GB"?gb:bg)[ex]||((xp==="GB"?gb:bg).shinyu);
   exCursor.current=0;exRunning.current=false;go(12);runEx();
  };
- const runEx=()=>{
+ runEx=()=>{
   if(exRunning.current||done.current)return;
   const action=exFlow.current[exCursor.current++];
   if(!action)return;
