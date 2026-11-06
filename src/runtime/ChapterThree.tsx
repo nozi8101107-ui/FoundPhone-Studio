@@ -69,6 +69,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
  const transferAttempts=useRef(0);
  const blacklisted=useRef(false);
  const refundItemId=useRef("");
+ const claimedRefundId=useRef("");
  const exFlow=useRef<ExAction[]>([]);
  const exCursor=useRef(0);
  let runEx:()=>void;
@@ -494,10 +495,12 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
    }
   };
   const onTransferClaim=(e:Event)=>{
-   const d=(e as CustomEvent).detail||{};if(stepRef.current!==91||d.id!==refundItemId.current)return;
+   const d=(e as CustomEvent).detail||{};
+   if(stepRef.current!==91||!refundItemId.current||d.id!==refundItemId.current||claimedRefundId.current===d.id)return;
+   claimedRefundId.current=d.id;
    const claimed=item("wechat",sellerThread,sellerDisplayName,String((transferTotal.current-800).toFixed(2)),false,{kind:"transferReceived",meta:{story:"chapter3",transferAmount:String(transferTotal.current-800),transferStatus:"claimed",remark:sellerDisplayName}});
    onNativeNotification("wechat",sellerThread,claimed);
-   incoming("wechat",sellerThread,sellerDisplayName,["好的 祝宝宝追星愉快！"],()=>{go(10);index.current=0;});
+   incoming("wechat",sellerThread,sellerDisplayName,["好的 祝宝宝追星愉快！"],()=>{index.current=0;go(10);});
   };
   window.addEventListener("foundphone-phone-unlocked",onPhoneUnlocked);
   window.addEventListener("foundphone-chapter3-calendar-open",onCalendar);
