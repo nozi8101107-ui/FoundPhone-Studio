@@ -695,9 +695,6 @@ function PhoneRuntime({
               >
                 <AppContent
                   app={plugin}
-                  chapterTwoDone={chapterTwoDone}
-                  chapterThreeDone={chapterThreeDone}
-                  chapterThreeComebackDate={chapterThreeComebackDate}
                   name={
                     work.apps.find((a) => a.id === app)?.name ?? plugin.name
                   }
