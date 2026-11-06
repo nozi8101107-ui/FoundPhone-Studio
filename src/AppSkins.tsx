@@ -244,11 +244,12 @@ export function WeChatSkin(p: SkinProps) {
   const [selectedTransfer, setSelectedTransfer] = useState<Item | null>(null);
   const threadItems = p.thread ? p.items.filter((i) => i.title === p.thread) : [];
   const sellerName = "票务 🍂打歌🎫代申";
-  const threadLabel = threadItems.find((i) => !i.outgoing && i.meta.remark)?.meta.remark
+  const isSellerThread = p.thread === sellerName || threadItems.some(i => i.meta.remark === sellerName || i.sender === sellerName);
+  const threadLabel = isSellerThread ? sellerName
+    : threadItems.find((i) => !i.outgoing && i.meta.remark)?.meta.remark
     || threadItems.find((i) => !i.outgoing)?.sender
     || threadItems.find((i) => i.meta.remark && i.meta.remark !== "我")?.meta.remark
     || p.thread;
-  const isSellerThread = p.thread === sellerName || threadItems.some(i => i.meta.remark === sellerName || i.sender === sellerName);
   const [readThreads, setReadThreads] = useSkinState<string[]>(
     p,
     "readThreads",
@@ -465,7 +466,7 @@ export function WeChatSkin(p: SkinProps) {
                     latest = latestByThread.get(t)!.item,
                     last = latest,
                     incoming = list.find((i) => !i.outgoing && i.meta.remark) || list.find((i) => !i.outgoing),
-                    label = incoming?.meta?.remark || incoming?.sender || list.find((i) => i.meta.remark && i.meta.remark !== "我")?.meta.remark || t,
+                    label = list.some(i => i.meta.remark === sellerName || i.sender === sellerName) ? sellerName : incoming?.meta?.remark || incoming?.sender || list.find((i) => i.meta.remark && i.meta.remark !== "我")?.meta.remark || t,
                     isHanjin = list.some((i) => i.meta.handle === "henan_prince"),
                     // The chat-list avatar belongs to the other participant, never whichever sender wrote last.
                     contactAvatar = isHanjin ? import.meta.env.BASE_URL + "people/IMG_9702.jpeg" : list.find((i) => !i.outgoing)?.avatar || "";
