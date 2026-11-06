@@ -187,7 +187,7 @@ function PhoneRuntime({
       const saved = localStorage.getItem(chapterThreeComebackDateKey);
       if (saved && /^\d{4}-\d{2}-\d{2}$/.test(saved)) return saved;
       if (chapterTwoDone || chapterThreeDone) {
-        const baseDate = /^\\d{4}-\\d{2}-\\d{2}$/.test(work.phone.date || "")
+        const baseDate = /^\d{4}-\d{2}-\d{2}$/.test(work.phone.date || "")
           ? new Date((work.phone.date as string) + "T12:00:00")
           : new Date();
         const target = new Date(baseDate);
@@ -468,7 +468,7 @@ function PhoneRuntime({
         setChapterThreeActive(true);
         if (!chapterThreeComebackDate) {
           const phoneDate = runtimeRef.current.date || work.phone.date || "";
-          const baseDate = /^\\d{4}-\\d{2}-\\d{2}$/.test(phoneDate)
+          const baseDate = /^\d{4}-\d{2}-\d{2}$/.test(phoneDate)
             ? new Date(phoneDate + "T12:00:00")
             : new Date();
           const target = new Date(baseDate);
