@@ -723,6 +723,8 @@ function PhoneRuntime({
                   onStoryChoice={(choice) => setStoryReply({app,thread:storyThread,text:choice,token:Date.now()})}
                   creator={creator}
                   chapterTwoDone={chapterTwoDone}
+                  chapterThreeDone={chapterThreeDone}
+                  chapterThreeComebackDate={chapterThreeComebackDate}
                   state={s}
                   onRead={(id) => {
                     event("read", id);
@@ -1322,6 +1324,8 @@ function AppContent({
   items,
   creator,
   chapterTwoDone = false,
+  chapterThreeDone = false,
+  chapterThreeComebackDate = "",
   state,
   onRead,
   onEdit,
@@ -1348,6 +1352,8 @@ function AppContent({
   items: Item[];
   creator: boolean;
   chapterTwoDone?: boolean;
+  chapterThreeDone?: boolean;
+  chapterThreeComebackDate?: string;
   state: Runtime;
   onRead: (id: string) => void;
   onEdit: (item: Item) => void;
