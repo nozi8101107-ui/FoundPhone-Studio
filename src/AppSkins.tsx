@@ -185,7 +185,7 @@ function WeChatStoryComposer(p: SkinProps) {
   const [plusOpen, setPlusOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [transferAmount, setTransferAmount] = useState("");
-  const [transferEnabled, setTransferEnabled] = useState(false);
+  const [transferEnabled, setTransferEnabled] = useState(() => { try { return localStorage.getItem("foundphone.chapter3.transferEnabled:" + p.thread) === "1"; } catch { return false; } });
   const isSeller = p.thread === "票务 🍂打歌🎫代申";
   useEffect(() => {
     if (p.storyReply) setDraft(p.storyReply.text);
@@ -193,7 +193,7 @@ function WeChatStoryComposer(p: SkinProps) {
   useEffect(() => {
     const enable = (event: Event) => {
       const detail = (event as CustomEvent).detail || {};
-      if (detail.thread === p.thread) setTransferEnabled(true);
+      if (detail.thread === p.thread) { setTransferEnabled(true); try { localStorage.setItem("foundphone.chapter3.transferEnabled:" + p.thread, "1"); } catch {} }
     };
     window.addEventListener("foundphone-story-transfer-enable", enable);
     return () => window.removeEventListener("foundphone-story-transfer-enable", enable);
