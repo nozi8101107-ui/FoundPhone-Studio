@@ -332,7 +332,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
   incoming(crushApp,crushThread,crushRemark,["今天见到你了","好高兴"],()=>prompt(crushApp,crushThread,"ㅋㅋㅋㅋ"));
  };
  const startPart5Ex=()=>{
-  go(19);
+  go(19);part5Stage.current=10;
   incoming(exApp,exThread,exRemark,["今天我们一直在对视吧？",crushName+"没有发现吗？"],()=>prompt(exApp,exThread,"……没有"));
  };
  const onPart5Send=(s:number,app:string,thread:string,text:string)=>{
@@ -346,59 +346,48 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
     });return true;
    }
    if(part5Stage.current===3){
-    onChoices([]);part5Choice.current=(["shinyu","youngjae","jihoon"].includes(crush)?["其实 是被你看着所以紧张…","嗯嗯……"]:["喂…","才没有！"]).indexOf(text);
+    onChoices([]);
+    const first=["shinyu","youngjae","jihoon"].includes(crush);
+    const choice=(first?["其实 是被你看着所以紧张…","嗯嗯……"]:["喂…","才没有！"]).indexOf(text);
     part5Stage.current=4;
-    const lines=part5Choice.current===0?["☺️",nick+"真的很可爱…"]:(
-     ["shinyu","youngjae","jihoon"].includes(crush)?["☺️没关系的 那种事不会再发生了","我一定会保护好你的"]:["☺️","嗯嗯知道了"]
-    );
-    incoming(crushApp,crushThread,crushRemark,lines,()=>{
-     if(branch==="3(1)")finishPart5();
-     else {const t=window.setTimeout(startPart5Ex,delay());timers.current.push(t);}
-    });return true;
+    const lines=choice===0?["☺️",nick+"真的很可爱…"]:(first?["☺️没关系的 那种事不会再发生了","我一定会保护好你的"]:["☺️","嗯嗯知道了"]);
+    incoming(crushApp,crushThread,crushRemark,lines,()=>{if(branch==="3(1)")finishPart5();else{const t=window.setTimeout(startPart5Ex,delay());timers.current.push(t);}});
+    return true;
    }
    return true;
   }
   if(s===19&&app===exApp&&thread===exThread){
-   if(part5Stage.current===4){part5Stage.current=5;prompt(exApp,exThread,"什么偷情 别乱说");return true;}
-   if(part5Stage.current===5){
-    onChoices([]);part5Stage.current=6;
-    incoming(exApp,exThread,exRemark,["不是偷情吗？","昨晚我们都那么卖力"],()=>{
-     const lines=["shinyu","jihoon"].includes(ex)?["啊 看来我还要更努力啊"]:["哦哦 难道说不是偷情的意思是我们已经复合了？"];
-     incoming(exApp,exThread,exRemark,lines,()=>{
-      if(["shinyu","jihoon"].includes(ex))finishPart5();
-      else prompt(exApp,exThread,"没有！！");
-     });
-    });return true;
-   }
-   if(part5Stage.current===6){if(!["shinyu","jihoon"].includes(ex))incoming(exApp,exThread,exRemark,["^ ^"],finishPart5);else finishPart5();return true;}
-   if(part5Stage.current===0){part5Stage.current=1;prompt(exApp,exThread,"……没有");return true;}
-   if(part5Stage.current===1){
-    part5Stage.current=2;
-    incoming(exApp,exThread,exRemark,["^ ^","偷情","好刺激"],()=>{onChoices(["什么啊 说得这么…","什么偷情 别乱说"]);part5Stage.current=3;});
+   if(part5Stage.current===10){
+    part5Stage.current=11;
+    incoming(exApp,exThread,exRemark,["^ ^","偷情","好刺激"],()=>{onChoices(["什么啊 说得这么…","什么偷情 别乱说"]);part5Stage.current=12;});
     return true;
    }
-   if(part5Stage.current===3){
+   if(part5Stage.current===12){
     onChoices([]);
     if(text==="什么啊 说得这么…"){
-     part5Stage.current=4;
-     incoming(exApp,exThread,exRemark,["嗯嗯","以后都要这样吗 我们","你什么时候和他断了？","我们复合吧"],()=>{onChoices(["不要","我看你挺享受偷情的"]);part5Stage.current=4;});
+     part5Stage.current=13;
+     incoming(exApp,exThread,exRemark,["嗯嗯","以后都要这样吗 我们","你什么时候和他断了？","我们复合吧"],()=>{onChoices(["不要","我看你挺享受偷情的"]);});
     }else{
-     part5Stage.current=5;
+     part5Stage.current=14;
      incoming(exApp,exThread,exRemark,["不是偷情吗？","昨晚我们都那么卖力"],()=>{
       const lines=["shinyu","jihoon"].includes(ex)?["啊 看来我还要更努力啊"]:["哦哦 难道说不是偷情的意思是我们已经复合了？"];
-      incoming(exApp,exThread,exRemark,lines,()=>{
-       if(["shinyu","jihoon"].includes(ex))finishPart5();
-       else prompt(exApp,exThread,"没有！！");
-      });
+      incoming(exApp,exThread,exRemark,lines,()=>{if(["shinyu","jihoon"].includes(ex))finishPart5();else prompt(exApp,exThread,"没有！！");});
      });
     }
     return true;
    }
-   if(part5Stage.current===4){
-    if(text==="不要"){onChoices([]);part5Stage.current=7;incoming(exApp,exThread,exRemark,["哦。"],finishPart5);return true;}
-    onChoices([]);part5Stage.current=7;
-    const lines=["shinyu","jihoon"].includes(ex)?["^ ^"]:ex==="hanjin"?["^ ^","明明是我先来的……"]:["^ ^","那我以后会更努力坐稳小三位置的"];
-    incoming(exApp,exThread,exRemark,lines,finishPart5);return true;
+   if(part5Stage.current===13){
+    onChoices([]);
+    if(text==="不要"){incoming(exApp,exThread,exRemark,["哦。"],finishPart5);}
+    else{
+     const lines=["shinyu","jihoon"].includes(ex)?["^ ^"]:ex==="hanjin"?["^ ^","明明是我先来的……"]:["^ ^","那我以后会更努力坐稳小三位置的"];
+     incoming(exApp,exThread,exRemark,lines,finishPart5);
+    }
+    part5Stage.current=15;return true;
+   }
+   if(part5Stage.current===14){
+    if(!["shinyu","jihoon"].includes(ex))incoming(exApp,exThread,exRemark,["^ ^"],finishPart5);else finishPart5();
+    part5Stage.current=15;return true;
    }
    return true;
   }
