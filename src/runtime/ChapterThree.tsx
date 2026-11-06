@@ -40,7 +40,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
   if(done.current||step!==0)return;
   setStep(1);
   const post:Item={id:"chapter3-tws-comeback-d2",title:"TWS",body:"[#TWS]  COMING SOON 🔥\nD-2\n再过两天就能见到42了\n准备好了吗？💙\n#TWS #투어스 #COMEBACK",richText:"",meta:{handle:"TWS_PLEDIS",likesDisplay:"9920",reposts:"5000",views:"20万"},time:"10:00",sender:"TWS",avatar:import.meta.env.BASE_URL+"people/tws-youtube.png",kind:"post",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:false,read:false,likes:9920,comments:[]};
-  const t=window.setTimeout(()=>onXNotification(post),1000);timers.current.push(t);
+  const t=window.setTimeout(()=>{onXPost(post);onXNotification(post);},1000);timers.current.push(t);
  };
  useEffect(()=>{
   const onCalendar=()=>start();
@@ -55,7 +55,11 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
    if(step===6&&d.app==="wechat"&&d.thread===sellerThread){send("wechat",sellerThread,text,()=>{if(index.current===9){index.current++;incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["接的接的","TWS 人歌预录代申\n申请时间：16:40\n下单格式：\n邮箱：\n密码：\n姓名：\n出生年月日：\n手机号码：","宝宝按这个格式下单！"],()=>setPrompt("wechat",sellerThread,"TWS 人歌预录代申\n申请时间：16:40\n下单格式：\n邮箱："+nickEnglish+"@mail.com\n密码："+nickEnglish+birthday.slice(-4)+"\n姓名："+nickEnglish+"\n出生年月日："+birthday+"\n手机号码："+phone));}else if(index.current===10){index.current++;incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["好的收到！","宝宝记得关闭限制海外登录哦"],()=>setPrompt("wechat",sellerThread,"好的👌"));}else{done.current=true;const t=window.setTimeout(onFinish,2000);timers.current.push(t);}});return;}
   };
   const onGroupOpen=(e:Event)=>{const d=(e as CustomEvent).detail||{};if(d.app==="wechat"&&d.thread===groupThread&&step===4){setStep(5);setPrompt("wechat",friendThread,"预录代申怎么这么贵");}};
-  const onThread=(e:Event)=>{const d=(e as CustomEvent).detail||{};if(d.app==="wechat"&&d.thread===friendThread&&step===4){setStep(5);setPrompt("wechat",friendThread,"预录代申怎么这么贵");}if(d.app==="wechat"&&d.thread===sellerThread&&step===5){index.current=9;setStep(6);setPrompt("wechat",sellerThread,"宝宝 tws代申还接吗");}};
+  const onThread=(e:Event)=>{const d=(e as CustomEvent).detail||{};
+   if(d.app==="wechat"&&d.thread===groupThread&&step===4){window.sessionStorage.setItem("chapter3.groupViewed:"+work.id,"1");return;}
+   if(d.app==="wechat"&&d.thread===friendThread&&step===4&&window.sessionStorage.getItem("chapter3.groupViewed:"+work.id)==="1"){setStep(5);setPrompt("wechat",friendThread,"预录代申怎么这么贵");return;}
+   if(d.app==="wechat"&&d.thread===sellerThread&&step===5){index.current=9;setStep(6);setPrompt("wechat",sellerThread,"宝宝 tws代申还接吗");}
+  };
   window.addEventListener("foundphone-chapter3-calendar-open",onCalendar);
   window.addEventListener("foundphone-open-dispatch",onXOpen);
   window.addEventListener("foundphone-story-send",onSend);
