@@ -11,7 +11,7 @@ const P=(text:string):ExAction=>({type:"prompt",text});
 const IMG=(path:string):ExAction=>({type:"image",path});
 const END:ExAction={type:"end"};
 
-export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onXNotification,onPrompt,onFinish}:{work:Work;onNativeItem:(app:string,item:Item)=>void;onNativeNotification:(app:string,thread:string,item:Item)=>void;onXPost:(item:Item)=>void;onXNotification:(item:Item)=>void;onPrompt:(app:string,thread:string,text:string,token:number)=>void;onFinish:()=>void}){
+export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onXNotification,onPrompt,onChoices,onFinish}:{work:Work;onNativeItem:(app:string,item:Item)=>void;onNativeNotification:(app:string,thread:string,item:Item)=>void;onXPost:(item:Item)=>void;onXNotification:(item:Item)=>void;onPrompt:(app:string,thread:string,text:string,token:number)=>void;onChoices:(choices:string[])=>void;onFinish:()=>void}){
  const crush=String(work.variables.storyCrush||"shinyu");
  const crushName=memberNames[crush]||crush;
  const crushApp=crush==="hanjin"?"wechat":"kakao";
@@ -36,6 +36,9 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
  const chapterTwoEnding=(()=>{try{return Number(JSON.parse(localStorage.getItem("foundphone.chapter2.ending:"+work.id)||"{}").ending||1);}catch{return 1;}})();
  const branch=chapterTwoEnding===2?"3(2)":"3(1)";
  const [,setStep]=useState(0);
+ const [endingVisible,setEndingVisible]=useState(false);
+ const part5Stage=useRef(0);
+ const part5Choice=useRef(-1);
  const stepRef=useRef(0);
  const tokenRef=useRef(7300);
  const timers=useRef<number[]>([]);
@@ -83,7 +86,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
   if(!part4Active.current||done.current)return;
   const a=part4Actions.current[part4Cursor.current];
   if(!a){
-   const t=window.setTimeout(()=>{done.current=true;window.dispatchEvent(new CustomEvent("foundphone-chapter3-part5-ready",{detail:{branch}}));onFinish();},1000);timers.current.push(t);return;
+   const t=window.setTimeout(()=>startPart5(),1000);timers.current.push(t);return;
   }
   if(a.type==="in"){
    part4Cursor.current++;
@@ -262,7 +265,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
      }else if(next?.type==="prompt"){
       if(next.thread===d.thread){part4Waiting.current=true;prompt("wechat",next.thread,next.text||"");}
       else {part4Waiting.current=true;}
-     }else runPart4();
+     }else advancePart4();
     }
     return;
    }
@@ -303,6 +306,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
     return;
    }
 
+   if(onPart5Send(s,d.app,d.thread,text))return;
    if(s===16&&d.app==="wechat"&&d.thread===buddyThread){
     send("wechat",buddyThread,text,()=>{go(161);incoming("wechat",buddyThread,"搭子",["好！"],()=>{window.dispatchEvent(new CustomEvent("foundphone-chapter3-blackout"));},{time:"06:22"});},{time:"06:22"});
     return;
@@ -319,7 +323,88 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
    if(s===12&&d.app===exApp&&d.thread===exThread){item(exApp,exThread,"我",text,true,{time:"19:29",meta:{story:"chapter3",handle:memberHandles[ex]||"",remark:exRemark}});runEx();return;}
   };
 
-  const onPhoneUnlocked=()=>{
+ 
+ const finishPart5=()=>{
+  done.current=true;onChoices([]);setEndingVisible(true);
+ };
+ const startPart5=()=>{
+  part5Stage.current=0;part5Choice.current=-1;go(18);
+  incoming(crushApp,crushThread,crushRemark,["今天见到你了","好高兴"],()=>prompt(crushApp,crushThread,"ㅋㅋㅋㅋ"));
+ };
+ const startPart5Ex=()=>{
+  go(19);
+  incoming(exApp,exThread,exRemark,["今天我们一直在对视吧？",crushName+"没有发现吗？"],()=>prompt(exApp,exThread,"……没有"));
+ };
+ const onPart5Send=(s:number,app:string,thread:string,text:string)=>{
+  if(s===18&&app===crushApp&&thread===crushThread){
+   if(part5Stage.current===0){part5Stage.current=1;prompt(crushApp,crushThread,"你今天一直看我 我都有点紧张了");return true;}
+   if(part5Stage.current===1){
+    part5Stage.current=2;
+    incoming(crushApp,crushThread,crushRemark,["是因为什么紧张","怕被人看出来吗？"],()=>{
+     if(["shinyu","youngjae","jihoon"].includes(crush))incoming(crushApp,crushThread,crushRemark,["不要害怕^ ^"],()=>{onChoices(["其实 是被你看着所以紧张…","嗯嗯……"]);part5Stage.current=3;});
+     else incoming(crushApp,crushThread,crushRemark,["还是因为我们一直对视？"],()=>{onChoices(["喂…","才没有！"]);part5Stage.current=3;});
+    });return true;
+   }
+   if(part5Stage.current===3){
+    onChoices([]);part5Choice.current=(["shinyu","youngjae","jihoon"].includes(crush)?["其实 是被你看着所以紧张…","嗯嗯……"]:["喂…","才没有！"]).indexOf(text);
+    part5Stage.current=4;
+    const lines=part5Choice.current===0?["☺️",nick+"真的很可爱…"]:(
+     ["shinyu","youngjae","jihoon"].includes(crush)?["☺️没关系的 那种事不会再发生了","我一定会保护好你的"]:["☺️","嗯嗯知道了"]
+    );
+    incoming(crushApp,crushThread,crushRemark,lines,()=>{
+     if(branch==="3(1)")finishPart5();
+     else {const t=window.setTimeout(startPart5Ex,delay());timers.current.push(t);}
+    });return true;
+   }
+   return true;
+  }
+  if(s===19&&app===exApp&&thread===exThread){
+   if(part5Stage.current===4){part5Stage.current=5;prompt(exApp,exThread,"什么偷情 别乱说");return true;}
+   if(part5Stage.current===5){
+    onChoices([]);part5Stage.current=6;
+    incoming(exApp,exThread,exRemark,["不是偷情吗？","昨晚我们都那么卖力"],()=>{
+     const lines=["shinyu","jihoon"].includes(ex)?["啊 看来我还要更努力啊"]:["哦哦 难道说不是偷情的意思是我们已经复合了？"];
+     incoming(exApp,exThread,exRemark,lines,()=>{
+      if(["shinyu","jihoon"].includes(ex))finishPart5();
+      else prompt(exApp,exThread,"没有！！");
+     });
+    });return true;
+   }
+   if(part5Stage.current===6){if(!["shinyu","jihoon"].includes(ex))incoming(exApp,exThread,exRemark,["^ ^"],finishPart5);else finishPart5();return true;}
+   if(part5Stage.current===0){part5Stage.current=1;prompt(exApp,exThread,"……没有");return true;}
+   if(part5Stage.current===1){
+    part5Stage.current=2;
+    incoming(exApp,exThread,exRemark,["^ ^","偷情","好刺激"],()=>{onChoices(["什么啊 说得这么…","什么偷情 别乱说"]);part5Stage.current=3;});
+    return true;
+   }
+   if(part5Stage.current===3){
+    onChoices([]);
+    if(text==="什么啊 说得这么…"){
+     part5Stage.current=4;
+     incoming(exApp,exThread,exRemark,["嗯嗯","以后都要这样吗 我们","你什么时候和他断了？","我们复合吧"],()=>{onChoices(["不要","我看你挺享受偷情的"]);part5Stage.current=4;});
+    }else{
+     part5Stage.current=5;
+     incoming(exApp,exThread,exRemark,["不是偷情吗？","昨晚我们都那么卖力"],()=>{
+      const lines=["shinyu","jihoon"].includes(ex)?["啊 看来我还要更努力啊"]:["哦哦 难道说不是偷情的意思是我们已经复合了？"];
+      incoming(exApp,exThread,exRemark,lines,()=>{
+       if(["shinyu","jihoon"].includes(ex))finishPart5();
+       else prompt(exApp,exThread,"没有！！");
+      });
+     });
+    }
+    return true;
+   }
+   if(part5Stage.current===4){
+    if(text==="不要"){onChoices([]);part5Stage.current=7;incoming(exApp,exThread,exRemark,["哦。"],finishPart5);return true;}
+    onChoices([]);part5Stage.current=7;
+    const lines=["shinyu","jihoon"].includes(ex)?["^ ^"]:ex==="hanjin"?["^ ^","明明是我先来的……"]:["^ ^","那我以后会更努力坐稳小三位置的"];
+    incoming(exApp,exThread,exRemark,lines,finishPart5);return true;
+   }
+   return true;
+  }
+  return false;
+ };
+ const onPhoneUnlocked=()=>{
    if(stepRef.current===161&&part4Active.current){
     const t=window.setTimeout(()=>{go(17);incoming("wechat",buddyThread,"搭子",["你回家路上注意安全！"],()=>{part4Cursor.current=0;part4Waiting.current=true;const a=part4Actions.current[0];if(a?.type==="prompt"&&a.thread===buddyThread)prompt("wechat",buddyThread,a.text||"");},{time:"09:47"});},1000);
     timers.current.push(t);
@@ -364,5 +449,12 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
   function onGroupOpen(e:Event){const d=(e as CustomEvent).detail||{};if(d.app==="wechat"&&d.thread===groupThread&&stepRef.current===4)groupViewed.current=true;}
   return()=>{window.removeEventListener("foundphone-phone-unlocked",onPhoneUnlocked);window.removeEventListener("foundphone-chapter3-calendar-open",onCalendar);window.removeEventListener("foundphone-open-dispatch",onXOpen);window.removeEventListener("foundphone-story-send",onSend);window.removeEventListener("foundphone-chapter2-thread-open",onThread);window.removeEventListener("foundphone-chapter3-group-open",onGroupOpen);window.removeEventListener("foundphone-story-transfer",onTransfer);window.removeEventListener("foundphone-story-transfer-claim",onTransferClaim);timers.current.forEach(clearTimeout);};
  },[]);
- return null;
+ return endingVisible?(
+  <div style={{position:"absolute",inset:0,zIndex:140,background:"rgba(0,0,0,.42)",display:"grid",placeItems:"center",padding:24}}>
+   <section style={{background:"#fff",borderRadius:20,padding:24,textAlign:"center",width:"100%",maxWidth:310,color:"#19191d"}}>
+    <h2>剧情已结束</h2><p>请探索手机吧</p>
+    <button onClick={()=>{setEndingVisible(false);onFinish();}} style={{border:0,background:"#171717",color:"#fff",borderRadius:12,padding:"12px 24px",marginTop:16}}>确定</button>
+   </section>
+  </div>
+ ):null;
 }
