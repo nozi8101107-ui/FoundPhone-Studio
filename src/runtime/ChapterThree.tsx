@@ -381,7 +381,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
     onChoices([]);
     if(text==="不要"){incoming(exApp,exThread,exRemark,["哦。"],finishPart5);}
     else{
-     const lines=["shinyu","jihoon"].includes(ex)?["^ ^"]:ex==="hanjin"?["^ ^","明明是我先来的……"]:["^ ^","那我以后会更努力坐稳小三位置的"];
+     const lines=["shinyu","jihoon"].includes(ex)?[]:ex==="hanjin"?["明明是我先来的……"]:["那我以后会更努力坐稳小三位置的"];
      incoming(exApp,exThread,exRemark,lines,finishPart5);
     }
     part5Stage.current=15;return true;
