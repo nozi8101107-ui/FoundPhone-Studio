@@ -471,10 +471,11 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
  },[]);
  return endingVisible?(
   <div style={{position:"absolute",inset:0,zIndex:140,background:"rgba(0,0,0,.42)",display:"grid",placeItems:"center",padding:24}}>
-   <section style={{background:"#fff",borderRadius:20,padding:24,textAlign:"center",width:"100%",maxWidth:310,color:"#19191d"}}>
-    <h2>剧情已结束</h2><p>请探索手机吧</p>
-    <button onClick={()=>{publishPart5SocialPosts();setEndingVisible(false);onFinish();}} style={{border:0,background:"#171717",color:"#fff",borderRadius:12,padding:"12px 24px",marginTop:16}}>确定</button>
-   </section>
+      <section style={{background:"#fff",borderRadius:20,padding:24,textAlign:"center",width:"100%",maxWidth:310,color:"#19191d"}}>
+        <h2>剧情3已结束</h2>
+        <p>可以自由探索手机啦！</p>
+        <button onClick={()=>{publishPart5SocialPosts();setEndingVisible(false);onFinish();}} style={{border:0,background:"#171717",color:"#fff",borderRadius:12,padding:"12px 24px",marginTop:16}}>确定</button>
+      </section>
   </div>
  ):null;
 }
