@@ -417,14 +417,14 @@ export function NotesSkin(p: Props) {
   );
 }
 export function CalendarSkin(p: Props) {
-  const phoneDate = /^\\d{4}-\\d{2}-\\d{2}$/.test(p.virtualDate || "")
+  const phoneDate = /^\d{4}-\\d{2}-\\d{2}$/.test(p.virtualDate || "")
     ? new Date((p.virtualDate as string) + "T12:00:00")
     : new Date();
   const [month, setMonth] = useState(phoneDate.getMonth()),
     [year, setYear] = useState(phoneDate.getFullYear()),
     [day, setDay] = useState(phoneDate.getDate());
   useEffect(() => {
-    const next = /^\\d{4}-\\d{2}-\\d{2}$/.test(p.virtualDate || "")
+    const next = /^\d{4}-\\d{2}-\\d{2}$/.test(p.virtualDate || "")
       ? new Date((p.virtualDate as string) + "T12:00:00")
       : new Date();
     setMonth(next.getMonth());
