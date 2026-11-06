@@ -162,7 +162,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
   const onTransfer=(e:Event)=>{
    const d=(e as CustomEvent).detail||{};if(d.thread!==sellerThread||stepRef.current!==9||blacklisted.current)return;
    const amount=Math.max(0,Math.round((Number(d.amount)||0)*100)/100);if(!amount)return;
-   transferAttempts.current++;transferTotal.current+=amount;
+   transferAttempts.current++;transferTotal.current=Math.round((transferTotal.current+amount)*100)/100;
    const outgoing=item("wechat",sellerThread,"我",String(amount),true,{kind:"transfer",meta:{story:"chapter3",transferAmount:String(amount),transferStatus:"sent",remark:"我"}});
    void outgoing;
    if(transferTotal.current===800){
