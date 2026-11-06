@@ -59,6 +59,26 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
   let n=0;const run=()=>{if(n>=lines.length){doneFn();return;}const t=window.setTimeout(()=>{const it=item(app,thread,sender,lines[n++],false,extra);onNativeNotification(app,thread,it);run();},delay());timers.current.push(t);};run();
  };
  const send=(app:string,thread:string,text:string,next:()=>void,extra:Partial<Item>={})=>{item(app,thread,"我",text,true,extra);next();};
+ const crushImage=crush==="hanjin"?"wx/IMG_0152.jpeg":({
+  shinyu:"kkt/IMG_0140.jpeg",
+  dohoon:"kkt/weverse_20261106200813_1675918858.jpeg",
+  youngjae:"kkt/IMG_0144.jpeg",
+  jihoon:"kkt/weverse_20261106202005_3242968375.jpeg",
+  kyungmin:"kkt/weverse_20261106202448_2704130200.jpeg"
+ } as Record<string,string>)[crush]||"kkt/IMG_0140.jpeg";
+ const sendPart3Image=(app:string,thread:string,sender:string,path:string,time="06:14")=>{
+  const it=item(app,thread,sender,"",false,{time,kind:"image",media:"/"+path,meta:{story:"chapter3",handle:app==="wechat"?"":memberHandles[crush]||"",remark:sender}});
+  onNativeNotification(app,thread,it);
+ };
+ const finishPart3=(which:string)=>{
+  done.current=true;
+  window.dispatchEvent(new CustomEvent("foundphone-chapter3-part4-ready",{detail:{branch:which}}));
+  onFinish();
+ };
+ const startPart3=()=>{
+  done.current=false;go(13);index.current=0;
+  incoming("wechat",buddyThread,"搭子",["宝宝你快到了吗","还有15分钟就要check了"],()=>prompt("wechat",buddyThread,"快啦快啦 我在车上 还有八分钟左右吧"),{time:"06:14"});
+ };
  const start=()=>{
   if(done.current||stepRef.current!==0)return;
   try{localStorage.setItem("foundphone.chapter3.branch:"+work.id,branch);}catch{}
@@ -93,7 +113,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
   const action=exFlow.current[exCursor.current++];
   if(!action)return;
   if(action.type==="prompt"){prompt(exApp,exThread,action.text);return;}
-  if(action.type==="end"){done.current=true;window.dispatchEvent(new CustomEvent("foundphone-chapter3-part3-ready",{detail:{branch:"3(2)"}}));onFinish();return;}
+  if(action.type==="end"){startPart3();return;}
   exRunning.current=true;
   const t=window.setTimeout(()=>{
    if(action.type==="in"){
@@ -153,7 +173,44 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
     if(blacklisted.current){item("wechat",sellerThread,"我",text,true,{meta:{story:"chapter3",blocked:"true",remark:"我"}});return;}
    }
    if(s===10&&d.app==="wechat"&&d.thread===buddyThread){
-    send("wechat",buddyThread,text,()=>{if(index.current===0){index.current++;incoming("wechat",buddyThread,"搭子",["我也中了！！！啊啊啊啊","你是多少号","我这次号很小"],()=>prompt("wechat",buddyThread,"我也挺小的！我39号"));}else if(index.current===1){index.current++;incoming("wechat",buddyThread,"搭子",["？？？？？wtf","我40号啊"],()=>prompt("wechat",buddyThread,"这也太巧了吧"));}else if(index.current===2){index.current++;prompt("wechat",buddyThread,"那我们到时候见");}else{index.current=0;incoming("wechat",buddyThread,"搭子",["嗯嗯！"],()=>{if(branch==="3(1)"){done.current=true;window.dispatchEvent(new CustomEvent("foundphone-chapter3-part3-ready",{detail:{branch:"3(1)"}}));onFinish();}else{go(11);const t=window.setTimeout(()=>startEx(),delay());timers.current.push(t);}});}});
+    send("wechat",buddyThread,text,()=>{if(index.current===0){index.current++;incoming("wechat",buddyThread,"搭子",["我也中了！！！啊啊啊啊","你是多少号","我这次号很小"],()=>prompt("wechat",buddyThread,"我也挺小的！我39号"));}else if(index.current===1){index.current++;incoming("wechat",buddyThread,"搭子",["？？？？？wtf","我40号啊"],()=>prompt("wechat",buddyThread,"这也太巧了吧"));}else if(index.current===2){index.current++;prompt("wechat",buddyThread,"那我们到时候见");}else{index.current=0;incoming("wechat",buddyThread,"搭子",["嗯嗯！"],()=>{if(branch==="3(1)"){startPart3();}else{go(11);const t=window.setTimeout(()=>startEx(),delay());timers.current.push(t);}});}});
+    return;
+   }
+
+   if(s===13&&d.app==="wechat"&&d.thread===buddyThread){
+    send("wechat",buddyThread,text,()=>{go(131);incoming("wechat",buddyThread,"搭子",["嗯嗯好"],()=>{const t=window.setTimeout(()=>{go(14);sendPart3Image(crushApp,crushThread,crushRemark,crushImage);incoming(crushApp,crushThread,crushRemark,["醒了吗","刚做完妆造 在路上","今天第一天打歌"],()=>prompt(crushApp,crushThread,"醒啦！"),{time:"06:14"});},1000);timers.current.push(t);},{time:"06:14"});});
+    return;
+   }
+   if(s===14&&d.app===crushApp&&d.thread===crushThread){
+    send(crushApp,crushThread,text,()=>{
+     if(index.current===0){index.current++;incoming(crushApp,crushThread,crushRemark,["醒得好早"],()=>prompt(crushApp,crushThread,"对呀"),{time:"06:14"});}
+     else if(index.current===1){index.current++;prompt(crushApp,crushThread,"你猜猜是为什么");}
+     else if(index.current===2){index.current++;incoming(crushApp,crushThread,crushRemark,["答对有奖励吗"],()=>prompt(crushApp,crushThread,"你先猜猜^ ^"),{time:"06:14"});}
+     else if(index.current===3){index.current++;incoming(crushApp,crushThread,crushRemark,["难道你今天要来看打歌？"],()=>prompt(crushApp,crushThread,"bingo！猜对了"),{time:"06:14"});}
+     else if(index.current===4){index.current++;prompt(crushApp,crushThread,"奖励是今天可以见面");}
+     else if(index.current===5){index.current++;prompt(crushApp,crushThread,"我是39号 应该站在第二排 记得找我噢");}
+     else{
+      index.current=0;
+      incoming(crushApp,crushThread,crushRemark,["ㅋㅋㅋ好"],()=>{
+       if(branch==="3(1)")finishPart3("3(1)");
+       else{const t=window.setTimeout(()=>{go(15);incoming(exApp,exThread,exRemark,["刚刚"+crushName+"给你发消息了是不是？"],()=>prompt(exApp,exThread,"？你怎么知道"),{time:"06:14"});},1000);timers.current.push(t);}
+      },{time:"06:14"});
+     }
+    },{time:"06:14"});
+    return;
+   }
+   if(s===15&&d.app===exApp&&d.thread===exThread){
+    send(exApp,exThread,text,()=>{
+     if(index.current===0){index.current++;incoming(exApp,exThread,exRemark,["我和他坐在一辆车上啊^ ^"],()=>prompt(exApp,exThread,"……"),{time:"06:14"});}
+     else if(index.current===1){index.current++;incoming(exApp,exThread,exRemark,["昨天晚上我们折腾到那么晚","你今天还能起这么早来看打歌？"],()=>prompt(exApp,exThread,"你也很厉害 还能上去唱跳rap呢^ ^"),{time:"06:14"});}
+     else if(index.current===2){
+      index.current++;
+      sendPart3Image(exApp,exThread,exRemark,crushImage);
+      incoming(exApp,exThread,exRemark,["他给你发自拍了吧",(["shinyu","youngjae","jihoon"].includes(ex)?"我怎么样":"我们谁更帅一点？")],()=>prompt(exApp,exThread,"……无聊"),{time:"06:14"});
+     }
+     else if(index.current===3){index.current++;incoming(exApp,exThread,exRemark,["你今天多少号 靠前吗？"],()=>prompt(exApp,exThread,"我是39号 大概在第二排吧"),{time:"06:14"});}
+     else{index.current=0;incoming(exApp,exThread,exRemark,["ok"],()=>finishPart3("3(2)"),{time:"06:14"});}
+    },{time:"06:14"});
     return;
    }
    if(s===12&&d.app===exApp&&d.thread===exThread){item(exApp,exThread,"我",text,true,{time:"19:29",meta:{story:"chapter3",handle:memberHandles[ex]||"",remark:exRemark}});runEx();return;}
