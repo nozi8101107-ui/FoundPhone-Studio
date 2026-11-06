@@ -78,32 +78,22 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
  const part4Cursor=useRef(0);
  const part4Waiting=useRef(false);
  const part4Active=useRef(false);
- const runPart4=()=>{
-  if(!part4Active.current||part4Waiting.current)return;
-  const action=part4Actions.current[part4Cursor.current];
-  if(!action){
+ const advancePart4=()=>{
+  if(!part4Active.current||done.current)return;
+  const a=part4Actions.current[part4Cursor.current];
+  if(!a){
    done.current=true;
    window.dispatchEvent(new CustomEvent("foundphone-chapter3-part5-ready",{detail:{branch}}));
-   onFinish();
-   return;
+   onFinish();return;
   }
-  if(action.type==="in"){
+  if(a.type==="in"){
    part4Cursor.current++;
-   incoming("wechat",action.thread,action.thread==="搭子"?"搭子":"闺蜜",action.lines||[],()=>runPart4(),{time:action.time});
-  }else{
-   part4Waiting.current=true;
-   // The prompt is surfaced only after the player opens the corresponding conversation.
-  }
+   incoming("wechat",a.thread,a.thread==="搭子"?"搭子":"闺蜜",a.lines||[],()=>{part4Waiting.current=true;const next=part4Actions.current[part4Cursor.current];if(next?.type==="prompt"&&next.thread===a.thread)prompt("wechat",next.thread,next.text||"");},{time:a.time});
+  }else part4Waiting.current=true;
  };
  const startPart4=(which:string)=>{
   done.current=false;part4Active.current=true;part4Waiting.current=false;part4Cursor.current=0;
-  const common=[
-   {type:"in" as const,thread:"搭子",lines:["宝宝你到了吗","马上要check了","这边在排队了！"],time:"06:22"},
-   {type:"prompt" as const,thread:"搭子",text:"到了到了！我看到你了",time:"06:22"},
-   {type:"in" as const,thread:"搭子",lines:["好！"],time:"06:22"},
-  ];
   const branchOne=[
-   {type:"in" as const,thread:"搭子",lines:["你回家路上注意安全！"],time:"09:47"},
    {type:"prompt" as const,thread:"搭子",text:"好！你也是！",time:"09:47"},
    {type:"in" as const,thread:"搭子",lines:["哎呀 今天好激动呀",crushName+"今天也一直在给你饭撒耶","逆应援也好好吃！！"],time:"09:47"},
    {type:"prompt" as const,thread:"搭子",text:"对呀对呀 好幸运呀",time:"09:47"},
@@ -123,7 +113,6 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
    {type:"in" as const,thread:"闺蜜",lines:["哈哈哈哈哈哈哈没事","其实告诉她了她受到的伤害会更大吧！",nick+"大胆飞 诡秘永相随。"],time:"09:50"}
   ];
   const branchTwo=[
-   {type:"in" as const,thread:"搭子",lines:["你回家路上注意安全！"],time:"09:47"},
    {type:"prompt" as const,thread:"搭子",text:"好！你也是！",time:"09:47"},
    {type:"in" as const,thread:"搭子",lines:["哎呀 今天好激动呀",exName+"今天往这边看了好几眼！","他是不是看到我手上写的字啦","我真的要粉他一辈子了……","他真的好宠粉呜呜我保证他是天使","还有"+crushName+"今天也一直在给你饭撒耶"],time:"09:47"},
    {type:"prompt" as const,thread:"搭子",text:"对呀对呀 好幸运呀",time:"09:47"},
@@ -149,11 +138,9 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
    {type:"prompt" as const,thread:"闺蜜",text:"可我只是一个被两个漂亮男人迷惑的可怜女人",time:"09:50"},
    {type:"in" as const,thread:"闺蜜",lines:["……没事诡秘你大胆去做吧",nick+"大胆飞 诡秘永相随。"],time:"09:50"}
   ];
-  part4Actions.current=[...common,...(which==="3(1)"?branchOne:branchTwo)];
+  part4Actions.current=which==="3(1)"?branchOne:branchTwo;
   go(16);index.current=0;
-  incoming("wechat",buddyThread,"搭子",["宝宝你到了吗","马上要check了","这边在排队了！"],()=>{
-   part4Waiting.current=true;
-  },{time:"06:22"});
+  incoming("wechat",buddyThread,"搭子",["宝宝你到了吗","马上要check了","这边在排队了！"],()=>{part4Waiting.current=true;},{time:"06:22"});
  };
  const startPart3=()=>{
   done.current=false;go(13);index.current=0;
@@ -219,9 +206,10 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
    if(d.app==="wechat"&&d.thread===buddyThread&&stepRef.current===7){prompt("wechat",buddyThread,"去的去的");return;}
    if(d.app==="wechat"&&d.thread===sellerThread&&stepRef.current===8){prompt("wechat",sellerThread,"omg！");return;}
    if(d.app==="wechat"&&d.thread===buddyThread&&stepRef.current===10){prompt("wechat",buddyThread,"我中了！！！");return;}
+   if(stepRef.current===16&&d.app==="wechat"&&d.thread===buddyThread&&part4Waiting.current){prompt("wechat",buddyThread,"到了到了！我看到你了");return;}
    if(part4Active.current&&part4Waiting.current){
     const a=part4Actions.current[part4Cursor.current];
-    if(a?.type==="prompt"&&a.thread===d.thread){prompt("wechat",d.thread,a.text||"");}
+    if(a?.type==="prompt"&&a.thread===d.thread){part4Waiting.current=false;prompt("wechat",d.thread,a.text||"");}
    }
    
   };
@@ -316,25 +304,24 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
    }
 
    if(s===16&&d.app==="wechat"&&d.thread===buddyThread){
-    if(part4Cursor.current===1){
-     send("wechat",buddyThread,text,()=>{part4Cursor.current++;incoming("wechat",buddyThread,["好！"][0],["好！"],()=>{window.dispatchEvent(new CustomEvent("foundphone-chapter3-blackout"));go(161);},{time:"06:22"});},{time:"06:22"});
-    }
+    send("wechat",buddyThread,text,()=>{go(161);incoming("wechat",buddyThread,"搭子",["好！"],()=>{window.dispatchEvent(new CustomEvent("foundphone-chapter3-blackout"));},{time:"06:22"});},{time:"06:22"});
     return;
    }
-   if((s===17||s===18)&&d.app==="wechat"&&d.thread===buddyThread&&part4Waiting.current){
+   if(part4Active.current&&s>=17&&d.app==="wechat"&&(d.thread===buddyThread||d.thread===friendThread)){
     const a=part4Actions.current[part4Cursor.current];
-    if(a?.type==="prompt"&&a.thread===buddyThread){part4Waiting.current=false;prompt("wechat",buddyThread,a.text||"");}
-   }
-   if(s===19&&d.app==="wechat"&&d.thread===friendThread&&part4Waiting.current){
-    const a=part4Actions.current[part4Cursor.current];
-    if(a?.type==="prompt"&&a.thread===friendThread){part4Waiting.current=false;prompt("wechat",friendThread,a.text||"");}
+    if(a?.type==="prompt"&&a.thread===d.thread){
+     item("wechat",d.thread,"我",text,true,{time:a.time,meta:{story:"chapter3",remark:"我"}});
+     part4Cursor.current++;part4Waiting.current=false;
+     advancePart4();
+    }
+    return;
    }
    if(s===12&&d.app===exApp&&d.thread===exThread){item(exApp,exThread,"我",text,true,{time:"19:29",meta:{story:"chapter3",handle:memberHandles[ex]||"",remark:exRemark}});runEx();return;}
   };
 
   const onPhoneUnlocked=()=>{
    if(stepRef.current===161&&part4Active.current){
-    const t=window.setTimeout(()=>{go(17);part4Cursor.current=3;part4Waiting.current=true;incoming("wechat",buddyThread,"搭子",["你回家路上注意安全！"],()=>{part4Waiting.current=true;const a=part4Actions.current[part4Cursor.current];if(a?.type==="prompt"&&a.thread===buddyThread)prompt("wechat",buddyThread,a.text||"");},{time:"09:47"});},1000);
+    const t=window.setTimeout(()=>{go(17);incoming("wechat",buddyThread,"搭子",["你回家路上注意安全！"],()=>{part4Cursor.current=0;part4Waiting.current=true;const a=part4Actions.current[0];if(a?.type==="prompt"&&a.thread===buddyThread)prompt("wechat",buddyThread,a.text||"");},{time:"09:47"});},1000);
     timers.current.push(t);
    }
   };
