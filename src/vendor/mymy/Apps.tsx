@@ -759,7 +759,8 @@ export function MymyX(p: SkinProps) {
           />
         )}
         <div className="kzxfd">
-          {p.items
+          {[...p.items]
+            .sort((a, b) => Number(b.id === "chapter3-tws-comeback-d2") - Number(a.id === "chapter3-tws-comeback-d2"))
             .filter((i) => (i.title + i.body).includes(query))
             .map((i) => (
               <article className="kzxt" key={i.id}>
