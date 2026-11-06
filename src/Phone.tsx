@@ -186,16 +186,8 @@ function PhoneRuntime({
     try {
       const saved = localStorage.getItem(chapterThreeComebackDateKey);
       if (saved && /^\d{4}-\d{2}-\d{2}$/.test(saved)) return saved;
-      if (chapterTwoDone || chapterThreeDone) {
-        const baseDate = /^\d{4}-\d{2}-\d{2}$/.test(work.phone.date || "")
-          ? new Date((work.phone.date as string) + "T12:00:00")
-          : new Date();
-        const target = new Date(baseDate);
-        target.setDate(target.getDate() + 2);
-        const value = `${target.getFullYear()}-${String(target.getMonth()+1).padStart(2,"0")}-${String(target.getDate()).padStart(2,"0")}`;
-        localStorage.setItem(chapterThreeComebackDateKey, value);
-        return value;
-      }
+      // Do not derive the comeback date from the static work template or the real system clock.
+      // It is calculated only when the calendar opens, from the live virtual phone date.
     } catch {}
     return "";
   });
