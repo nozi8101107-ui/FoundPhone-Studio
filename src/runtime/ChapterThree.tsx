@@ -32,8 +32,19 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
  const crushBirthday=String(work.variables["storyCrushBirthday"]||work.variables["storyCrushBirth"]||memberBirthdays[crush]||"2003-11-07").replace(/[^0-9]/g,"").padEnd(8,"0").slice(0,8);
  const nickEnglish=String(work.variables.storyNicknameEnglish||nick).toLowerCase().replace(/[^a-z0-9]/g,"")||"user";
  const phone="010"+birthday.slice(-4)+crushBirthday.slice(-4);
- const friendThread="闺蜜", buddyThread="搭子", groupThread="🍂的预录打歌群2群", sellerThread="票务 🍂打歌🎫代申";
- const chapterTwoEnding=(()=>{try{return Number(JSON.parse(localStorage.getItem("foundphone.chapter2.v1:"+work.id+":"+String(work.variables.storyNickname||""))||"{}").ending||1);}catch{return 1;}})();
+ const friendThread="闺蜜", buddyThread="搭子";
+ const groupDisplayName="🍂的预录打歌2群";
+ const groupSeed=(work.data.wechat||[]).find(i=>i.title===groupDisplayName||i.meta?.remark===groupDisplayName||i.sender===groupDisplayName);
+ const groupThread=groupSeed?.title||groupDisplayName;
+ const sellerDisplayName="票务 🍂打歌🎫代申";
+ const sellerSeed=(work.data.wechat||[]).find(i=>!i.outgoing&&(i.meta?.remark===sellerDisplayName||i.sender===sellerDisplayName||i.title===sellerDisplayName))
+   ||(work.data.wechat||[]).find(i=>i.meta?.remark===sellerDisplayName||i.sender===sellerDisplayName||i.title===sellerDisplayName);
+ const sellerThread=sellerSeed?.title||sellerDisplayName;
+ const chapterTwoEnding=(()=>{try{
+  const current=JSON.parse(localStorage.getItem("foundphone.chapter2.v1:"+work.id+":"+String(work.variables.storyNickname||""))||"{}");
+  const fallback=JSON.parse(localStorage.getItem("foundphone.chapter2.ending:"+work.id)||"{}");
+  return Number(current.ending??fallback.ending??1);
+ }catch{return 1;}})();
  const branch=chapterTwoEnding===2?"3(2)":"3(1)";
  const [,setStep]=useState(0);
  const [endingVisible,setEndingVisible]=useState(false);
@@ -155,7 +166,10 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
   ];
   part4Actions.current=which==="3(1)"?branchOne:branchTwo;
   go(16);index.current=0;
-  window.dispatchEvent(new CustomEvent("foundphone-chapter3-blackout"));
+  incoming("wechat",buddyThread,"搭子",["宝宝你到了吗","马上要check了","这边在排队了！"],()=>{
+   part4Waiting.current=true;
+   if(activeThreadRef.current===buddyThread){part4Waiting.current=false;prompt("wechat",buddyThread,"到了到了！我看到你了");}
+  },{time:"06:22"});
  };
  const startPart3=()=>{
   done.current=false;go(13);index.current=0;
@@ -267,7 +281,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
     return;
    }
    if(s===3&&d.app==="wechat"&&d.thread===friendThread){
-    send("wechat",friendThread,text,()=>{if(index.current===3){index.current++;prompt("wechat",friendThread,"话说前两天发的预告我还没看……");}else if(index.current===4){index.current++;incoming("wechat",friendThread,"闺蜜",["笑死 你都收到无数张未公开自拍了吧","这个预告照不看也罢"],()=>prompt("wechat",friendThread,"哎呀哎呀"));}else{go(4);const t=window.setTimeout(()=>{const g=item("wechat",groupThread,"票务 🍂打歌🎫代申","Tws 人歌sbs\n韩文名400 英文名800中后付\n申请时间：16:40");onNativeNotification("wechat",groupThread,g);},delay());timers.current.push(t);}});
+    send("wechat",friendThread,text,()=>{if(index.current===3){index.current++;prompt("wechat",friendThread,"话说前两天发的预告我还没看……");}else if(index.current===4){index.current++;incoming("wechat",friendThread,"闺蜜",["笑死 你都收到无数张未公开自拍了吧","这个预告照不看也罢"],()=>prompt("wechat",friendThread,"哎呀哎呀"));}else{go(4);const t=window.setTimeout(()=>{const g=item("wechat",groupThread,sellerDisplayName,"Tws 人歌sbs\n韩文名400 英文名800中后付\n申请时间：16:40");onNativeNotification("wechat",groupThread,g);},delay());timers.current.push(t);}});
     return;
    }
    if(s===5&&d.app==="wechat"&&d.thread===friendThread){
@@ -275,11 +289,11 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
     return;
    }
    if(s===6&&d.app==="wechat"&&d.thread===sellerThread){
-    send("wechat",sellerThread,text,()=>{if(index.current===9){index.current++;incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["接的接的","TWS 人歌预录代申\n申请时间：16:40\n下单格式：\n邮箱：\n密码：\n姓名：\n出生年月日：\n手机号码：","宝宝按这个格式下单！"],()=>prompt("wechat",sellerThread,"TWS 人歌预录代申\n申请时间：16:40\n下单格式：\n邮箱："+nickEnglish+"@mail.com\n密码："+nickEnglish+birthday.slice(-4)+"\n姓名："+nickEnglish+"\n出生年月日："+birthday+"\n手机号码："+phone));}else if(index.current===10){index.current++;incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["好的收到！","宝宝记得关闭限制海外登录哦"],()=>prompt("wechat",sellerThread,"好的👌"));}else{index.current=0;go(7);const t=window.setTimeout(()=>incoming("wechat",buddyThread,"搭子",["宝宝 你去看这次首次打歌吗"],()=>{}),2000);timers.current.push(t);}});
+    send("wechat",sellerThread,text,()=>{if(index.current===9){index.current++;incoming("wechat",sellerThread,sellerDisplayName,["接的接的","TWS 人歌预录代申\n申请时间：16:40\n下单格式：\n邮箱：\n密码：\n姓名：\n出生年月日：\n手机号码：","宝宝按这个格式下单！"],()=>prompt("wechat",sellerThread,"TWS 人歌预录代申\n申请时间：16:40\n下单格式：\n邮箱："+nickEnglish+"@mail.com\n密码："+nickEnglish+birthday.slice(-4)+"\n姓名："+nickEnglish+"\n出生年月日："+birthday+"\n手机号码："+phone));}else if(index.current===10){index.current++;incoming("wechat",sellerThread,sellerDisplayName,["好的收到！","宝宝记得关闭限制海外登录哦"],()=>prompt("wechat",sellerThread,"好的👌"));}else{index.current=0;go(7);const t=window.setTimeout(()=>incoming("wechat",buddyThread,"搭子",["宝宝 你去看这次首次打歌吗"],()=>{}),2000);timers.current.push(t);}});
     return;
    }
    if(s===7&&d.app==="wechat"&&d.thread===buddyThread){
-    send("wechat",buddyThread,text,()=>{if(index.current===0){index.current++;prompt("wechat",buddyThread,"刚找了代申 不知道能不能中");}else{index.current=0;incoming("wechat",buddyThread, "搭子",["我也刚找了代申！","希望能中"],()=>{const t=window.setTimeout(()=>{const msg=item("wechat",sellerThread,"票务 🍂打歌🎫代申","宝宝 中了！39号！");onNativeNotification("wechat",sellerThread,msg);go(8);},1000);timers.current.push(t);});}});
+    send("wechat",buddyThread,text,()=>{if(index.current===0){index.current++;prompt("wechat",buddyThread,"刚找了代申 不知道能不能中");}else{index.current=0;incoming("wechat",buddyThread, "搭子",["我也刚找了代申！","希望能中"],()=>{const t=window.setTimeout(()=>{const msg=item("wechat",sellerThread,sellerDisplayName,"宝宝 中了！39号！");onNativeNotification("wechat",sellerThread,msg);go(8);},1000);timers.current.push(t);});}});
     return;
    }
    if(s===8&&d.app==="wechat"&&d.thread===sellerThread){
@@ -350,7 +364,12 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
 
    if(onPart5Send(s,d.app,d.thread,text))return;
    if(s===16&&d.app==="wechat"&&d.thread===buddyThread){
-    send("wechat",buddyThread,text,()=>{go(161);incoming("wechat",buddyThread,"搭子",["好！"],()=>{const t=window.setTimeout(()=>{go(17);incoming("wechat",buddyThread,"搭子",["你回家路上注意安全！"],()=>{part4Cursor.current=0;part4Waiting.current=true;const a=part4Actions.current[0];if(a?.type==="prompt"&&a.thread===buddyThread)prompt("wechat",a.thread,a.text||"");},{time:"09:47"});},1000);timers.current.push(t);},{time:"06:22"});},{time:"06:22"});
+    send("wechat",buddyThread,text,()=>{
+     go(161);
+     incoming("wechat",buddyThread,"搭子",["好！"],()=>{
+      window.dispatchEvent(new CustomEvent("foundphone-chapter3-blackout"));
+     },{time:"06:22"});
+    },{time:"06:22"});
     return;
    }
    if(part4Active.current&&s>=17&&d.app==="wechat"&&(d.thread===buddyThread||d.thread===friendThread)){
@@ -379,6 +398,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
  };
  const onPart5Send=(s:number,app:string,thread:string,text:string)=>{
   if(s===18&&app===crushApp&&thread===crushThread){
+   item(app,thread,"我",text,true,{time:"09:50",meta:{story:"chapter3",handle:memberHandles[crush]||"",remark:"我"}});
    if(part5Stage.current===0){part5Stage.current=1;prompt(crushApp,crushThread,"你今天一直看我 我都有点紧张了");return true;}
    if(part5Stage.current===1){
     part5Stage.current=2;
@@ -399,6 +419,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
    return true;
   }
   if(s===19&&app===exApp&&thread===exThread){
+   item(app,thread,"我",text,true,{time:"09:50",meta:{story:"chapter3",handle:memberHandles[ex]||"",remark:"我"}});
    if(part5Stage.current===10){
     part5Stage.current=11;
     incoming(exApp,exThread,exRemark,["^ ^","偷情","好刺激"],()=>{onChoices(["什么啊 说得这么…","什么偷情 别乱说"]);part5Stage.current=12;});
@@ -437,10 +458,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
  };
  startPart5Ref.current=startPart5;
  const onPhoneUnlocked=()=>{
-   if(stepRef.current===16&&part4Active.current){
-    const t=window.setTimeout(()=>incoming("wechat",buddyThread,"搭子",["宝宝你到了吗","马上要check了","这边在排队了！"],()=>{part4Waiting.current=true;if(activeThreadRef.current===buddyThread){part4Waiting.current=false;prompt("wechat",buddyThread,"到了到了！我看到你了");}},{time:"06:22"}),1000);
-    timers.current.push(t);
-   }else if(stepRef.current===161&&part4Active.current){
+   if(stepRef.current===161&&part4Active.current){
     const t=window.setTimeout(()=>{go(17);incoming("wechat",buddyThread,"搭子",["你回家路上注意安全！"],()=>{part4Cursor.current=0;part4Waiting.current=true;const a=part4Actions.current[0];if(a?.type==="prompt"&&a.thread===buddyThread)prompt("wechat",a.thread,a.text||"");},{time:"09:47"});},1000);
     timers.current.push(t);
    }
@@ -453,25 +471,25 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
    const outgoing=item("wechat",sellerThread,"我",String(amount),true,{kind:"transfer",meta:{story:"chapter3",transferAmount:String(amount),transferStatus:"sent",remark:"我"}});
    void outgoing;
    if(transferTotal.current===800){
-    incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["好的好的收到啦 祝追星愉快！"],()=>{go(10);index.current=0;});
+    incoming("wechat",sellerThread,sellerDisplayName,["好的好的收到啦 祝追星愉快！"],()=>{go(10);index.current=0;});
    }else if(transferTotal.current<800){
     const n=transferAttempts.current;
-    if(n===1)incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["宝宝你是不是发错了呀"],()=>{});
-    else if(n===2)incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["？"],()=>{});
-    else if(n===3)incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["你也不希望你的真名还有电话号满天飞吧"],()=>{});
+    if(n===1)incoming("wechat",sellerThread,sellerDisplayName,["宝宝你是不是发错了呀"],()=>{});
+    else if(n===2)incoming("wechat",sellerThread,sellerDisplayName,["？"],()=>{});
+    else if(n===3)incoming("wechat",sellerThread,sellerDisplayName,["你也不希望你的真名还有电话号满天飞吧"],()=>{});
     else{blacklisted.current=true;}
    }else{
     const refund=transferTotal.current-800;
-    const received=item("wechat",sellerThread,"票务 🍂打歌🎫代申",String(refund.toFixed(2)),false,{kind:"transfer",meta:{story:"chapter3",refund:"true",transferAmount:String(refund),transferStatus:"pending",remark:"票务 🍂打歌🎫代申"}});
+    const received=item("wechat",sellerThread,sellerDisplayName,String(refund.toFixed(2)),false,{kind:"transfer",meta:{story:"chapter3",refund:"true",transferAmount:String(refund),transferStatus:"pending",remark:sellerDisplayName}});
     refundItemId.current=received.id;onNativeNotification("wechat",sellerThread,received);
-    incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["宝宝你发多啦！我给你退回来"],()=>go(91));
+    incoming("wechat",sellerThread,sellerDisplayName,["宝宝你发多啦！我给你退回来"],()=>go(91));
    }
   };
   const onTransferClaim=(e:Event)=>{
    const d=(e as CustomEvent).detail||{};if(stepRef.current!==91||d.id!==refundItemId.current)return;
-   const claimed=item("wechat",sellerThread,"票务 🍂打歌🎫代申",String((transferTotal.current-800).toFixed(2)),false,{kind:"transferReceived",meta:{story:"chapter3",transferAmount:String(transferTotal.current-800),transferStatus:"claimed",remark:"票务 🍂打歌🎫代申"}});
+   const claimed=item("wechat",sellerThread,sellerDisplayName,String((transferTotal.current-800).toFixed(2)),false,{kind:"transferReceived",meta:{story:"chapter3",transferAmount:String(transferTotal.current-800),transferStatus:"claimed",remark:sellerDisplayName}});
    onNativeNotification("wechat",sellerThread,claimed);
-   incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["好的 祝宝宝追星愉快！"],()=>{go(10);index.current=0;});
+   incoming("wechat",sellerThread,sellerDisplayName,["好的 祝宝宝追星愉快！"],()=>{go(10);index.current=0;});
   };
   window.addEventListener("foundphone-phone-unlocked",onPhoneUnlocked);
   window.addEventListener("foundphone-chapter3-calendar-open",onCalendar);
