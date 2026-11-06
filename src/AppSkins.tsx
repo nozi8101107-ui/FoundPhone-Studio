@@ -182,20 +182,54 @@ function Compose({
 }
 function WeChatStoryComposer(p: SkinProps) {
   const [draft, setDraft] = useState("");
+  const [plusOpen, setPlusOpen] = useState(false);
+  const [transferOpen, setTransferOpen] = useState(false);
+  const [transferAmount, setTransferAmount] = useState("");
+  const [transferEnabled, setTransferEnabled] = useState(false);
+  const isSeller = p.thread === "票务 🍂打歌🎫代申";
   useEffect(() => {
     if (p.storyReply) setDraft(p.storyReply.text);
   }, [p.storyReply?.token]);
+  useEffect(() => {
+    const enable = (event: Event) => {
+      const detail = (event as CustomEvent).detail || {};
+      if (detail.thread === p.thread) setTransferEnabled(true);
+    };
+    window.addEventListener("foundphone-story-transfer-enable", enable);
+    return () => window.removeEventListener("foundphone-story-transfer-enable", enable);
+  }, [p.thread]);
   return (
-    <>{p.storyChoices?.length ? <div style={{display:"flex",gap:8,flexWrap:"wrap",padding:"8px 10px"}}>{p.storyChoices.map(choice=><button key={choice} type="button" onClick={()=>p.onStoryChoice?.(choice)} style={{border:"1px solid #07c160",borderRadius:16,padding:"7px 12px",background:"#fff",color:"#16834a"}}>{choice}</button>)}</div>:null}<form className="skin-compose" onSubmit={(e) => {
-      e.preventDefault();
-      if (!draft.trim()) return;
-      p.onStorySend?.(draft.trim());
-      setDraft("");
-    }}>
-      <Mic size={20} />
-      <input aria-label="微信消息" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="输入消息" style={{flex:1,minWidth:0,border:0,outline:0,background:"transparent",font:"inherit"}} />
-      <button type="submit" disabled={!draft.trim()} style={{border:0,borderRadius:8,padding:"6px 12px",background:draft.trim()?"#07c160":"#ddd",color:"#fff"}}>发送</button>
-    </form></>
+    <div style={{position:"relative"}}>
+      {p.storyChoices?.length ? <div style={{display:"flex",gap:8,flexWrap:"wrap",padding:"8px 10px"}}>{p.storyChoices.map(choice=><button key={choice} type="button" onClick={()=>p.onStoryChoice?.(choice)} style={{border:"1px solid #07c160",borderRadius:16,padding:"7px 12px",background:"#fff",color:"#16834a"}}>{choice}</button>)}</div>:null}
+      <form className="skin-compose" onSubmit={(e) => {
+        e.preventDefault();
+        if (!draft.trim()) return;
+        p.onStorySend?.(draft.trim());
+        setDraft("");
+      }}>
+        <Mic size={20} />
+        <input aria-label="微信消息" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="输入消息" style={{flex:1,minWidth:0,border:0,outline:0,background:"transparent",font:"inherit"}} />
+        <button type="submit" disabled={!draft.trim()} style={{border:0,borderRadius:8,padding:"6px 12px",background:draft.trim()?"#07c160":"#ddd",color:"#fff"}}>发送</button>
+        {isSeller && transferEnabled && <button type="button" aria-label="更多功能" onClick={()=>setPlusOpen(v=>!v)} style={{border:0,background:"transparent",padding:4,color:"#333"}}><Plus size={23}/></button>}
+      </form>
+      {plusOpen && (
+        <div style={{position:"absolute",right:8,bottom:58,zIndex:30,width:250,padding:12,borderRadius:14,background:"#f7f7f7",boxShadow:"0 4px 22px #0002",display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10}}>
+          {["照片","拍摄","通话","位置","红包","礼物","转账","语音输入"].map(label=><button key={label} type="button" onClick={()=>{setPlusOpen(false);if(label==="转账")setTransferOpen(true);}} style={{border:0,background:"transparent",padding:"8px 2px",fontSize:12,color:"#333"}}><span style={{display:"block",fontSize:21,marginBottom:4}}>{label==="转账"?"💴":label==="照片"?"▧":label==="拍摄"?"📷":label==="通话"?"☎":label==="位置"?"⌖":label==="红包"?"🧧":label==="礼物"?"🎁":"🎙"}</span>{label}</button>)}
+        </div>
+      )}
+      {transferOpen && (
+        <div style={{position:"absolute",inset:"-390px 0 0",zIndex:40,background:"#f7f7f7",display:"flex",flexDirection:"column",padding:18}}>
+          <button type="button" onClick={()=>setTransferOpen(false)} style={{alignSelf:"flex-start",border:0,background:"transparent",fontSize:26}}>‹</button>
+          <h3 style={{textAlign:"center",fontSize:18,fontWeight:600,margin:"20px 0 28px"}}>转账给{p.thread}</h3>
+          <label style={{fontSize:13,color:"#666"}}>转账金额</label>
+          <div style={{display:"flex",alignItems:"center",borderBottom:"1px solid #ddd",padding:"14px 0",gap:8}}>
+            <b style={{fontSize:30}}>¥</b>
+            <input aria-label="转账金额" inputMode="decimal" value={transferAmount} onChange={e=>setTransferAmount(e.target.value.replace(/[^0-9.]/g,""))} placeholder="0.00" style={{fontSize:32,width:"100%",border:0,outline:0,background:"transparent"}}/>
+          </div>
+          <button type="button" disabled={!Number(transferAmount)||Number(transferAmount)<=0} onClick={()=>{window.dispatchEvent(new CustomEvent("foundphone-story-transfer",{detail:{thread:p.thread,amount:Number(transferAmount)}}));setTransferAmount("");setTransferOpen(false);}} style={{marginTop:30,border:0,borderRadius:8,padding:14,background:Number(transferAmount)>0?"#07c160":"#ddd",color:"#fff",fontSize:16}}>转账</button>
+        </div>
+      )}
+    </div>
   );
 }
 export function WeChatSkin(p: SkinProps) {
@@ -351,7 +385,7 @@ export function WeChatSkin(p: SkinProps) {
           {!p.items.some((i) => i.title === p.thread && i.meta.stub !== "true") && (
             <p className="skin-empty">暂无聊天记录</p>
           )}
-          {p.storyReply || p.storyChoices?.length ? <WeChatStoryComposer {...p} /> : <Compose creator={p.creator} onAdd={p.onAdd} />}
+          {p.storyReply || p.storyChoices?.length || (p.thread === "票务 🍂打歌🎫代申" && p.items.some(i => i.title === p.thread && i.meta.story === "chapter3")) ? <WeChatStoryComposer {...p} /> : <Compose creator={p.creator} onAdd={p.onAdd} />}
         </>
       ) : moments ? (
         <div className="wx-moments">
@@ -561,6 +595,9 @@ export function WeChatSkin(p: SkinProps) {
             <p>{selectedTransfer.kind === "transferReceived" ? "已接收" : selectedTransfer.meta.transferStatus === "claimed" ? "已领取" : "待领取"}</p>
             <div className="wx-transfer-detail-status">{selectedTransfer.kind === "transferReceived" ? "收款方已接收转账" : selectedTransfer.meta.transferStatus === "claimed" ? "已收款" : "等待对方领取"}</div>
             <small>{selectedTransfer.outgoing ? "你发出的转账" : `${selectedTransfer.sender} 转账给你`}</small>
+            {selectedTransfer.kind === "transferReceived" && selectedTransfer.meta.story === "chapter3" && selectedTransfer.meta.transferStatus !== "claimed" && (
+              <button type="button" onClick={() => { window.dispatchEvent(new CustomEvent("foundphone-story-transfer-claim", {detail:{id:selectedTransfer.id}})); setSelectedTransfer(null); }} style={{marginTop:24,width:"100%",border:0,borderRadius:10,padding:13,background:"#07c160",color:"#fff",fontSize:15}}>接收转账</button>
+            )}
           </section>
         </div>
       )}
