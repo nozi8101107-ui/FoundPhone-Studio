@@ -303,7 +303,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
      const next=part4Actions.current[part4Cursor.current];
      if(next?.type==="in"){
       part4Cursor.current++;
-      incoming("wechat",next.thread,next.thread==="搭子"?"搭子":"闺蜜",next.lines||[],()=>{part4Waiting.current=true;const upcoming=part4Actions.current[part4Cursor.current];if(upcoming?.type==="prompt"&&upcoming.thread===next.thread)prompt("wechat",next.thread,upcoming.text||"");},{time:next.time});
+      incoming("wechat",next.thread,next.thread==="搭子"?"搭子":"闺蜜",next.lines||[],()=>{part4Waiting.current=true;const upcoming=part4Actions.current[part4Cursor.current];if(upcoming?.type==="prompt"&&upcoming.thread===next.thread){part4Waiting.current=false;prompt("wechat",next.thread,upcoming.text||"");}else if(!upcoming){advancePart4();}},{time:next.time});
      }else if(next?.type==="prompt"){
       if(next.thread===d.thread){part4Waiting.current=true;prompt("wechat",next.thread,next.text||"");}
       else {part4Waiting.current=true;}
