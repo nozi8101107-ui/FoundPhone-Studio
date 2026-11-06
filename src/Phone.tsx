@@ -831,6 +831,7 @@ function PhoneRuntime({
                 setStoryApp(nativeApp);setStoryThread(nativeThread);setPendingThread(nativeThread);
                 setStoryReply({app:nativeApp,thread:nativeThread,text,token});
               }}
+              onChoices={setChapterTwoChoices}
               onFinish={()=>{
                 setChapterThreeActive(false);setChapterThreeDone(true);
                 try{localStorage.setItem("foundphone.chapter3.done:"+work.id,"1");}catch{}
