@@ -1467,7 +1467,7 @@ function AppContent({
               chapterTwoDone={chapterTwoDone}
               owner={work.phone.owner}
               virtualTime={state.time}
-              virtualDate={work.phone.date}
+              virtualDate={`${deviceNow.getFullYear()}-${String(deviceNow.getMonth()+1).padStart(2,"0")}-${String(deviceNow.getDate()).padStart(2,"0")}`}
               ui={state.ui?.[app.id]}
               onUi={creator ? undefined : onUi}
               name={name}
