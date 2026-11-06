@@ -443,6 +443,9 @@ export function CalendarSkin(p: Props) {
   };
   const first = new Date(Date.UTC(year, month, 1)).getUTCDay(),
     days = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+  const comebackDate = new Date(phoneDate.getFullYear(), phoneDate.getMonth(), phoneDate.getDate() + 2);
+  const hasChapterThree = (() => { try { return Object.keys(localStorage).some((key) => key.startsWith("foundphone.chapter2.ending:")); } catch { return false; } })();
+  const isComebackDay = (n:number) => hasChapterThree && year === comebackDate.getFullYear() && month === comebackDate.getMonth() && n === comebackDate.getDate();
   return (
     <div className="catalog-skin native-calendar">
       <Header p={p} />
@@ -472,6 +475,7 @@ export function CalendarSkin(p: Props) {
               onClick={() => setDay(i + 1)}
             >
               {i + 1}
+              {isComebackDay(i + 1) && <span className="calendar-comeback-tag">回归</span>}
               {p.items.some((x) =>
                 x.time.startsWith(
                   `${prefix}-${String(i + 1).padStart(2, "0")}`,
