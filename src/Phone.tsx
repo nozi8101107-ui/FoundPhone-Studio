@@ -233,17 +233,6 @@ function PhoneRuntime({
     });
   };
   useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(chapterItemsKey) || "null");
-      if (saved && typeof saved === "object") {
-        setChapterItems(Object.fromEntries(Object.entries(saved).map(([app,items]) => [app,Array.from(new Map((Array.isArray(items)?items as Item[]:[]).map(item=>[item.id,item])).values())])));
-      } else {
-        const legacy = JSON.parse(localStorage.getItem("foundphone.chapter1.messages:"+work.id) || "null");
-        if (legacy && typeof legacy === "object") setChapterItems(legacy as Record<string,Item[]>);
-      }
-    } catch {}
-  }, [chapterItemsKey]);
-  useEffect(() => {
     try { localStorage.setItem(chapterItemsKey, JSON.stringify(chapterItems)); } catch {}
   }, [chapterItemsKey, chapterItems]);
   const [storyReply, setStoryReply] = useState<{app:string;thread:string;text:string;token:number}|null>(null);
