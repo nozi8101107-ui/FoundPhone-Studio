@@ -36,6 +36,7 @@ export type SkinProps = {
   ui?: Record<string, UiValue>;
   onUi?: (key: string, value: UiValue) => void;
   appId?: string;
+  chapterTwoDone?: boolean;
   owner?: string;
   virtualTime?: string;
   virtualDate?: string;
