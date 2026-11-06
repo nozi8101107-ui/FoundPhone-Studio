@@ -69,6 +69,7 @@ import type { SaveSlot } from "./runtime/saveSlots";
 import { collectProgressStorage } from "./runtime/saveSlots";
 import { ChapterOne } from "./runtime/ChapterOne";
 import { ChapterTwo } from "./runtime/ChapterTwo";
+import { ChapterThree } from "./runtime/ChapterThree";
 export function AppIcon({
   id,
   name,
@@ -168,6 +169,8 @@ function PhoneRuntime({
   const [chapterTwoDone, setChapterTwoDone] = useState(() => { try { return !!JSON.parse(localStorage.getItem(chapterTwoKey) || "null")?.done; } catch { return false; } });
   const [chapterTwoXReady, setChapterTwoXReady] = useState(false);
   const [chapterTwoChoices,setChapterTwoChoices]=useState<string[]>([]);
+  const [chapterThreeActive,setChapterThreeActive]=useState(false);
+  const [chapterThreeDone,setChapterThreeDone]=useState(()=>{try{return !!localStorage.getItem("foundphone.chapter3.done:"+work.id);}catch{return false;}});
   useEffect(() => {
     try { localStorage.setItem(chapterTwoKey, JSON.stringify({openedApps:chapterTwoOpenedApps,active:chapterTwoActive,done:chapterTwoDone})); } catch {}
   }, [chapterTwoKey,chapterTwoOpenedApps,chapterTwoActive,chapterTwoDone]);
@@ -410,6 +413,10 @@ function PhoneRuntime({
     setKeyboard(false);
     if (id === "twitter") {
       window.dispatchEvent(new CustomEvent("foundphone-open-dispatch"));
+    }
+    if (id === "calendar" && chapterTwoDone && !chapterThreeDone && !creator) {
+      setChapterThreeActive(true);
+      window.dispatchEvent(new CustomEvent("foundphone-chapter3-calendar-open"));
     }
     if (storyFinished && !chapterTwoDone) {
       const nextOpenedApps = chapterTwoOpenedApps.includes(id) ? chapterTwoOpenedApps : [...chapterTwoOpenedApps, id];
@@ -787,6 +794,33 @@ function PhoneRuntime({
               onXNotification={(item) => {
                 setStoryUnreadThreads((v) => ({...v,[storyUnreadKey("twitter","PLEDIS_Entertainment")]:true}));
                 setStoryNotification({app:"twitter",thread:"PLEDIS_Entertainment",item});
+              }}
+            />
+          )}
+          {chapterThreeActive && chapterTwoDone && !chapterThreeDone && !locked && !creator && (
+            <ChapterThree
+              work={work}
+              onNativeItem={(nativeApp,item)=>addChapterItem(nativeApp,item)}
+              onNativeNotification={(nativeApp,thread,item)=>{
+                if(app===nativeApp && storyThread===thread){
+                  setBanner((nativeApp==="kakao"?"KakaoTalk":"微信")+": "+item.sender+"："+item.body);
+                } else {
+                  setStoryUnreadThreads(v=>({...v,[storyUnreadKey(nativeApp,thread)]:true}));
+                  setStoryNotification({app:nativeApp,thread,item});
+                }
+              }}
+              onXPost={(item)=>setChapterItems(v=>({...v,twitter:[item,...(v.twitter||[]).filter(existing=>existing.id!==item.id)]}))}
+              onXNotification={(item)=>{
+                setStoryUnreadThreads(v=>({...v,[storyUnreadKey("twitter","TWS")]:true}));
+                setStoryNotification({app:"twitter",thread:"TWS",item});
+              }}
+              onPrompt={(nativeApp,nativeThread,text,token)=>{
+                setStoryApp(nativeApp);setStoryThread(nativeThread);setPendingThread(nativeThread);
+                setStoryReply({app:nativeApp,thread:nativeThread,text,token});
+              }}
+              onFinish={()=>{
+                setChapterThreeActive(false);setChapterThreeDone(true);
+                try{localStorage.setItem("foundphone.chapter3.done:"+work.id,"1");}catch{}
               }}
             />
           )}
