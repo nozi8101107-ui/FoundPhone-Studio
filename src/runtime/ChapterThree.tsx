@@ -139,7 +139,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
     return;
    }
    if(s===6&&d.app==="wechat"&&d.thread===sellerThread){
-    send("wechat",sellerThread,text,()=>{if(index.current===9){index.current++;incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["接的接的","TWS 人歌预录代申\n申请时间：16:40\n下单格式：\n邮箱：\n密码：\n姓名：\n出生年月日：\n手机号码：","宝宝按这个格式下单！"],()=>prompt("wechat",sellerThread,"TWS 人歌预录代申\n申请时间：16:40\n下单格式：\n邮箱："+nickEnglish+"@mail.com\n密码："+nickEnglish+birthday.slice(-4)+"\n姓名："+nickEnglish+"\n出生年月日："+birthday+"\n手机号码："+phone));}else if(index.current===10){index.current++;incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["好的收到！","宝宝记得关闭限制海外登录哦"],()=>prompt("wechat",sellerThread,"好的👌"));}else{go(7);const t=window.setTimeout(()=>incoming("wechat",buddyThread,"搭子",["宝宝 你去看这次首次打歌吗"],()=>{}),2000);timers.current.push(t);}});
+    send("wechat",sellerThread,text,()=>{if(index.current===9){index.current++;incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["接的接的","TWS 人歌预录代申\n申请时间：16:40\n下单格式：\n邮箱：\n密码：\n姓名：\n出生年月日：\n手机号码：","宝宝按这个格式下单！"],()=>prompt("wechat",sellerThread,"TWS 人歌预录代申\n申请时间：16:40\n下单格式：\n邮箱："+nickEnglish+"@mail.com\n密码："+nickEnglish+birthday.slice(-4)+"\n姓名："+nickEnglish+"\n出生年月日："+birthday+"\n手机号码："+phone));}else if(index.current===10){index.current++;incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["好的收到！","宝宝记得关闭限制海外登录哦"],()=>prompt("wechat",sellerThread,"好的👌"));}else{index.current=0;go(7);const t=window.setTimeout(()=>incoming("wechat",buddyThread,"搭子",["宝宝 你去看这次首次打歌吗"],()=>{}),2000);timers.current.push(t);}});
     return;
    }
    if(s===7&&d.app==="wechat"&&d.thread===buddyThread){
