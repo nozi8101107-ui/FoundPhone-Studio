@@ -174,7 +174,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
     else{blacklisted.current=true;}
    }else{
     const refund=transferTotal.current-800;
-    const received=item("wechat",sellerThread,"票务 🍂打歌🎫代申",String(refund.toFixed(2)),false,{kind:"transferReceived",meta:{story:"chapter3",transferAmount:String(refund),transferStatus:"pending",remark:"票务 🍂打歌🎫代申"}});
+    const received=item("wechat",sellerThread,"票务 🍂打歌🎫代申",String(refund.toFixed(2)),false,{kind:"transfer",meta:{story:"chapter3",refund:"true",transferAmount:String(refund),transferStatus:"pending",remark:"票务 🍂打歌🎫代申"}});
     refundItemId.current=received.id;onNativeNotification("wechat",sellerThread,received);
     incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["宝宝你发多啦！我给你退回来"],()=>go(91));
    }
