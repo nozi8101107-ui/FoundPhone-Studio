@@ -34,7 +34,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
  const friendThread="闺蜜", buddyThread="搭子", groupThread="🍂的预录打歌群2群", sellerThread="票务 🍂打歌🎫代申";
  const chapterTwoEnding=(()=>{try{return Number(JSON.parse(localStorage.getItem("foundphone.chapter2.ending:"+work.id)||"{}").ending||1);}catch{return 1;}})();
  const branch=chapterTwoEnding===2?"3(2)":"3(1)";
- const [step,setStep]=useState(0);
+ const [,setStep]=useState(0);
  const stepRef=useRef(0);
  const [token,setToken]=useState(7300);
  const tokenRef=useRef(7300);
@@ -109,6 +109,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
  useEffect(()=>{
   start();
   const onCalendar=()=>start();
+  const onCalendar=()=>start();
   const onXOpen=()=>{if(stepRef.current===1)go(2);};
   const onThread=(e:Event)=>{
    const d=(e as CustomEvent).detail||{};
@@ -119,7 +120,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
    if(d.app==="wechat"&&d.thread===buddyThread&&stepRef.current===7){prompt("wechat",buddyThread,"去的去的");return;}
    if(d.app==="wechat"&&d.thread===sellerThread&&stepRef.current===8){prompt("wechat",sellerThread,"omg！");return;}
    if(d.app==="wechat"&&d.thread===buddyThread&&stepRef.current===10){prompt("wechat",buddyThread,"我中了！！！");return;}
-   if(stepRef.current===12&&d.app===exApp&&d.thread===exThread){runEx();}
+   
   };
   const onSend=(e:Event)=>{
    const d=(e as CustomEvent).detail||{};const text=String(d.text||"");
@@ -134,7 +135,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
     return;
    }
    if(s===5&&d.app==="wechat"&&d.thread===friendThread){
-    send("wechat",friendThread,text,()=>{if(index.current===5){index.current++;prompt("wechat",friendThread,"比别的团都贵");}else if(index.current===6){index.current++;prompt("wechat",friendThread,"你说我要不要去看");}else if(index.current===7){index.current=8;incoming("wechat",friendThread, "闺蜜",["看吧看吧","不是正好你和"+crushName+"最近不方便见面","想他就去看看"],()=>prompt("wechat",friendThread,"有道理 那我去找代申"));}});
+    send("wechat",friendThread,text,()=>{if(index.current===5){index.current++;prompt("wechat",friendThread,"比别的团都贵");}else if(index.current===6){index.current++;prompt("wechat",friendThread,"你说我要不要去看");}else if(index.current===7){index.current=8;incoming("wechat",friendThread, "闺蜜",["看吧看吧","不是正好你和"+crushName+"最近不方便见面","想他就去看看"],()=>prompt("wechat",friendThread,"有道理 那我去找代申"));}else if(index.current===8){go(6);}});
     return;
    }
    if(s===6&&d.app==="wechat"&&d.thread===sellerThread){
@@ -153,7 +154,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
     if(blacklisted.current){item("wechat",sellerThread,"我",text,true,{meta:{story:"chapter3",blocked:"true",remark:"我"}});return;}
    }
    if(s===10&&d.app==="wechat"&&d.thread===buddyThread){
-    send("wechat",buddyThread,text,()=>{if(index.current===0){index.current++;incoming("wechat",buddyThread,"搭子",["我也中了！！！啊啊啊啊","你是多少号","我这次号很小"],()=>prompt("wechat",buddyThread,"我也挺小的！我39号"));}else if(index.current===1){index.current++;incoming("wechat",buddyThread,"搭子",["？？？？？wtf","我40号啊"],()=>prompt("wechat",buddyThread,"这也太巧了吧"));}else if(index.current===2){index.current++;prompt("wechat",buddyThread,"那我们到时候见");}else{index.current=0;incoming("wechat",buddyThread,"搭子",["嗯嗯！"],()=>{if(branch==="3(1)"){done.current=true;window.dispatchEvent(new CustomEvent("foundphone-chapter3-part3-ready",{detail:{branch:"3(1)"}}));onFinish();}else{go(11);const t=window.setTimeout(()=>incoming(exApp,exThread,exRemark,[""],()=>{}, {time:"19:29",meta:{story:"chapter3",handle:memberHandles[ex]||"",remark:exRemark}}),delay());timers.current.push(t);}});}});
+    send("wechat",buddyThread,text,()=>{if(index.current===0){index.current++;incoming("wechat",buddyThread,"搭子",["我也中了！！！啊啊啊啊","你是多少号","我这次号很小"],()=>prompt("wechat",buddyThread,"我也挺小的！我39号"));}else if(index.current===1){index.current++;incoming("wechat",buddyThread,"搭子",["？？？？？wtf","我40号啊"],()=>prompt("wechat",buddyThread,"这也太巧了吧"));}else if(index.current===2){index.current++;prompt("wechat",buddyThread,"那我们到时候见");}else{index.current=0;incoming("wechat",buddyThread,"搭子",["嗯嗯！"],()=>{if(branch==="3(1)"){done.current=true;window.dispatchEvent(new CustomEvent("foundphone-chapter3-part3-ready",{detail:{branch:"3(1)"}}));onFinish();}else{go(11);const t=window.setTimeout(()=>startEx(),delay());timers.current.push(t);}});}});
     return;
    }
    if(s===12&&d.app===exApp&&d.thread===exThread){item(exApp,exThread,"我",text,true,{time:"19:29",meta:{story:"chapter3",handle:memberHandles[ex]||"",remark:exRemark}});runEx();return;}
