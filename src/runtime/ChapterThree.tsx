@@ -43,7 +43,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
   if(done.current||step!==0)return;
   try{localStorage.setItem(branchKey,chapterTwoEnding===2?"3(2)":"3(1)");}catch{}
   setStep(1);
-  const post:Item={id:"chapter3-tws-comeback-d2",title:"TWS",body:"[#TWS]  COMING SOON 🔥\nD-2\n再过两天就能见到42了\n准备好了吗？💙\n#TWS #투어스 #COMEBACK",richText:"",meta:{handle:"TWS_PLEDIS",likesDisplay:"9920",reposts:"5000",views:"20万"},time:"10:00",sender:"TWS",avatar:import.meta.env.BASE_URL+"people/tws-youtube.png",kind:"post",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:false,read:false,likes:9920,comments:[]};
+  const post:Item={id:"chapter3-tws-comeback-d2",title:"TWS",body:"[#TWS]  COMING SOON 🔥\nD-2\n再过两天就能见到42了\n准备好了吗？💙\n#TWS #투어스 #COMEBACK",richText:"",meta:{handle:"TWS_PLEDIS",likesDisplay:"9920",reposts:"5000",views:"20万"},time:"10:00",sender:"TWS",avatar:import.meta.env.BASE_URL+"youtube/channels4_profile.jpeg",kind:"post",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:false,read:false,likes:9920,comments:[]};
   const t=window.setTimeout(()=>{onXPost(post);onXNotification(post);},1000);timers.current.push(t);
  };
  useEffect(()=>{
