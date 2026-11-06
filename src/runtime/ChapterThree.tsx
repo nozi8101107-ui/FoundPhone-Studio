@@ -77,6 +77,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
  const part4Actions=useRef<Array<{type:"in"|"prompt";thread:string;text?:string;lines?:string[];time:string}>>([]);
  const part4Cursor=useRef(0);
  const part4Waiting=useRef(false);
+ const activeThreadRef=useRef("");
  const part4Active=useRef(false);
  const advancePart4=()=>{
   if(!part4Active.current||done.current)return;
@@ -89,7 +90,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
   if(a.type==="in"){
    part4Cursor.current++;
    incoming("wechat",a.thread,a.thread==="搭子"?"搭子":"闺蜜",a.lines||[],()=>{part4Waiting.current=true;const next=part4Actions.current[part4Cursor.current];if(next?.type==="prompt"&&next.thread===a.thread)prompt("wechat",next.thread,next.text||"");},{time:a.time});
-  }else part4Waiting.current=true;
+  }else{part4Waiting.current=true;if(activeThreadRef.current===a.thread){part4Waiting.current=false;prompt("wechat",a.thread,a.text||"");}}
  };
  const startPart4=(which:string)=>{
   done.current=false;part4Active.current=true;part4Waiting.current=false;part4Cursor.current=0;
@@ -199,6 +200,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
   const onXOpen=()=>{if(stepRef.current===1)go(2);};
   const onThread=(e:Event)=>{
    const d=(e as CustomEvent).detail||{};
+   activeThreadRef.current=String(d.thread||"");
    if(stepRef.current===2&&d.app===crushApp&&d.thread===crushThread){prompt(crushApp,crushThread,"后天要回归了！");return;}
    if(d.app==="wechat"&&d.thread===groupThread&&stepRef.current===4){groupViewed.current=true;return;}
    if(d.app==="wechat"&&d.thread===friendThread&&stepRef.current===4&&groupViewed.current){go(5);prompt("wechat",friendThread,"预录代申怎么这么贵");return;}
