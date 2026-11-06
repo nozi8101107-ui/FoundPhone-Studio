@@ -443,7 +443,7 @@ export function CalendarSkin(p: Props) {
   };
   const first = new Date(Date.UTC(year, month, 1)).getUTCDay(),
     days = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
-  const comebackDate = /^\\d{4}-\\d{2}-\\d{2}$/.test(p.chapterThreeComebackDate || "")
+  const comebackDate = /^\d{4}-\d{2}-\d{2}$/.test(p.chapterThreeComebackDate || "")
     ? new Date((p.chapterThreeComebackDate as string) + "T12:00:00")
     : new Date(phoneDate.getFullYear(), phoneDate.getMonth(), phoneDate.getDate() + 2);
   const showComeback = !!p.chapterThreeComebackDate || !!p.chapterTwoDone || !!p.chapterThreeDone;
