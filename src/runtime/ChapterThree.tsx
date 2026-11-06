@@ -5,6 +5,11 @@ const memberNames:Record<string,string>={shinyu:"申正焕",dohoon:"金道勋",y
 const memberHandles:Record<string,string>={shinyu:"tlswjdghks",dohoon:"doking",youngjae:"jae_e",hanjin:"henan_prince",jihoon:"ahoooon",kyungmin:"kyungman_lee"};
 const memberBirthdays:Record<string,string>={shinyu:"2003-11-07",dohoon:"2005-01-30",youngjae:"2005-05-31",hanjin:"2006-01-05",jihoon:"2006-03-28",kyungmin:"2007-10-02"};
 const delay=()=>1000+Math.random()*1500;
+type ExAction={type:"in";lines:string[]}|{type:"image";path:string}|{type:"prompt";text:string}|{type:"end"};
+const I=(...lines:string[]):ExAction=>({type:"in",lines});
+const P=(text:string):ExAction=>({type:"prompt",text});
+const IMG=(path:string):ExAction=>({type:"image",path});
+const END:ExAction={type:"end"};
 
 export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onXNotification,onPrompt,onFinish}:{work:Work;onNativeItem:(app:string,item:Item)=>void;onNativeNotification:(app:string,thread:string,item:Item)=>void;onXPost:(item:Item)=>void;onXNotification:(item:Item)=>void;onPrompt:(app:string,thread:string,text:string,token:number)=>void;onFinish:()=>void}){
  const crush=String(work.variables.storyCrush||"shinyu");
@@ -14,63 +19,181 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
  const crushThread=crushSeed?.title||crushName;
  const crushRemark=String(crushSeed?.meta?.remark||crushSeed?.title||crushName);
  const crushAvatar=crushSeed?.avatar||"";
+ const ex=String(work.variables.storyEx||"dohoon");
+ const xp=String(work.variables.storyXp||"BG").toUpperCase()==="GB"?"GB":"BG";
+ const exApp=ex==="hanjin"?"wechat":"kakao";
+ const exSeed=(work.data[exApp]||[]).find(i=>i.meta?.handle===memberHandles[ex]&&!i.outgoing);
+ const exThread=exSeed?.title||memberNames[ex]||ex;
+ const exRemark=String(exSeed?.meta?.remark||exSeed?.title||memberNames[ex]||ex);
+ const exAvatar=exSeed?.avatar||"";
  const nick=String(work.variables.storyNickname||"你");
  const birthday=String(work.variables.storyBirthday||"2006-08-10").replace(/[^0-9]/g,"").padEnd(8,"0").slice(0,8);
  const crushBirthday=String(work.variables["storyCrushBirthday"]||work.variables["storyCrushBirth"]||memberBirthdays[crush]||"2003-11-07").replace(/[^0-9]/g,"").padEnd(8,"0").slice(0,8);
  const nickEnglish=String(work.variables.storyNicknameEnglish||nick).toLowerCase().replace(/[^a-z0-9]/g,"")||"user";
  const phone="010"+birthday.slice(-4)+crushBirthday.slice(-4);
- const friendThread="闺蜜";
- const groupThread="🍂的预录打歌群2群";
- const sellerThread="票务 🍂打歌🎫代申";
+ const friendThread="闺蜜", buddyThread="搭子", groupThread="🍂的预录打歌群2群", sellerThread="票务 🍂打歌🎫代申";
  const chapterTwoEnding=(()=>{try{return Number(JSON.parse(localStorage.getItem("foundphone.chapter2.ending:"+work.id)||"{}").ending||1);}catch{return 1;}})();
- const branchKey="foundphone.chapter3.branch:"+work.id;
+ const branch=chapterTwoEnding===2?"3(2)":"3(1)";
  const [step,setStep]=useState(0);
+ const stepRef=useRef(0);
  const [token,setToken]=useState(7300);
+ const tokenRef=useRef(7300);
  const timers=useRef<number[]>([]);
  const index=useRef(0);
  const done=useRef(false);
- const prompt=(app:string,thread:string,text:string)=>{setToken(v=>v+1);onPrompt(app,thread,text,token+1);};
+ const groupViewed=useRef(false);
+ const transferTotal=useRef(0);
+ const transferAttempts=useRef(0);
+ const blacklisted=useRef(false);
+ const refundItemId=useRef("");
+ const exFlow=useRef<ExAction[]>([]);
+ const exCursor=useRef(0);
+ const exRunning=useRef(false);
+ const go=(n:number)=>{stepRef.current=n;setStep(n);};
+ const prompt=(app:string,thread:string,text:string)=>{tokenRef.current+=1;setToken(tokenRef.current);onPrompt(app,thread,text,tokenRef.current);};
  const item=(app:string,thread:string,sender:string,body:string,outgoing=false,extra:Partial<Item>={})=>{
-  const it:Item={id:"chapter3-"+step+"-"+Date.now()+"-"+Math.random().toString(36).slice(2),title:thread,body,richText:"",meta:{story:"chapter3",handle:app==="kakao"?memberHandles[crush]:"",remark:sender},time:step===5?"10:29":"10:01",sender:outgoing?"我":sender,avatar:outgoing?String(work.variables.storyUserAvatar||""):app===crushApp?crushAvatar:"",kind:"text",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing,read:false,likes:0,comments:[],...extra};
-  onNativeItem(app,it); return it;
+  const it:Item={id:"chapter3-"+stepRef.current+"-"+Date.now()+"-"+Math.random().toString(36).slice(2),title:thread,body,richText:"",meta:{story:"chapter3",handle:app==="kakao"?memberHandles[crush]:"",remark:sender},time:stepRef.current>=12?"19:29":stepRef.current===5?"10:29":"10:01",sender:outgoing?"我":sender,avatar:outgoing?String(work.variables.storyUserAvatar||""):app===crushApp?crushAvatar:app===exApp?exAvatar:"",kind:"text",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing,read:false,likes:0,comments:[],...extra};
+  onNativeItem(app,it);return it;
  };
- const incoming=(app:string,thread:string,sender:string,lines:string[],doneFn:()=>void)=>{
-  let n=0; const run=()=>{if(n>=lines.length){doneFn();return;}const t=window.setTimeout(()=>{const it=item(app,thread,sender,lines[n++]);onNativeNotification(app,thread,it);run();},delay());timers.current.push(t);};run();
+ const incoming=(app:string,thread:string,sender:string,lines:string[],doneFn:()=>void,extra:Partial<Item>={})=>{
+  let n=0;const run=()=>{if(n>=lines.length){doneFn();return;}const t=window.setTimeout(()=>{const it=item(app,thread,sender,lines[n++],false,extra);onNativeNotification(app,thread,it);run();},delay());timers.current.push(t);};run();
  };
- const send=(app:string,thread:string,text:string,next:()=>void)=>{item(app,thread,"我",text,true);next();};
- const setPrompt=(app:string,thread:string,text:string)=>prompt(app,thread,text);
+ const send=(app:string,thread:string,text:string,next:()=>void,extra:Partial<Item>={})=>{item(app,thread,"我",text,true,extra);next();};
  const start=()=>{
-  if(done.current||step!==0)return;
-  try{localStorage.setItem(branchKey,chapterTwoEnding===2?"3(2)":"3(1)");}catch{}
-  setStep(1);
+  if(done.current||stepRef.current!==0)return;
+  try{localStorage.setItem("foundphone.chapter3.branch:"+work.id,branch);}catch{}
+  go(1);
   const post:Item={id:"chapter3-tws-comeback-d2",title:"TWS",body:"[#TWS]  COMING SOON 🔥\nD-2\n再过两天就能见到42了\n准备好了吗？💙\n#TWS #투어스 #COMEBACK",richText:"",meta:{handle:"TWS_PLEDIS",likesDisplay:"9920",reposts:"5000",views:"20万"},time:"10:00",sender:"TWS",avatar:import.meta.env.BASE_URL+"youtube/channels4_profile.jpeg",kind:"post",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:false,read:false,likes:9920,comments:[]};
   const t=window.setTimeout(()=>{onXPost(post);onXNotification(post);},1000);timers.current.push(t);
  };
- useEffect(()=>{start();},[]);
+ const startEx=()=>{
+  const userOlderThanHanjin=birthday<"2006-01-05";
+  const hanjinNick=nick+(userOlderThanHanjin?"姐姐":"");
+  const bg:Record<string,ExAction[]> = {
+   shinyu:[I("你出发了吗","我到了 在等你"),P("我马上出发"),I("嗯","路上小心"),END],
+   dohoon:[I("我快到你家楼下了"),P("这么快"),P("你买好套了吗"),I("当然","等着我"),END],
+   youngjae:[I("我马上到"),P("怎么这么快"),I("嗯","到了","我现在上楼"),END],
+   hanjin:[I("我快到了","你准备下楼吧"),P("好快"),I("因为想快点见到你"),END],
+   jihoon:[I("我马上到！"),P("好的"),I("三分钟","等我"),END],
+   kyungmin:[I("我马上就到","密码还是我生日吧？"),P("……是"),I("嗯","我就知道"),END]
+  };
+  const gb:Record<string,ExAction[]> = {
+   shinyu:[I("你出发了吗","我已经准备好了"),P("我马上出发"),I("可不要迟到","我会等得很难受的"),P("会难受到哭吗 想看"),I("……"),END],
+   dohoon:[I("我都做好事前准备了","你出发了吗"),P("我现在出发 二十分钟到"),I("ok"),IMG("kkt/IMG_0101.jpeg"),P("穿这么多给谁看"),I("穿得少的版本等你来了亲眼看"),END],
+   youngjae:[IMG("kkt/IMG_0104.jpeg"),I("马上出发 十五分钟到"),P("？"),P("说好的男仆装 裸体围裙 露背毛衣呢"),I("？","我还要出门坐车过去"),P("你现在就穿 另外两件也带过来"),P("害臊就在外面套个风衣^ ^"),I("……行"),END],
+   hanjin:[I(hanjinNick,"我马上到"),P("看看脸"),I("……","马上到了 到时候再看嘛","不光能看脸","你想看的话 哪里都可以哦"),P("……"),I("迫不及待了吧^ ^","等我"),END],
+   jihoon:[I("我马上到了！"),P("好"),I("怎么这么冷淡","不期待吗"),P("你猜我在用哪打字？"),I("……？","你长出来了？"),P("哈哈 当然是用手打字啊"),I("……","今天不搞到你腱鞘炎我就随妻姓"),END],
+   kyungmin:[I("我大概还有五分钟到"),P("嗯好"),I("密码还是我生日吧？"),P("对"),P("你直接进来"),I("好"),IMG("kkt/weverse_20261106164830_753070257.jpeg"),P("穿的什么 看不清"),I("外面穿了一件外套"),P("里面呢"),I("你等会自己看看"),END]
+  };
+  exFlow.current=(xp==="GB"?gb:bg)[ex]||((xp==="GB"?gb:bg).shinyu);
+  exCursor.current=0;exRunning.current=false;go(12);runEx();
+ };
+ const runEx=()=>{
+  if(exRunning.current||done.current)return;
+  const action=exFlow.current[exCursor.current++];
+  if(!action)return;
+  if(action.type==="prompt"){prompt(exApp,exThread,action.text);return;}
+  if(action.type==="end"){done.current=true;window.dispatchEvent(new CustomEvent("foundphone-chapter3-part3-ready",{detail:{branch:"3(2)"}}));onFinish();return;}
+  exRunning.current=true;
+  const t=window.setTimeout(()=>{
+   if(action.type==="in"){
+    const lines=action.lines;let n=0;
+    const deliver=()=>{if(n>=lines.length){exRunning.current=false;runEx();return;}const it=item(exApp,exThread,exRemark,lines[n++],false,{time:"19:29",meta:{story:"chapter3",handle:memberHandles[ex]||"",remark:exRemark}});onNativeNotification(exApp,exThread,it);const next=window.setTimeout(deliver,delay());timers.current.push(next);};
+    deliver();
+   }else{
+    const it=item(exApp,exThread,exRemark,"",false,{time:"19:29",kind:"image",media:action.path,meta:{story:"chapter3",handle:memberHandles[ex]||"",remark:exRemark}});
+    onNativeNotification(exApp,exThread,it);exRunning.current=false;runEx();
+   }
+  },delay());timers.current.push(t);
+ };
  useEffect(()=>{
+  start();
   const onCalendar=()=>start();
-  const onXOpen=()=>{if(step===1){setStep(2);setPrompt(crushApp,crushThread,"后天要回归了！");}};
+  const onXOpen=()=>{if(stepRef.current===1)go(2);};
+  const onThread=(e:Event)=>{
+   const d=(e as CustomEvent).detail||{};
+   if(stepRef.current===2&&d.app===crushApp&&d.thread===crushThread){prompt(crushApp,crushThread,"后天要回归了！");return;}
+   if(d.app==="wechat"&&d.thread===groupThread&&stepRef.current===4){groupViewed.current=true;return;}
+   if(d.app==="wechat"&&d.thread===friendThread&&stepRef.current===4&&groupViewed.current){go(5);prompt("wechat",friendThread,"预录代申怎么这么贵");return;}
+   if(d.app==="wechat"&&d.thread===sellerThread&&stepRef.current===6){index.current=9;prompt("wechat",sellerThread,"宝宝 tws代申还接吗");return;}
+   if(d.app==="wechat"&&d.thread===buddyThread&&stepRef.current===7){prompt("wechat",buddyThread,"去的去的");return;}
+   if(d.app==="wechat"&&d.thread===sellerThread&&stepRef.current===8){prompt("wechat",sellerThread,"omg！");return;}
+   if(d.app==="wechat"&&d.thread===buddyThread&&stepRef.current===10){prompt("wechat",buddyThread,"我中了！！！");return;}
+   if(stepRef.current===12&&d.app===exApp&&d.thread===exThread){runEx();}
+  };
   const onSend=(e:Event)=>{
    const d=(e as CustomEvent).detail||{};const text=String(d.text||"");
+   const s=stepRef.current;
    if(done.current)return;
-   if(step===1&&d.app==="twitter"){setStep(2);setPrompt(crushApp,crushThread,"后天要回归了！");return;}
-   if(step===2&&d.app===crushApp&&d.thread===crushThread){send(crushApp,crushThread,text,()=>{if(index.current===0){index.current++;setPrompt(crushApp,crushThread,"好期待呀");}else if(index.current===1){index.current++;setPrompt(crushApp,crushThread,"加油噢");}else if(index.current===2){index.current++;incoming(crushApp,crushThread,crushRemark,["嗯嗯……","会努力的","最近回归期好累","好想见你 但是不能……"],()=>setPrompt(crushApp,crushThread,"我也想……"));}else{setStep(3);const f=window.setTimeout(()=>{incoming("wechat",friendThread,"闺蜜",["闺蜜闺蜜","tms又要回归了","居然就在后天 我还没有实感"],()=>setPrompt("wechat",friendThread,"看到了！"));},delay());timers.current.push(f);}});return;}
-   if(step===3&&d.app==="wechat"&&d.thread===friendThread){send("wechat",friendThread,text,()=>{if(index.current===3){index.current++;setPrompt("wechat",friendThread,"话说前两天发的预告我还没看……");}else if(index.current===4){index.current++;incoming("wechat",friendThread,"闺蜜",["笑死 你都收到无数张未公开自拍了吧","这个预告照不看也罢"],()=>setPrompt("wechat",friendThread,"哎呀哎呀"));}else{setStep(4);const t=window.setTimeout(()=>{const g=item("wechat",groupThread,"票务 🍂打歌🎫代申","Tws 人歌sbs\n韩文名400 英文名800中后付\n申请时间：16:40");onNativeNotification("wechat",groupThread,g);},delay());timers.current.push(t);}});return;}
-   if(step===5&&d.app==="wechat"&&d.thread===friendThread){send("wechat",friendThread,text,()=>{if(index.current===5){index.current++;setPrompt("wechat",friendThread,"比别的团都贵");}else if(index.current===6){index.current++;setPrompt("wechat",friendThread,"你说我要不要去看");}else if(index.current===7){index.current=8;incoming("wechat",friendThread,"闺蜜",["看吧看吧","不是正好你和"+crushName+"最近不方便见面","想他就去看看"],()=>setPrompt("wechat",friendThread,"有道理 那我去找代申"));}});return;}
-   if(step===6&&d.app==="wechat"&&d.thread===sellerThread){send("wechat",sellerThread,text,()=>{if(index.current===9){index.current++;incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["接的接的","TWS 人歌预录代申\n申请时间：16:40\n下单格式：\n邮箱：\n密码：\n姓名：\n出生年月日：\n手机号码：","宝宝按这个格式下单！"],()=>setPrompt("wechat",sellerThread,"TWS 人歌预录代申\n申请时间：16:40\n下单格式：\n邮箱："+nickEnglish+"@mail.com\n密码："+nickEnglish+birthday.slice(-4)+"\n姓名："+nickEnglish+"\n出生年月日："+birthday+"\n手机号码："+phone));}else if(index.current===10){index.current++;incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["好的收到！","宝宝记得关闭限制海外登录哦"],()=>setPrompt("wechat",sellerThread,"好的👌"));}else{done.current=true;const t=window.setTimeout(()=>{window.dispatchEvent(new CustomEvent("foundphone-chapter3-part2-ready",{detail:{branch:chapterTwoEnding===2?"3(2)":"3(1)"}}));onFinish();},2000);timers.current.push(t);}});return;}
+   if(s===2&&d.app===crushApp&&d.thread===crushThread){
+    send(crushApp,crushThread,text,()=>{if(index.current===0){index.current++;prompt(crushApp,crushThread,"好期待呀");}else if(index.current===1){index.current++;prompt(crushApp,crushThread,"加油噢");}else if(index.current===2){index.current++;incoming(crushApp,crushThread,crushRemark,["嗯嗯……","会努力的","最近回归期好累","好想见你 但是不能……"],()=>prompt(crushApp,crushThread,"我也想……"));}else{go(3);incoming("wechat",friendThread,"闺蜜",["闺蜜闺蜜","tms又要回归了","居然就在后天 我还没有实感"],()=>prompt("wechat",friendThread,"看到了！"));}});
+    return;
+   }
+   if(s===3&&d.app==="wechat"&&d.thread===friendThread){
+    send("wechat",friendThread,text,()=>{if(index.current===3){index.current++;prompt("wechat",friendThread,"话说前两天发的预告我还没看……");}else if(index.current===4){index.current++;incoming("wechat",friendThread,"闺蜜",["笑死 你都收到无数张未公开自拍了吧","这个预告照不看也罢"],()=>prompt("wechat",friendThread,"哎呀哎呀"));}else{go(4);const t=window.setTimeout(()=>{const g=item("wechat",groupThread,"票务 🍂打歌🎫代申","Tws 人歌sbs\n韩文名400 英文名800中后付\n申请时间：16:40");onNativeNotification("wechat",groupThread,g);},delay());timers.current.push(t);}});
+    return;
+   }
+   if(s===5&&d.app==="wechat"&&d.thread===friendThread){
+    send("wechat",friendThread,text,()=>{if(index.current===5){index.current++;prompt("wechat",friendThread,"比别的团都贵");}else if(index.current===6){index.current++;prompt("wechat",friendThread,"你说我要不要去看");}else if(index.current===7){index.current=8;incoming("wechat",friendThread, "闺蜜",["看吧看吧","不是正好你和"+crushName+"最近不方便见面","想他就去看看"],()=>prompt("wechat",friendThread,"有道理 那我去找代申"));}});
+    return;
+   }
+   if(s===6&&d.app==="wechat"&&d.thread===sellerThread){
+    send("wechat",sellerThread,text,()=>{if(index.current===9){index.current++;incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["接的接的","TWS 人歌预录代申\n申请时间：16:40\n下单格式：\n邮箱：\n密码：\n姓名：\n出生年月日：\n手机号码：","宝宝按这个格式下单！"],()=>prompt("wechat",sellerThread,"TWS 人歌预录代申\n申请时间：16:40\n下单格式：\n邮箱："+nickEnglish+"@mail.com\n密码："+nickEnglish+birthday.slice(-4)+"\n姓名："+nickEnglish+"\n出生年月日："+birthday+"\n手机号码："+phone));}else if(index.current===10){index.current++;incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["好的收到！","宝宝记得关闭限制海外登录哦"],()=>prompt("wechat",sellerThread,"好的👌"));}else{go(7);const t=window.setTimeout(()=>incoming("wechat",buddyThread,"搭子",["宝宝 你去看这次首次打歌吗"],()=>{}),2000);timers.current.push(t);}});
+    return;
+   }
+   if(s===7&&d.app==="wechat"&&d.thread===buddyThread){
+    send("wechat",buddyThread,text,()=>{if(index.current===0){index.current++;prompt("wechat",buddyThread,"刚找了代申 不知道");}else{index.current=0;incoming("wechat",buddyThread, "搭子",["我也刚找了代申！","希望能中"],()=>{const t=window.setTimeout(()=>{const msg=item("wechat",sellerThread,"票务 🍂打歌🎫代申","宝宝 中了！39号！");onNativeNotification("wechat",sellerThread,msg);go(8);},1000);timers.current.push(t);});}});
+    return;
+   }
+   if(s===8&&d.app==="wechat"&&d.thread===sellerThread){
+    send("wechat",sellerThread,text,()=>{if(index.current===0){index.current++;prompt("wechat",sellerThread,"好的好的！800是吗");}else if(index.current===1){index.current++;window.dispatchEvent(new CustomEvent("foundphone-story-transfer-enable",{detail:{thread:sellerThread,recipient:sellerThread}}));go(9);}});
+    return;
+   }
+   if(s===9&&d.app==="wechat"&&d.thread===sellerThread){
+    if(blacklisted.current){item("wechat",sellerThread,"我",text,true,{meta:{story:"chapter3",blocked:"true",remark:"我"}});return;}
+   }
+   if(s===10&&d.app==="wechat"&&d.thread===buddyThread){
+    send("wechat",buddyThread,text,()=>{if(index.current===0){index.current++;incoming("wechat",buddyThread,"搭子",["我也中了！！！啊啊啊啊","你是多少号","我这次号很小"],()=>prompt("wechat",buddyThread,"我也挺小的！我39号"));}else if(index.current===1){index.current++;incoming("wechat",buddyThread,"搭子",["？？？？？wtf","我40号啊"],()=>prompt("wechat",buddyThread,"这也太巧了吧"));}else if(index.current===2){index.current++;prompt("wechat",buddyThread,"那我们到时候见");}else{index.current=0;incoming("wechat",buddyThread,"搭子",["嗯嗯！"],()=>{if(branch==="3(1)"){done.current=true;window.dispatchEvent(new CustomEvent("foundphone-chapter3-part3-ready",{detail:{branch:"3(1)"}}));onFinish();}else{go(11);const t=window.setTimeout(()=>incoming(exApp,exThread,exRemark,[""],()=>{}, {time:"19:29",meta:{story:"chapter3",handle:memberHandles[ex]||"",remark:exRemark}}),delay());timers.current.push(t);}});}});
+    return;
+   }
+   if(s===12&&d.app===exApp&&d.thread===exThread){item(exApp,exThread,"我",text,true,{time:"19:29",meta:{story:"chapter3",handle:memberHandles[ex]||"",remark:exRemark}});runEx();return;}
   };
-  const onGroupOpen=(e:Event)=>{const d=(e as CustomEvent).detail||{};if(d.app==="wechat"&&d.thread===groupThread&&step===4){setStep(5);setPrompt("wechat",friendThread,"预录代申怎么这么贵");}};
-  const onThread=(e:Event)=>{const d=(e as CustomEvent).detail||{};
-   if(d.app==="wechat"&&d.thread===groupThread&&step===4){window.sessionStorage.setItem("chapter3.groupViewed:"+work.id,"1");return;}
-   if(d.app==="wechat"&&d.thread===friendThread&&step===4&&window.sessionStorage.getItem("chapter3.groupViewed:"+work.id)==="1"){setStep(5);setPrompt("wechat",friendThread,"预录代申怎么这么贵");return;}
-   if(d.app==="wechat"&&d.thread===sellerThread&&step===5){index.current=9;setStep(6);setPrompt("wechat",sellerThread,"宝宝 tws代申还接吗");}
+  const onTransfer=(e:Event)=>{
+   const d=(e as CustomEvent).detail||{};if(d.thread!==sellerThread||stepRef.current!==9||blacklisted.current)return;
+   const amount=Math.max(0,Math.round(Number(d.amount)||0));if(!amount)return;
+   transferAttempts.current++;transferTotal.current+=amount;
+   const outgoing=item("wechat",sellerThread,"我",String(amount),true,{kind:"transfer",meta:{story:"chapter3",transferAmount:String(amount),transferStatus:"sent",remark:"我"}});
+   void outgoing;
+   if(transferTotal.current===800){
+    incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["好的好的收到啦 祝追星愉快！"],()=>{go(10);index.current=0;});
+   }else if(transferTotal.current<800){
+    const n=transferAttempts.current;
+    if(n===1)incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["宝宝你是不是发错了呀"],()=>{});
+    else if(n===2)incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["？"],()=>{});
+    else if(n===3)incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["你也不希望你的真名还有电话号满天飞吧"],()=>{});
+    else{blacklisted.current=true;const t=window.setTimeout(()=>{const msg=item("wechat",sellerThread,"票务 🍂打歌🎫代申","",false,{meta:{story:"chapter3",blocked:"true",remark:"票务 🍂打歌🎫代申"}});onNativeNotification("wechat",sellerThread,msg);},delay());timers.current.push(t);}
+   }else{
+    const refund=transferTotal.current-800;
+    const received=item("wechat",sellerThread,"票务 🍂打歌🎫代申",String(refund),false,{kind:"transferReceived",meta:{story:"chapter3",transferAmount:String(refund),transferStatus:"pending",remark:"票务 🍂打歌🎫代申"}});
+    refundItemId.current=received.id;onNativeNotification("wechat",sellerThread,received);
+    incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["宝宝你发多啦！我给你退回来"],()=>go(91));
+   }
+  };
+  const onTransferClaim=(e:Event)=>{
+   const d=(e as CustomEvent).detail||{};if(stepRef.current!==91||d.id!==refundItemId.current)return;
+   const claimed=item("wechat",sellerThread,"票务 🍂打歌🎫代申",String(transferTotal.current-800),false,{kind:"transferReceived",meta:{story:"chapter3",transferAmount:String(transferTotal.current-800),transferStatus:"claimed",remark:"票务 🍂打歌🎫代申"}});
+   onNativeNotification("wechat",sellerThread,claimed);
+   incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["好的 祝宝宝追星愉快！"],()=>{go(10);index.current=0;});
   };
   window.addEventListener("foundphone-chapter3-calendar-open",onCalendar);
   window.addEventListener("foundphone-open-dispatch",onXOpen);
   window.addEventListener("foundphone-story-send",onSend);
   window.addEventListener("foundphone-chapter2-thread-open",onThread);
   window.addEventListener("foundphone-chapter3-group-open",onGroupOpen);
-  return()=>{window.removeEventListener("foundphone-chapter3-calendar-open",onCalendar);window.removeEventListener("foundphone-open-dispatch",onXOpen);window.removeEventListener("foundphone-story-send",onSend);window.removeEventListener("foundphone-chapter2-thread-open",onThread);window.removeEventListener("foundphone-chapter3-group-open",onGroupOpen);timers.current.forEach(clearTimeout);};
- },[step,index.current]);
+  window.addEventListener("foundphone-story-transfer",onTransfer);
+  window.addEventListener("foundphone-story-transfer-claim",onTransferClaim);
+  function onGroupOpen(e:Event){const d=(e as CustomEvent).detail||{};if(d.app==="wechat"&&d.thread===groupThread&&stepRef.current===4)groupViewed.current=true;}
+  return()=>{window.removeEventListener("foundphone-chapter3-calendar-open",onCalendar);window.removeEventListener("foundphone-open-dispatch",onXOpen);window.removeEventListener("foundphone-story-send",onSend);window.removeEventListener("foundphone-chapter2-thread-open",onThread);window.removeEventListener("foundphone-chapter3-group-open",onGroupOpen);window.removeEventListener("foundphone-story-transfer",onTransfer);window.removeEventListener("foundphone-story-transfer-claim",onTransferClaim);timers.current.forEach(clearTimeout);};
+ },[]);
  return null;
 }
