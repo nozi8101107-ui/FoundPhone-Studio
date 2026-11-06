@@ -148,6 +148,7 @@ function PhoneRuntime({
 
   const [homeRequest, setHomeRequest] = useState(0);
   const [locked, setLocked] = useState(!creator);
+  const [storyBlackout,setStoryBlackout]=useState(false);
   const storyKey = "foundphone.chapter1.v2.done:" + work.id + ":" + String(work.variables.storyNickname || "");
   const storyFlowKey = "foundphone.chapter1.v3:" + work.id + ":" + String(work.variables.storyNickname || "");
   const dispatchDate = work.phone.date || "2026-09-01";
@@ -434,11 +435,22 @@ function PhoneRuntime({
   };
   const installedApps = work.apps.filter((a) => a.installed);
   const apps = installedApps.filter((a) => a.visible);
+  useEffect(()=>{
+    const blackout=()=>{
+      setApp("");
+      setLocked(true);
+      setStoryBlackout(true);
+      window.setTimeout(()=>setStoryBlackout(false),3000);
+    };
+    window.addEventListener("foundphone-chapter3-blackout",blackout);
+    return ()=>window.removeEventListener("foundphone-chapter3-blackout",blackout);
+  },[]);
   const unlock = (pin = "") => {
     if (!work.phone.passcode || pin === work.phone.passcode) {
       setLocked(false);
       setPinOpen(false);
       event("password", pin);
+      window.dispatchEvent(new CustomEvent("foundphone-phone-unlocked"));
     } else {
       setPinError("密码不正确");
       setPinOpen(true);
@@ -562,6 +574,7 @@ function PhoneRuntime({
             }
           }}
         >
+          {storyBlackout && <div style={{position:"absolute",inset:0,zIndex:10000,background:"#000",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:18,fontWeight:600,letterSpacing:2}}>事前录制中…</div>}
           <div className="wallpaper-orb orb-one" />
           <div className="wallpaper-orb orb-two" />
           <div className="status-bar">
@@ -797,7 +810,7 @@ function PhoneRuntime({
               }}
             />
           )}
-          {chapterThreeActive && chapterTwoDone && !chapterThreeDone && !locked && !creator && (
+          {chapterThreeActive && chapterTwoDone && !chapterThreeDone && !creator && (
             <ChapterThree
               work={work}
               onNativeItem={(nativeApp,item)=>addChapterItem(nativeApp,item)}
