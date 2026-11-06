@@ -424,9 +424,19 @@ function PhoneRuntime({
     if (id === "twitter") {
       window.dispatchEvent(new CustomEvent("foundphone-open-dispatch"));
     }
-    if (id === "calendar" && chapterTwoDone && !chapterThreeDone && !creator) {
-      setChapterThreeActive(true);
-      window.dispatchEvent(new CustomEvent("foundphone-chapter3-calendar-open"));
+    if (id === "calendar" && !chapterThreeDone && !creator) {
+      let completed = chapterTwoDone;
+      if (!completed) {
+        try {
+          const saved = JSON.parse(localStorage.getItem(chapterTwoKey) || "null");
+          completed = !!saved?.done;
+        } catch { completed = false; }
+      }
+      if (completed) {
+        setChapterTwoDone(true);
+        setChapterThreeActive(true);
+        window.dispatchEvent(new CustomEvent("foundphone-chapter3-calendar-open"));
+      }
     }
     if (storyFinished && !chapterTwoDone) {
       const nextOpenedApps = chapterTwoOpenedApps.includes(id) ? chapterTwoOpenedApps : [...chapterTwoOpenedApps, id];
@@ -1451,6 +1461,7 @@ function AppContent({
           <Suspense fallback={<div className="catalog-loading">正在打开…</div>}>
             <Skin
               appId={app.id}
+              chapterTwoDone={chapterTwoDone}
               owner={work.phone.owner}
               virtualTime={state.time}
               virtualDate={work.phone.date}
