@@ -196,6 +196,35 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
    }
   },delay());timers.current.push(t);
  };
+ const publishPart5SocialPosts=()=>{
+  const nicknames:Record<string,string[]>={shinyu:["老雕","大哥哥","甲谁"],dohoon:["老牛","黑牛"],youngjae:["丑年","宰割"],hanjin:["蛤蟆","大振哥"],jihoon:["强子","志强"],kyungmin:["娟子","卷子"]};
+  const shortName=(Math.random()<0.55?crushName:(nicknames[crush]||[crushName])[Math.floor(Math.random()*(nicknames[crush]||[crushName]).length)]);
+  const variants=[
+   "李涛"+shortName+"前两天绯闻到底是不是真的 今天他状态超级好啊",
+   "果然男癌豆还是要骂 骂完今天"+shortName+"打歌真是火力全开啊",
+   "我去你们看今天打歌repo了吗",
+   "今天tms首场打歌大家都好帅啊啊啊啊",
+   shortName+"真的知道错了吧 而且本来都说了就只是朋友聚餐而已 他都已经这样回归粉丝了还不够吗"
+  ];
+  const threadComments=["笑死我了","wtf","dnys","佛","我感觉是真的呀","果然男爱豆还是要辱追……","可是今天都好帅啊啊啊","黄泉路人能不能滚","纳尼","纳尼。","啊啊啊啊啊啊","不信"+shortName+"恋爱的这辈子有了 老了卖你保健品"];
+  const pick=(arr:string[],n:number)=>[...arr].sort(()=>Math.random()-.5).slice(0,n);
+  const base=(id:string,sender:string,body:string,comments:string[],likes:number,reposts:string,extra:Record<string,string>={}):Item=>({
+   id,title:sender,body,richText:"",meta:{story:"chapter3-social",handle:extra.handle||sender,likesDisplay:likes.toLocaleString("zh-CN"),reposts,commentCount:String(comments.length),...extra},
+   time:"2026-11-06 10:30",sender,avatar:"",kind:"post",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:false,read:false,likes,comments
+  });
+  pick(variants,4).forEach((body,i)=>onNativeItem("threads",base("chapter3-threads-"+i,"路过的42",body,pick(threadComments,7),26000+i*1700,(29000+i*900).toLocaleString("zh-CN"),{reposts:(29000+i*900).toLocaleString("zh-CN")})));
+  const weiboComments=["wtf","我的法 他生图这么丑啊","评论区的造谣很有意思？","啊啊啊啊啊啊","纳尼。","闹麻","他都这么有事业心了缟纻还揪着他不放宁猪肝到底是谁","黄泉路人能不能滚","我有缟纻猪肝大头照"];
+  const fanPosts=[
+   "【心灵丑】老公 一定要骂了你才会好好工作热情饭撒吗 今天看了你打歌舞台那么卖力我突然意识到你就是一个烂人",
+   "【心灵丑】今天"+shortName+"打歌下班生图🈶"
+  ];
+  fanPosts.forEach((body,i)=>onNativeItem("weibo",base("chapter3-weibo-fan-"+i,"不脱先踩丑老公",body,pick(weiboComments,6),31000+i*2500,(33000+i*1200).toLocaleString("zh-CN"),{reposts:(33000+i*1200).toLocaleString("zh-CN"),handle:"heart_ugly"})));
+  const english=String(work.variables.storyCrushEnglishName||work.variables["storyCrushEnglish"]||({shinyu:"SHINYU",dohoon:"DOHOON",youngjae:"YOUNGJAE",hanjin:"HANJIN",jihoon:"JIHOON",kyungmin:"KYUNGMIN"} as Record<string,string>)[crush]||crushName).toUpperCase();
+  const drawComments=["严肃参与","就是就是 都澄清了","相信"+crushName,"参与！！","大家都转一转呀","414","而且他今天打歌那么帅 就不能原谅他吗","评论区让原谅他的是什么意思 没错怎么原谅","有的人 你再讨厌他 你点开今天的打歌舞台 看看他 你会发现他也是一个很帅很有魅力的人呀……"];
+  const drawBody=english+"的事业心和职业素养我们有目共睹 恋爱传闻纯属造谣 图片已澄清 详情见：微博正文\n转发+评论抽10个人100元🧧、15个人52元🧧 自动开奖\n要求没有嘴过"+english+" 会查主页";
+  onNativeItem("weibo",base("chapter3-weibo-giveaway-"+crush,"今天也要支持"+english,drawBody,drawComments,18000,"2.1万",{handle:"giveaway_"+crush}));
+ };
+
  useEffect(()=>{
   start();
   const onCalendar=()=>start();
@@ -325,34 +354,6 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
   };
 
  
- const publishPart5SocialPosts=()=>{
-  const nicknames:Record<string,string[]>={shinyu:["老雕","大哥哥","甲谁"],dohoon:["老牛","黑牛"],youngjae:["丑年","宰割"],hanjin:["蛤蟆","大振哥"],jihoon:["强子","志强"],kyungmin:["娟子","卷子"]};
-  const shortName=(Math.random()<0.55?crushName:(nicknames[crush]||[crushName])[Math.floor(Math.random()*(nicknames[crush]||[crushName]).length)]);
-  const variants=[
-   "李涛"+shortName+"前两天绯闻到底是不是真的 今天他状态超级好啊",
-   "果然男癌豆还是要骂 骂完今天"+shortName+"打歌真是火力全开啊",
-   "我去你们看今天打歌repo了吗",
-   "今天tms首场打歌大家都好帅啊啊啊啊",
-   shortName+"真的知道错了吧 而且本来都说了就只是朋友聚餐而已 他都已经这样回归粉丝了还不够吗"
-  ];
-  const threadComments=["笑死我了","wtf","dnys","佛","我感觉是真的呀","果然男爱豆还是要辱追……","可是今天都好帅啊啊啊","黄泉路人能不能滚","纳尼","纳尼。","啊啊啊啊啊啊","不信"+shortName+"恋爱的这辈子有了 老了卖你保健品"];
-  const pick=(arr:string[],n:number)=>[...arr].sort(()=>Math.random()-.5).slice(0,n);
-  const base=(id:string,sender:string,body:string,comments:string[],likes:number,reposts:string,extra:Record<string,string>={}):Item=>({
-   id,title:sender,body,richText:"",meta:{story:"chapter3-social",handle:extra.handle||sender,likesDisplay:likes.toLocaleString("zh-CN"),reposts,commentCount:String(comments.length),...extra},
-   time:"2026-11-06 10:30",sender,avatar:"",kind:"post",media:"",hidden:false,unlock:"",password:"",folder:"",favorite:false,outgoing:false,read:false,likes,comments
-  });
-  pick(variants,4).forEach((body,i)=>onNativeItem("threads",base("chapter3-threads-"+i,"路过的42",body,pick(threadComments,7),26000+i*1700,(29000+i*900).toLocaleString("zh-CN"),{reposts:(29000+i*900).toLocaleString("zh-CN")})));
-  const weiboComments=["wtf","我的法 他生图这么丑啊","评论区的造谣很有意思？","啊啊啊啊啊啊","纳尼。","闹麻","他都这么有事业心了缟纻还揪着他不放宁猪肝到底是谁","黄泉路人能不能滚","我有缟纻猪肝大头照"];
-  const fanPosts=[
-   "【心灵丑】老公 一定要骂了你才会好好工作热情饭撒吗 今天看了你打歌舞台那么卖力我突然意识到你就是一个烂人",
-   "【心灵丑】今天"+shortName+"打歌下班生图🈶"
-  ];
-  fanPosts.forEach((body,i)=>onNativeItem("weibo",base("chapter3-weibo-fan-"+i,"不脱先踩丑老公",body,pick(weiboComments,6),31000+i*2500,(33000+i*1200).toLocaleString("zh-CN"),{reposts:(33000+i*1200).toLocaleString("zh-CN"),handle:"heart_ugly"})));
-  const english=String(work.variables.storyCrushEnglishName||work.variables["storyCrushEnglish"]||({shinyu:"SHINYU",dohoon:"DOHOON",youngjae:"YOUNGJAE",hanjin:"HANJIN",jihoon:"JIHOON",kyungmin:"KYUNGMIN"} as Record<string,string>)[crush]||crushName).toUpperCase();
-  const drawComments=["严肃参与","就是就是 都澄清了","相信"+crushName,"参与！！","大家都转一转呀","414","而且他今天打歌那么帅 就不能原谅他吗","评论区让原谅他的是什么意思 没错怎么原谅","有的人 你再讨厌他 你点开今天的打歌舞台 看看他 你会发现他也是一个很帅很有魅力的人呀……"];
-  const drawBody=english+"的事业心和职业素养我们有目共睹 恋爱传闻纯属造谣 图片已澄清 详情见：微博正文\n转发+评论抽10个人100元🧧、15个人52元🧧 自动开奖\n要求没有嘴过"+english+" 会查主页";
-  onNativeItem("weibo",base("chapter3-weibo-giveaway-"+crush,"今天也要支持"+english,drawBody,drawComments,18000,"2.1万",{handle:"giveaway_"+crush}));
- };
  const finishPart5=()=>{
   done.current=true;onChoices([]);setEndingVisible(true);
  };
