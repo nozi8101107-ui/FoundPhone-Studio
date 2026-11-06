@@ -48,6 +48,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
  const refundItemId=useRef("");
  const exFlow=useRef<ExAction[]>([]);
  const exCursor=useRef(0);
+ let runEx:()=>void;
  const exRunning=useRef(false);
  const go=(n:number)=>{stepRef.current=n;setStep(n);};
  const prompt=(app:string,thread:string,text:string)=>{tokenRef.current+=1;setToken(tokenRef.current);onPrompt(app,thread,text,tokenRef.current);};
