@@ -267,10 +267,11 @@ export function WeChatSkin(p: SkinProps) {
     const threadMessages = p.items.filter((i) => i.title === p.thread && i.meta.stub !== "true");
     const latest = threadMessages[threadMessages.length - 1];
     if (!latest) return;
-    setReadThreads((current) => [
-      ...current.filter((entry) => !entry.startsWith(p.thread + "::")),
-      p.thread + "::" + latest.id,
-    ]);
+    const marker = p.thread + "::" + latest.id;
+    setReadThreads((current) => {
+      if (current.includes(marker)) return current;
+      return [...current.filter((entry) => !entry.startsWith(p.thread + "::")), marker];
+    });
   }, [p.thread, p.items]);
   const messageRank = (item: Item) => {
     const raw = String(item.time || "").trim();
