@@ -185,7 +185,7 @@ function PhoneRuntime({
   const [chapterThreeComebackDate, setChapterThreeComebackDate] = useState(() => {
     try {
       const saved = localStorage.getItem(chapterThreeComebackDateKey);
-      if (saved && /^\\d{4}-\\d{2}-\\d{2}$/.test(saved)) return saved;
+      if (saved && /^\d{4}-\d{2}-\d{2}$/.test(saved)) return saved;
       if (chapterTwoDone || chapterThreeDone) {
         const target = new Date();
         target.setDate(target.getDate() + 2);
