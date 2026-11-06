@@ -44,6 +44,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
  };
  useEffect(()=>{
   const onCalendar=()=>start();
+  const onXOpen=()=>{if(step===1){setStep(2);setPrompt(crushApp,crushThread,"后天要回归了！");}};
   const onSend=(e:Event)=>{
    const d=(e as CustomEvent).detail||{};const text=String(d.text||"");
    if(done.current)return;
@@ -54,12 +55,13 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
    if(step===6&&d.app==="wechat"&&d.thread===sellerThread){send("wechat",sellerThread,text,()=>{if(index.current===9){index.current++;incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["接的接的","TWS 人歌预录代申\n申请时间：16:40\n下单格式：\n邮箱：\n密码：\n姓名：\n出生年月日：\n手机号码：","宝宝按这个格式下单！"],()=>setPrompt("wechat",sellerThread,"TWS 人歌预录代申\n申请时间：16:40\n下单格式：\n邮箱："+nickEnglish+"@mail.com\n密码："+nickEnglish+birthday.slice(-4)+"\n姓名："+nickEnglish+"\n出生年月日："+birthday+"\n手机号码："+phone));}else if(index.current===10){index.current++;incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["好的收到！","宝宝记得关闭限制海外登录哦"],()=>setPrompt("wechat",sellerThread,"好的👌"));}else{done.current=true;const t=window.setTimeout(onFinish,2000);timers.current.push(t);}});return;}
   };
   const onGroupOpen=(e:Event)=>{const d=(e as CustomEvent).detail||{};if(d.app==="wechat"&&d.thread===groupThread&&step===4){setStep(5);setPrompt("wechat",friendThread,"预录代申怎么这么贵");}};
-  const onThread=(e:Event)=>{const d=(e as CustomEvent).detail||{};if(d.app==="wechat"&&d.thread===friendThread&&step===4){setStep(5);setPrompt("wechat",friendThread,"预录代申怎么这么贵");}if(d.app==="wechat"&&d.thread===sellerThread&&step===5){setStep(6);setPrompt("wechat",sellerThread,"宝宝 tws代申还接吗");}};
+  const onThread=(e:Event)=>{const d=(e as CustomEvent).detail||{};if(d.app==="wechat"&&d.thread===friendThread&&step===4){setStep(5);setPrompt("wechat",friendThread,"预录代申怎么这么贵");}if(d.app==="wechat"&&d.thread===sellerThread&&step===5){index.current=9;setStep(6);setPrompt("wechat",sellerThread,"宝宝 tws代申还接吗");}};
   window.addEventListener("foundphone-chapter3-calendar-open",onCalendar);
+  window.addEventListener("foundphone-open-dispatch",onXOpen);
   window.addEventListener("foundphone-story-send",onSend);
   window.addEventListener("foundphone-chapter2-thread-open",onThread);
   window.addEventListener("foundphone-chapter3-group-open",onGroupOpen);
-  return()=>{window.removeEventListener("foundphone-chapter3-calendar-open",onCalendar);window.removeEventListener("foundphone-story-send",onSend);window.removeEventListener("foundphone-chapter2-thread-open",onThread);window.removeEventListener("foundphone-chapter3-group-open",onGroupOpen);timers.current.forEach(clearTimeout);};
+  return()=>{window.removeEventListener("foundphone-chapter3-calendar-open",onCalendar);window.removeEventListener("foundphone-open-dispatch",onXOpen);window.removeEventListener("foundphone-story-send",onSend);window.removeEventListener("foundphone-chapter2-thread-open",onThread);window.removeEventListener("foundphone-chapter3-group-open",onGroupOpen);timers.current.forEach(clearTimeout);};
  },[step,index.current]);
  return null;
 }
