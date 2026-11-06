@@ -33,12 +33,20 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
  const nickEnglish=String(work.variables.storyNicknameEnglish||nick).toLowerCase().replace(/[^a-z0-9]/g,"")||"user";
  const phone="010"+birthday.slice(-4)+crushBirthday.slice(-4);
  const friendThread="闺蜜", buddyThread="搭子";
- const groupDisplayName="🍂的预录打歌2群";
- const groupSeed=(work.data.wechat||[]).find(i=>i.title===groupDisplayName||i.meta?.remark===groupDisplayName||i.sender===groupDisplayName);
+ const groupDisplayName="🍂的打歌代申2群";
+ const groupPool=work.data.wechat||[];
+ const groupSeed=groupPool.find(i=>i.title===groupDisplayName)
+   ||groupPool.find(i=>i.title.includes("打歌代申2群")||i.title.includes("预录打歌2群"))
+   ||groupPool.find(i=>i.meta?.remark===groupDisplayName||i.sender===groupDisplayName);
+ // Keep the original group conversation's actual title; never create a second group.
  const groupThread=groupSeed?.title||groupDisplayName;
  const sellerDisplayName="票务 🍂打歌🎫代申";
- const sellerSeed=(work.data.wechat||[]).find(i=>!i.outgoing&&(i.meta?.remark===sellerDisplayName||i.sender===sellerDisplayName||i.title===sellerDisplayName))
-   ||(work.data.wechat||[]).find(i=>i.meta?.remark===sellerDisplayName||i.sender===sellerDisplayName||i.title===sellerDisplayName);
+ // The group announcement is sent inside groupThread. This seed is only for
+ // the existing one-to-one ticket-agent DM opened afterward.
+ const sellerSeed=groupPool.find(i=>i.title!==groupThread&&!i.title.includes("群")&&!i.outgoing&&
+   (i.meta?.remark===sellerDisplayName||i.sender===sellerDisplayName||i.title===sellerDisplayName))
+   ||groupPool.find(i=>i.title!==groupThread&&!i.title.includes("群")&&
+   (i.meta?.remark===sellerDisplayName||i.sender===sellerDisplayName||i.title===sellerDisplayName));
  const sellerThread=sellerSeed?.title||sellerDisplayName;
  const chapterTwoEnding=(()=>{try{
   const current=JSON.parse(localStorage.getItem("foundphone.chapter2.v1:"+work.id+":"+String(work.variables.storyNickname||""))||"{}");
