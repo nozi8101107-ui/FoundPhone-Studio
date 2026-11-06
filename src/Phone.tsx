@@ -458,15 +458,14 @@ function PhoneRuntime({
       if (completed) {
         setChapterTwoDone(true);
         setChapterThreeActive(true);
-        if (!chapterThreeComebackDate) {
-          const phoneDate = runtimeRef.current.date || work.phone.date || "";
-          if (/^\d{4}-\d{2}-\d{2}$/.test(phoneDate)) {
-            const target = new Date(phoneDate + "T12:00:00");
-            target.setDate(target.getDate() + 2);
-            const value = `${target.getFullYear()}-${String(target.getMonth()+1).padStart(2,"0")}-${String(target.getDate()).padStart(2,"0")}`;
-            setChapterThreeComebackDate(value);
-            try { localStorage.setItem(chapterThreeComebackDateKey, value); } catch {}
-          }
+        {
+          // The calendar follows the user's actual device-local date, not the
+          // story template's fixed date (for example, 2026-10-25).
+          const now = new Date();
+          const target = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2, 12);
+          const value = `${target.getFullYear()}-${String(target.getMonth()+1).padStart(2,"0")}-${String(target.getDate()).padStart(2,"0")}`;
+          setChapterThreeComebackDate(value);
+          try { localStorage.setItem(chapterThreeComebackDateKey, value); } catch {}
         }
         window.dispatchEvent(new CustomEvent("foundphone-chapter3-calendar-open"));
       }
@@ -1509,7 +1508,7 @@ function AppContent({
               chapterThreeComebackDate={chapterThreeComebackDate}
               owner={work.phone.owner}
               virtualTime={state.time}
-              virtualDate={state.date || work.phone.date || `${deviceNow.getFullYear()}-${String(deviceNow.getMonth()+1).padStart(2,"0")}-${String(deviceNow.getDate()).padStart(2,"0")}`}
+              virtualDate={`${deviceNow.getFullYear()}-${String(deviceNow.getMonth()+1).padStart(2,"0")}-${String(deviceNow.getDate()).padStart(2,"0")}`}
               ui={state.ui?.[app.id]}
               onUi={creator ? undefined : onUi}
               name={name}
