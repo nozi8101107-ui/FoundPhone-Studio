@@ -141,7 +141,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
   ];
   part4Actions.current=which==="3(1)"?branchOne:branchTwo;
   go(16);index.current=0;
-  incoming("wechat",buddyThread,"搭子",["宝宝你到了吗","马上要check了","这边在排队了！"],()=>{part4Waiting.current=true;},{time:"06:22"});
+  incoming("wechat",buddyThread,"搭子",["宝宝你到了吗","马上要check了","这边在排队了！"],()=>{part4Waiting.current=true;if(activeThreadRef.current===buddyThread){part4Waiting.current=false;prompt("wechat",buddyThread,"到了到了！我看到你了");}},{time:"06:22"});
  };
  const startPart3=()=>{
   done.current=false;go(13);index.current=0;
