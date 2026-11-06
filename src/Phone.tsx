@@ -460,14 +460,13 @@ function PhoneRuntime({
         setChapterThreeActive(true);
         if (!chapterThreeComebackDate) {
           const phoneDate = runtimeRef.current.date || work.phone.date || "";
-          const baseDate = /^\d{4}-\d{2}-\d{2}$/.test(phoneDate)
-            ? new Date(phoneDate + "T12:00:00")
-            : new Date();
-          const target = new Date(baseDate);
-          target.setDate(target.getDate() + 2);
-          const value = `${target.getFullYear()}-${String(target.getMonth()+1).padStart(2,"0")}-${String(target.getDate()).padStart(2,"0")}`;
-          setChapterThreeComebackDate(value);
-          try { localStorage.setItem(chapterThreeComebackDateKey, value); } catch {}
+          if (/^\d{4}-\d{2}-\d{2}$/.test(phoneDate)) {
+            const target = new Date(phoneDate + "T12:00:00");
+            target.setDate(target.getDate() + 2);
+            const value = `${target.getFullYear()}-${String(target.getMonth()+1).padStart(2,"0")}-${String(target.getDate()).padStart(2,"0")}`;
+            setChapterThreeComebackDate(value);
+            try { localStorage.setItem(chapterThreeComebackDateKey, value); } catch {}
+          }
         }
         window.dispatchEvent(new CustomEvent("foundphone-chapter3-calendar-open"));
       }
