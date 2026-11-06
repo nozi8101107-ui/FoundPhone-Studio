@@ -1337,6 +1337,7 @@ function AppContent({
   onRenameSlot?: (slot: number, name: string) => Promise<void>;
   onLoadSlot?: (slot: SaveSlot) => void;
 }) {
+  const deviceNow = new Date();
   const [detail, setDetail] = useState<Item | null>(null);
   const [thread, setThread] = useState(initialThread);
   useEffect(() => { if (initialThread) setThread(initialThread); }, [initialThread]);
