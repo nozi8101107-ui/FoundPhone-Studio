@@ -181,6 +181,21 @@ function PhoneRuntime({
   const [chapterTwoChoices,setChapterTwoChoices]=useState<string[]>([]);
   const [chapterThreeActive,setChapterThreeActive]=useState(false);
   const [chapterThreeDone,setChapterThreeDone]=useState(()=>{try{return !!localStorage.getItem(chapterThreeDoneKey);}catch{return false;}});
+  const chapterThreeComebackDateKey = "foundphone.chapter3.comeback-date:" + work.id + ":" + playthroughKey;
+  const [chapterThreeComebackDate, setChapterThreeComebackDate] = useState(() => {
+    try {
+      const saved = localStorage.getItem(chapterThreeComebackDateKey);
+      if (saved && /^\\d{4}-\\d{2}-\\d{2}$/.test(saved)) return saved;
+      if (chapterTwoDone || chapterThreeDone) {
+        const target = new Date();
+        target.setDate(target.getDate() + 2);
+        const value = `${target.getFullYear()}-${String(target.getMonth()+1).padStart(2,"0")}-${String(target.getDate()).padStart(2,"0")}`;
+        localStorage.setItem(chapterThreeComebackDateKey, value);
+        return value;
+      }
+    } catch {}
+    return "";
+  });
   useEffect(() => {
     try {
       const current = JSON.parse(localStorage.getItem(chapterTwoKey) || "{}");
@@ -448,6 +463,13 @@ function PhoneRuntime({
       if (completed) {
         setChapterTwoDone(true);
         setChapterThreeActive(true);
+        if (!chapterThreeComebackDate) {
+          const target = new Date();
+          target.setDate(target.getDate() + 2);
+          const value = `${target.getFullYear()}-${String(target.getMonth()+1).padStart(2,"0")}-${String(target.getDate()).padStart(2,"0")}`;
+          setChapterThreeComebackDate(value);
+          try { localStorage.setItem(chapterThreeComebackDateKey, value); } catch {}
+        }
         window.dispatchEvent(new CustomEvent("foundphone-chapter3-calendar-open"));
       }
     }
@@ -1479,6 +1501,8 @@ function AppContent({
             <Skin
               appId={app.id}
               chapterTwoDone={chapterTwoDone}
+              chapterThreeDone={chapterThreeDone}
+              chapterThreeComebackDate={chapterThreeComebackDate}
               owner={work.phone.owner}
               virtualTime={state.time}
               virtualDate={`${deviceNow.getFullYear()}-${String(deviceNow.getMonth()+1).padStart(2,"0")}-${String(deviceNow.getDate()).padStart(2,"0")}`}
