@@ -255,9 +255,30 @@ export function WeChatSkin(p: SkinProps) {
         .map((i) => i.title),
     ),
   ].sort((a, b) => {
-    const aPinned = p.items.some((i) => i.title === a && i.meta.pinned === "true");
-    const bPinned = p.items.some((i) => i.title === b && i.meta.pinned === "true");
-    return Number(bPinned) - Number(aPinned);
+    const aItems = p.items.filter((i) => i.title === a);
+    const bItems = p.items.filter((i) => i.title === b);
+    const aPinned = aItems.some((i) => i.meta.pinned === "true");
+    const bPinned = bItems.some((i) => i.meta.pinned === "true");
+    if (aPinned !== bPinned) return Number(bPinned) - Number(aPinned);
+    // WeChat's conversation list follows the time of each chat's newest message.
+    // Prefer the last message's timestamp; fall back to source order if timestamps are absent.
+    const latestTime = (items: Item[]) => {
+      let latest = -1;
+      let latestIndex = -1;
+      items.forEach((item, index) => {
+        const parsed = Date.parse(item.time);
+        const value = Number.isFinite(parsed) ? parsed : (() => {
+          const match = item.time.match(/(\\d{1,2}):(\\d{2})$/);
+          return match ? Number(match[1]) * 60 + Number(match[2]) : -1;
+        })();
+        if (value >= latest) {
+          latest = value;
+          latestIndex = index;
+        }
+      });
+      return latest >= 0 ? latest : latestIndex;
+    };
+    return latestTime(bItems) - latestTime(aItems);
   });
   const contacts = [
     ...new Set(
