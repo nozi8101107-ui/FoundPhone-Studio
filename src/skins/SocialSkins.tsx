@@ -91,7 +91,7 @@ function WeiboActions({ p, item }: { p: Props; item: Item }) {
 export function WeiboSkin(p: Props) {
   const { tab, setTab, q, setQ, items } = useContent(p, "关注");
   const [feed, setFeed] = useState("全部");
-  const list = feed === "全部" ? items : items.filter((i) => i.folder === feed);
+  const list = (feed === "全部" ? items : items.filter((i) => i.folder === feed)).slice().sort((a,b)=>Number(b.meta?.story==="chapter3-social")-Number(a.meta?.story==="chapter3-social"));
   return (
     <div className="catalog-skin weibo-ui">
       <Header p={p} />
@@ -220,10 +220,10 @@ export function ThreadsSkin(p: Props) {
         </button>
       </div>
       <div className="catalog-scroll">
-        {(tab === "个人主页"
+        {((tab === "个人主页"
           ? items
           : items.filter((i) => tab !== "正在关注" || i.folder === "正在关注")
-        ).map((i) => (
+        ).slice().sort((a,b)=>Number(b.meta?.story==="chapter3-social")-Number(a.meta?.story==="chapter3-social"))).map((i) => (
           <article className="threads-post" key={i.id}>
             <div className="thread-avatar">
               <Avatar name={i.sender} src={i.avatar} />
