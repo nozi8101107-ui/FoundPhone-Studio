@@ -242,7 +242,7 @@ export function WeChatSkin(p: SkinProps) {
     [utility, setUtility] = useState("");
   const [selectedTransfer, setSelectedTransfer] = useState<Item | null>(null);
   const threadItems = p.thread ? p.items.filter((i) => i.title === p.thread) : [];
-  const threadLabel = threadItems.find((i) => i.meta.remark)?.meta.remark || p.thread;
+  const threadLabel = threadItems.find((i) => !i.outgoing && i.meta.remark)?.meta.remark || p.thread;
   const [readThreads, setReadThreads] = useSkinState<string[]>(
     p,
     "readThreads",
