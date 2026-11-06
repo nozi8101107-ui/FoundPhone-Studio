@@ -134,6 +134,8 @@ function MessageList({
           {!whatsapp && !i.outgoing && (
             <Avatar name={i.sender} src={i.avatar} />
           )}
+          <div style={{display:"flex",flexDirection:"column",alignItems:i.outgoing?"flex-end":"flex-start",minWidth:0}}>
+          {(!whatsapp && !i.outgoing && (items.some(v => v.title === i.title && !!v.meta.groupMembers) || /群/.test(i.title))) && <small style={{fontSize:10,color:"#888",margin:"0 8px 3px"}}>{i.sender}</small>}
           <button
             className="skin-bubble"
             onClick={() => (creator ? onItem(i) : (i.kind === "transfer" || i.kind === "transferReceived") ? onTransfer?.(i) : onRead(i.id))}
@@ -156,6 +158,7 @@ function MessageList({
             </small>
           </button>
           {i.meta.blocked === "true" && <small style={{color:"#b42318",fontSize:11,margin:"2px 8px",maxWidth:180}}>消息已发出，但被对方拒收了</small>}
+          </div>
           {!whatsapp && i.outgoing && <Avatar name={i.sender} src={i.avatar} />}
         </div>
       ))}
@@ -262,14 +265,13 @@ export function WeChatSkin(p: SkinProps) {
     const parsed = Date.parse(raw);
     return Number.isFinite(parsed) ? new Date(parsed).getHours() * 60 + new Date(parsed).getMinutes() : -1;
   };
-  const latestByThread = new Map<string, { item: Item; rank: number; index: number }>();
+  // Message arrays are append-ordered. Recency must follow insertion order,
+  // not virtual clock labels, which may be equal or intentionally backdated.
+  const latestByThread = new Map<string, { item: Item; index: number }>();
   p.items.forEach((item, index) => {
     if (["朋友圈", "我", "通讯录"].includes(item.folder)) return;
-    const rank = messageRank(item);
     const previous = latestByThread.get(item.title);
-    if (!previous || rank > previous.rank || (rank === previous.rank && index > previous.index)) {
-      latestByThread.set(item.title, { item, rank, index });
-    }
+    if (!previous || index > previous.index) latestByThread.set(item.title, { item, index });
   });
   const conversations = [...latestByThread.keys()].sort((a, b) => {
     const aItems = p.items.filter((i) => i.title === a);
@@ -277,9 +279,7 @@ export function WeChatSkin(p: SkinProps) {
     const aPinned = aItems.some((i) => i.meta.pinned === "true");
     const bPinned = bItems.some((i) => i.meta.pinned === "true");
     if (aPinned !== bPinned) return Number(bPinned) - Number(aPinned);
-    const latestA = latestByThread.get(a)!;
-    const latestB = latestByThread.get(b)!;
-    return latestB.rank - latestA.rank || latestB.index - latestA.index;
+    return latestByThread.get(b)!.index - latestByThread.get(a)!.index;
   });
   const contacts = [
     ...new Set(
@@ -482,10 +482,8 @@ export function WeChatSkin(p: SkinProps) {
                     >
                       <span className="wx-chat-avatar">
                         <Avatar name={label} src={contactAvatar} />
-                        {(p.unreadThread === t || p.unreadThreads?.includes(t)) ? (
-                          <b className="wx-unread" style={{width:8,height:8,minWidth:8,padding:0,borderRadius:"50%",fontSize:0}} />
-                        ) : !readThreads.includes(t) && list.some((i) => !i.read) ? (
-                          <b className="wx-unread">{list.filter((i) => !i.read).length}</b>
+                        {list.some((i) => !i.outgoing && !i.read) ? (
+                          <b className="wx-unread">{list.filter((i) => !i.outgoing && !i.read).length}</b>
                         ) : null}
                       </span>
                       <div>
