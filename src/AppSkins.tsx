@@ -595,7 +595,7 @@ export function WeChatSkin(p: SkinProps) {
             <p>{selectedTransfer.kind === "transferReceived" ? "已接收" : selectedTransfer.meta.transferStatus === "claimed" ? "已领取" : "待领取"}</p>
             <div className="wx-transfer-detail-status">{selectedTransfer.kind === "transferReceived" ? "收款方已接收转账" : selectedTransfer.meta.transferStatus === "claimed" ? "已收款" : "等待对方领取"}</div>
             <small>{selectedTransfer.outgoing ? "你发出的转账" : `${selectedTransfer.sender} 转账给你`}</small>
-            {selectedTransfer.kind === "transferReceived" && selectedTransfer.meta.story === "chapter3" && selectedTransfer.meta.transferStatus !== "claimed" && (
+            {selectedTransfer.meta.refund === "true" && selectedTransfer.meta.story === "chapter3" && selectedTransfer.meta.transferStatus !== "claimed" && (
               <button type="button" onClick={() => { window.dispatchEvent(new CustomEvent("foundphone-story-transfer-claim", {detail:{id:selectedTransfer.id}})); setSelectedTransfer(null); }} style={{marginTop:24,width:"100%",border:0,borderRadius:10,padding:13,background:"#07c160",color:"#fff",fontSize:15}}>接收转账</button>
             )}
           </section>
