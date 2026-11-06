@@ -696,7 +696,15 @@ function PhoneRuntime({
                     ),
                     ...(s.messages[app] ?? []),
                     ...(chapterItems[app] ?? []),
-                  ].filter((item) => {
+                  ].map((item) => ({
+                    ...item,
+                    id: typeof item?.id === "string" ? item.id : "recovered-message-" + Math.random().toString(36).slice(2),
+                    title: typeof item?.title === "string" ? item.title : "",
+                    body: typeof item?.body === "string" ? item.body : "",
+                    sender: typeof item?.sender === "string" ? item.sender : "",
+                    time: typeof item?.time === "string" ? item.time : "",
+                    meta: item?.meta && typeof item.meta === "object" && !Array.isArray(item.meta) ? item.meta : {},
+                  })).filter((item) => {
                     if (creator) return true;
                     const chapterPost = item.id.startsWith("chapter-thread-") || item.id.startsWith("chapter-toilet-") || item.id.startsWith("chapter-battle-") || item.id.startsWith("chapter-exfan-") || item.id === "chapter-giveaway" || item.id === "chapter-dispatch";
                     return !chapterPost || storyFinished || (storyActive && item.id === "chapter-dispatch");
