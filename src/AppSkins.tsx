@@ -37,6 +37,8 @@ export type SkinProps = {
   onUi?: (key: string, value: UiValue) => void;
   appId?: string;
   chapterTwoDone?: boolean;
+  chapterThreeDone?: boolean;
+  chapterThreeComebackDate?: string;
   owner?: string;
   virtualTime?: string;
   virtualDate?: string;
@@ -258,6 +260,18 @@ export function WeChatSkin(p: SkinProps) {
     "readThreads",
     [],
   );
+  // Store the last message ID seen in each conversation. This clears old
+  // unread badges without suppressing notifications for messages arriving later.
+  useEffect(() => {
+    if (!p.thread) return;
+    const threadMessages = p.items.filter((i) => i.title === p.thread && i.meta.stub !== "true");
+    const latest = threadMessages[threadMessages.length - 1];
+    if (!latest) return;
+    setReadThreads((current) => [
+      ...current.filter((entry) => !entry.startsWith(p.thread + "::")),
+      p.thread + "::" + latest.id,
+    ]);
+  }, [p.thread, p.items]);
   const messageRank = (item: Item) => {
     const raw = String(item.time || "").trim();
     const clock = raw.match(/(\d{1,2}):(\d{2})$/);
@@ -475,16 +489,24 @@ export function WeChatSkin(p: SkinProps) {
                       className="wx-chat-row"
                       key={t}
                       onClick={() => {
-                        setReadThreads((v) => (v.includes(t) ? v : [...v, t]));
+                        const latestId = list[list.length - 1]?.id;
+                        if (latestId) setReadThreads((v) => [
+                          ...v.filter((entry) => !entry.startsWith(t + "::")),
+                          t + "::" + latestId,
+                        ]);
                         p.onThread(t);
                         p.onRead(t);
                       }}
                     >
                       <span className="wx-chat-avatar">
                         <Avatar name={label} src={contactAvatar} />
-                        {list.some((i) => !i.outgoing && !i.read) ? (
-                          <b className="wx-unread">{list.filter((i) => !i.outgoing && !i.read).length}</b>
-                        ) : null}
+                        {(() => {
+                          const marker = readThreads.find((entry) => entry.startsWith(t + "::"));
+                          const markerId = marker?.slice((t + "::").length);
+                          const markerIndex = markerId ? list.findIndex((i) => i.id === markerId) : -1;
+                          const unread = list.filter((i, index) => !i.outgoing && !i.read && index > markerIndex);
+                          return unread.length ? <b className="wx-unread">{unread.length}</b> : null;
+                        })()}
                       </span>
                       <div>
                         <strong>{label}</strong>
