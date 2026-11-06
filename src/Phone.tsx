@@ -187,7 +187,10 @@ function PhoneRuntime({
       const saved = localStorage.getItem(chapterThreeComebackDateKey);
       if (saved && /^\d{4}-\d{2}-\d{2}$/.test(saved)) return saved;
       if (chapterTwoDone || chapterThreeDone) {
-        const target = new Date();
+        const baseDate = /^\\d{4}-\\d{2}-\\d{2}$/.test(work.phone.date || "")
+          ? new Date((work.phone.date as string) + "T12:00:00")
+          : new Date();
+        const target = new Date(baseDate);
         target.setDate(target.getDate() + 2);
         const value = `${target.getFullYear()}-${String(target.getMonth()+1).padStart(2,"0")}-${String(target.getDate()).padStart(2,"0")}`;
         localStorage.setItem(chapterThreeComebackDateKey, value);
@@ -464,7 +467,11 @@ function PhoneRuntime({
         setChapterTwoDone(true);
         setChapterThreeActive(true);
         if (!chapterThreeComebackDate) {
-          const target = new Date();
+          const phoneDate = runtimeRef.current.date || work.phone.date || "";
+          const baseDate = /^\\d{4}-\\d{2}-\\d{2}$/.test(phoneDate)
+            ? new Date(phoneDate + "T12:00:00")
+            : new Date();
+          const target = new Date(baseDate);
           target.setDate(target.getDate() + 2);
           const value = `${target.getFullYear()}-${String(target.getMonth()+1).padStart(2,"0")}-${String(target.getDate()).padStart(2,"0")}`;
           setChapterThreeComebackDate(value);
@@ -1514,7 +1521,7 @@ function AppContent({
               chapterThreeComebackDate={chapterThreeComebackDate}
               owner={work.phone.owner}
               virtualTime={state.time}
-              virtualDate={`${deviceNow.getFullYear()}-${String(deviceNow.getMonth()+1).padStart(2,"0")}-${String(deviceNow.getDate()).padStart(2,"0")}`}
+              virtualDate={state.date || work.phone.date || `${deviceNow.getFullYear()}-${String(deviceNow.getMonth()+1).padStart(2,"0")}-${String(deviceNow.getDate()).padStart(2,"0")}`}
               ui={state.ui?.[app.id]}
               onUi={creator ? undefined : onUi}
               name={name}
