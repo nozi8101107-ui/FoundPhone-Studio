@@ -101,14 +101,13 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
     const deliver=()=>{if(n>=lines.length){exRunning.current=false;runEx();return;}const it=item(exApp,exThread,exRemark,lines[n++],false,{time:"19:29",meta:{story:"chapter3",handle:memberHandles[ex]||"",remark:exRemark}});onNativeNotification(exApp,exThread,it);const next=window.setTimeout(deliver,delay());timers.current.push(next);};
     deliver();
    }else{
-    const it=item(exApp,exThread,exRemark,"",false,{time:"19:29",kind:"image",media:action.path,meta:{story:"chapter3",handle:memberHandles[ex]||"",remark:exRemark}});
+    const it=item(exApp,exThread,exRemark,"",false,{time:"19:29",kind:"image",media:"/"+action.path,meta:{story:"chapter3",handle:memberHandles[ex]||"",remark:exRemark}});
     onNativeNotification(exApp,exThread,it);exRunning.current=false;runEx();
    }
   },delay());timers.current.push(t);
  };
  useEffect(()=>{
   start();
-  const onCalendar=()=>start();
   const onCalendar=()=>start();
   const onXOpen=()=>{if(stepRef.current===1)go(2);};
   const onThread=(e:Event)=>{
@@ -161,7 +160,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
   };
   const onTransfer=(e:Event)=>{
    const d=(e as CustomEvent).detail||{};if(d.thread!==sellerThread||stepRef.current!==9||blacklisted.current)return;
-   const amount=Math.max(0,Math.round(Number(d.amount)||0));if(!amount)return;
+   const amount=Math.max(0,Math.round((Number(d.amount)||0)*100)/100);if(!amount)return;
    transferAttempts.current++;transferTotal.current+=amount;
    const outgoing=item("wechat",sellerThread,"我",String(amount),true,{kind:"transfer",meta:{story:"chapter3",transferAmount:String(amount),transferStatus:"sent",remark:"我"}});
    void outgoing;
@@ -172,17 +171,17 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
     if(n===1)incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["宝宝你是不是发错了呀"],()=>{});
     else if(n===2)incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["？"],()=>{});
     else if(n===3)incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["你也不希望你的真名还有电话号满天飞吧"],()=>{});
-    else{blacklisted.current=true;const t=window.setTimeout(()=>{const msg=item("wechat",sellerThread,"票务 🍂打歌🎫代申","",false,{meta:{story:"chapter3",blocked:"true",remark:"票务 🍂打歌🎫代申"}});onNativeNotification("wechat",sellerThread,msg);},delay());timers.current.push(t);}
+    else{blacklisted.current=true;}
    }else{
     const refund=transferTotal.current-800;
-    const received=item("wechat",sellerThread,"票务 🍂打歌🎫代申",String(refund),false,{kind:"transferReceived",meta:{story:"chapter3",transferAmount:String(refund),transferStatus:"pending",remark:"票务 🍂打歌🎫代申"}});
+    const received=item("wechat",sellerThread,"票务 🍂打歌🎫代申",String(refund.toFixed(2)),false,{kind:"transferReceived",meta:{story:"chapter3",transferAmount:String(refund),transferStatus:"pending",remark:"票务 🍂打歌🎫代申"}});
     refundItemId.current=received.id;onNativeNotification("wechat",sellerThread,received);
     incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["宝宝你发多啦！我给你退回来"],()=>go(91));
    }
   };
   const onTransferClaim=(e:Event)=>{
    const d=(e as CustomEvent).detail||{};if(stepRef.current!==91||d.id!==refundItemId.current)return;
-   const claimed=item("wechat",sellerThread,"票务 🍂打歌🎫代申",String(transferTotal.current-800),false,{kind:"transferReceived",meta:{story:"chapter3",transferAmount:String(transferTotal.current-800),transferStatus:"claimed",remark:"票务 🍂打歌🎫代申"}});
+   const claimed=item("wechat",sellerThread,"票务 🍂打歌🎫代申",String((transferTotal.current-800).toFixed(2)),false,{kind:"transferReceived",meta:{story:"chapter3",transferAmount:String(transferTotal.current-800),transferStatus:"claimed",remark:"票务 🍂打歌🎫代申"}});
    onNativeNotification("wechat",sellerThread,claimed);
    incoming("wechat",sellerThread,"票务 🍂打歌🎫代申",["好的 祝宝宝追星愉快！"],()=>{go(10);index.current=0;});
   };
