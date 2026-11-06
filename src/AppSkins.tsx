@@ -187,7 +187,8 @@ function WeChatStoryComposer(p: SkinProps) {
   const [transferOpen, setTransferOpen] = useState(false);
   const [transferAmount, setTransferAmount] = useState("");
   const [transferEnabled, setTransferEnabled] = useState(() => p.items.some(i => i.title === p.thread && i.outgoing && i.body === "好的好的！800是吗" && i.meta.story === "chapter3"));
-  const isSeller = p.thread === "票务 🍂打歌🎫代申";
+  const sellerName = "票务 🍂打歌🎫代申";
+  const isSeller = p.thread === sellerName || p.items.some(i => i.title === p.thread && (i.meta.remark === sellerName || i.sender === sellerName));
   useEffect(() => {
     if (p.storyReply) setDraft(p.storyReply.text);
   }, [p.storyReply?.token]);
@@ -221,7 +222,7 @@ function WeChatStoryComposer(p: SkinProps) {
       {transferOpen && (
         <div style={{position:"absolute",inset:"-390px 0 0",zIndex:40,background:"#f7f7f7",display:"flex",flexDirection:"column",padding:18}}>
           <button type="button" onClick={()=>setTransferOpen(false)} style={{alignSelf:"flex-start",border:0,background:"transparent",fontSize:26}}>‹</button>
-          <h3 style={{textAlign:"center",fontSize:18,fontWeight:600,margin:"20px 0 28px"}}>转账给{p.thread}</h3>
+          <h3 style={{textAlign:"center",fontSize:18,fontWeight:600,margin:"20px 0 28px"}}>转账给{isSeller ? sellerName : p.thread}</h3>
           <label style={{fontSize:13,color:"#666"}}>转账金额</label>
           <div style={{display:"flex",alignItems:"center",borderBottom:"1px solid #ddd",padding:"14px 0",gap:8}}>
             <b style={{fontSize:30}}>¥</b>
@@ -242,43 +243,42 @@ export function WeChatSkin(p: SkinProps) {
     [utility, setUtility] = useState("");
   const [selectedTransfer, setSelectedTransfer] = useState<Item | null>(null);
   const threadItems = p.thread ? p.items.filter((i) => i.title === p.thread) : [];
-  const threadLabel = threadItems.find((i) => !i.outgoing && i.meta.remark)?.meta.remark || p.thread;
+  const sellerName = "票务 🍂打歌🎫代申";
+  const threadLabel = threadItems.find((i) => !i.outgoing && i.meta.remark)?.meta.remark
+    || threadItems.find((i) => !i.outgoing)?.sender
+    || threadItems.find((i) => i.meta.remark && i.meta.remark !== "我")?.meta.remark
+    || p.thread;
+  const isSellerThread = p.thread === sellerName || threadItems.some(i => i.meta.remark === sellerName || i.sender === sellerName);
   const [readThreads, setReadThreads] = useSkinState<string[]>(
     p,
     "readThreads",
     [],
   );
-  const conversations = [
-    ...new Set(
-      p.items
-        .filter((i) => !["朋友圈", "我", "通讯录"].includes(i.folder))
-        .map((i) => i.title),
-    ),
-  ].sort((a, b) => {
+  const messageRank = (item: Item) => {
+    const raw = String(item.time || "").trim();
+    const clock = raw.match(/(\d{1,2}):(\d{2})$/);
+    if (clock) return Number(clock[1]) * 60 + Number(clock[2]);
+    const parsed = Date.parse(raw);
+    return Number.isFinite(parsed) ? new Date(parsed).getHours() * 60 + new Date(parsed).getMinutes() : -1;
+  };
+  const latestByThread = new Map<string, { item: Item; rank: number; index: number }>();
+  p.items.forEach((item, index) => {
+    if (["朋友圈", "我", "通讯录"].includes(item.folder)) return;
+    const rank = messageRank(item);
+    const previous = latestByThread.get(item.title);
+    if (!previous || rank > previous.rank || (rank === previous.rank && index > previous.index)) {
+      latestByThread.set(item.title, { item, rank, index });
+    }
+  });
+  const conversations = [...latestByThread.keys()].sort((a, b) => {
     const aItems = p.items.filter((i) => i.title === a);
     const bItems = p.items.filter((i) => i.title === b);
     const aPinned = aItems.some((i) => i.meta.pinned === "true");
     const bPinned = bItems.some((i) => i.meta.pinned === "true");
     if (aPinned !== bPinned) return Number(bPinned) - Number(aPinned);
-    // WeChat's conversation list follows the time of each chat's newest message.
-    // Prefer the last message's timestamp; fall back to source order if timestamps are absent.
-    const latestTime = (items: Item[]) => {
-      let latest = -1;
-      let latestIndex = -1;
-      items.forEach((item, index) => {
-        const parsed = Date.parse(item.time);
-        const value = Number.isFinite(parsed) ? parsed : (() => {
-          const match = item.time.match(/(\\d{1,2}):(\\d{2})$/);
-          return match ? Number(match[1]) * 60 + Number(match[2]) : -1;
-        })();
-        if (value >= latest) {
-          latest = value;
-          latestIndex = index;
-        }
-      });
-      return latest >= 0 ? latest : latestIndex;
-    };
-    return latestTime(bItems) - latestTime(aItems);
+    const latestA = latestByThread.get(a)!;
+    const latestB = latestByThread.get(b)!;
+    return latestB.rank - latestA.rank || latestB.index - latestA.index;
   });
   const contacts = [
     ...new Set(
@@ -407,7 +407,7 @@ export function WeChatSkin(p: SkinProps) {
           {!p.items.some((i) => i.title === p.thread && i.meta.stub !== "true") && (
             <p className="skin-empty">暂无聊天记录</p>
           )}
-          {p.storyReply || p.storyChoices?.length || (p.thread === "票务 🍂打歌🎫代申" && p.items.some(i => i.title === p.thread && i.meta.story === "chapter3")) ? <WeChatStoryComposer {...p} /> : <Compose creator={p.creator} onAdd={p.onAdd} />}
+          {p.storyReply || p.storyChoices?.length || (isSellerThread && threadItems.some(i => i.meta.story === "chapter3")) ? <WeChatStoryComposer {...p} /> : <Compose creator={p.creator} onAdd={p.onAdd} />}
         </>
       ) : moments ? (
         <div className="wx-moments">
@@ -462,8 +462,10 @@ export function WeChatSkin(p: SkinProps) {
                 )
                 .map((t) => {
                   const list = p.items.filter((i) => i.title === t),
-                    last = list.at(-1)!,
-                    label = list.find((i) => i.meta.remark)?.meta.remark || t,
+                    latest = latestByThread.get(t)!.item,
+                    last = latest,
+                    incoming = list.find((i) => !i.outgoing && i.meta.remark) || list.find((i) => !i.outgoing),
+                    label = incoming?.meta?.remark || incoming?.sender || list.find((i) => i.meta.remark && i.meta.remark !== "我")?.meta.remark || t,
                     isHanjin = list.some((i) => i.meta.handle === "henan_prince"),
                     // The chat-list avatar belongs to the other participant, never whichever sender wrote last.
                     contactAvatar = isHanjin ? import.meta.env.BASE_URL + "people/IMG_9702.jpeg" : list.find((i) => !i.outgoing)?.avatar || "";
