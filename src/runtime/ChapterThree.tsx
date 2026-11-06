@@ -33,10 +33,10 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
  const nickEnglish=String(work.variables.storyNicknameEnglish||nick).toLowerCase().replace(/[^a-z0-9]/g,"")||"user";
  const phone="010"+birthday.slice(-4)+crushBirthday.slice(-4);
  const friendThread="闺蜜", buddyThread="搭子";
- const groupDisplayName="🍂的打歌预录2群";
+ const groupDisplayName="🍂的打歌代申2群";
  const groupPool=work.data.wechat||[];
  const groupSeed=groupPool.find(i=>i.title===groupDisplayName)
-   ||groupPool.find(i=>i.title.includes("打歌预录2群")||i.title.includes("预录打歌2群")||i.title.includes("打歌代申2群"))
+   ||groupPool.find(i=>i.title.includes("打歌代申2群")||i.title.includes("打歌预录2群")||i.title.includes("预录打歌2群"))
    ||groupPool.find(i=>i.meta?.remark===groupDisplayName||i.sender===groupDisplayName);
  // Keep the original group conversation's actual title; never create a second group.
  const groupThread=groupSeed?.title||groupDisplayName;
