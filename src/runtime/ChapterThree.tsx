@@ -38,6 +38,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
  const [,setStep]=useState(0);
  const [endingVisible,setEndingVisible]=useState(false);
  const part5Stage=useRef(0);
+ const startPart5Ref=useRef<()=>void>(()=>{});
  const part5Choice=useRef(-1);
  const stepRef=useRef(0);
  const tokenRef=useRef(7300);
@@ -86,7 +87,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
   if(!part4Active.current||done.current)return;
   const a=part4Actions.current[part4Cursor.current];
   if(!a){
-   const t=window.setTimeout(()=>startPart5(),1000);timers.current.push(t);return;
+   const t=window.setTimeout(()=>startPart5Ref.current(),1000);timers.current.push(t);return;
   }
   if(a.type==="in"){
    part4Cursor.current++;
