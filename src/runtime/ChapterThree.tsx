@@ -72,7 +72,7 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
   onNativeNotification(app,thread,it);
  };
  const finishPart3=(which:string)=>{
-  startPart4(which);
+  const t=window.setTimeout(()=>startPart4(which),1000);timers.current.push(t);
  };
  const part4Actions=useRef<Array<{type:"in"|"prompt";thread:string;text?:string;lines?:string[];time:string}>>([]);
  const part4Cursor=useRef(0);
@@ -83,13 +83,11 @@ export function ChapterThree({work,onNativeItem,onNativeNotification,onXPost,onX
   if(!part4Active.current||done.current)return;
   const a=part4Actions.current[part4Cursor.current];
   if(!a){
-   done.current=true;
-   window.dispatchEvent(new CustomEvent("foundphone-chapter3-part5-ready",{detail:{branch}}));
-   onFinish();return;
+   const t=window.setTimeout(()=>{done.current=true;window.dispatchEvent(new CustomEvent("foundphone-chapter3-part5-ready",{detail:{branch}}));onFinish();},1000);timers.current.push(t);return;
   }
   if(a.type==="in"){
    part4Cursor.current++;
-   incoming("wechat",a.thread,a.thread==="搭子"?"搭子":"闺蜜",a.lines||[],()=>{part4Waiting.current=true;const next=part4Actions.current[part4Cursor.current];if(next?.type==="prompt"&&next.thread===a.thread)prompt("wechat",next.thread,next.text||"");},{time:a.time});
+   incoming("wechat",a.thread,a.thread==="搭子"?"搭子":"闺蜜",a.lines||[],()=>{part4Waiting.current=true;const next=part4Actions.current[part4Cursor.current];if(next?.type==="prompt"&&next.thread===a.thread){part4Waiting.current=false;prompt("wechat",next.thread,next.text||"");}else if(!next)advancePart4();},{time:a.time});
   }else{part4Waiting.current=true;if(activeThreadRef.current===a.thread){part4Waiting.current=false;prompt("wechat",a.thread,a.text||"");}}
  };
  const startPart4=(which:string)=>{
